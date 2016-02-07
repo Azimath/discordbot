@@ -5,30 +5,35 @@ import sys
 import json
 import random
 
+####Helper stuff
+class COCallableSearchIterator():#commandobjectsiterator
+    def __init__(self, commandObjects, name):
+        self.commandObjects = commandObjects
+        self.name = name
+    def __iter__(self):
+        for commandObject in self.commandObjects:
+            for key, funcName in commandObject.commandDict.items():
+                if key == self.name:
+                    thing = getattr(commandObject, funcName)
+                    if callable(getattr(commandObject, funcName)):
+                        yield thing
+
 def callEvents(eventName, commandObjects, *args, **kwargs):
     calledCount = 0
-    for commandObject in commandObjects:
-        for key, funcName in commandObject.commandDict.items():
-            if key == eventName:
-                if callable(getattr(commandObject, funcName)):
-                    getattr(commandObject, funcName)(*args,**kwargs)
-                    calledCount += 1
+    for method in COCallableSearchIterator(commandObjects, eventName):
+        method(*args, **kwargs)
+        calledCount += 1
     return calledCount
 
 #TODO: what if?: !command is defined multiple times
 def callCommand(commandObjects, commandName, remainder, messageObj, *args, **kwargs):
-    found = False
-    for commandObject in commandObjects:
-        for key, funcName in commandObject.commandDict.items():
-            if key == commandName:
-                if callable(getattr(commandObject, funcName)):
-                    if commandObject.legacy:
-                        getattr(commandObject, funcName)(messageObj)
-                    else:
-                        getattr(commandObject, funcName)(messageObj, remainder, *args, **kwargs)
-                    found = True
-                    break#TODO: continue or not? => if yes, change found from bool to int and counter
-    return found
+    for method in COCallableSearchIterator(commandObjects, commandName):
+        if commandObject.legacy:
+            getattr(commandObject, funcName)(messageObj)
+        else:
+            getattr(commandObject, funcName)(messageObj, remainder, *args, **kwargs)
+        return True#TODO: continue or not? => if yes, return counter instead of bool
+    return False
 
 def loadPlugins():
     global commandObjects
@@ -52,6 +57,7 @@ def loadPlugins():
     callEvents("\\set_root_context_on_load", commandObjects, [locals(), globals()])
     print(str(commandObjects.__len__()) + " plugins loaded")
 #####
+#####
 
 with open('config.json', 'r') as configfile:
     config = json.loads(configfile.read())
@@ -65,10 +71,12 @@ def listen():
         global commandObjects
         global plugins
 
-        callEvents("\\message", commandObjects, message)
+        callEvents("\\message_with_bot", commandObjects, message)
 
-            
         if message.author.id != client.user.id:#we ignore our own messages
+            callEvents("\\message", commandObjects, message)#shorthand for message_no_bot: should we even allow implicit?
+            callEvents("\\message_no_bot", commandObjects, message)
+
             if message.content.startswith("!help"):
                 args = message.content.replace("!help","",1).split()
                 if len(args) == 0:
