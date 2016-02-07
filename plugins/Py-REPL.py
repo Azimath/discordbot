@@ -6,8 +6,8 @@ class REPL:
 	def __init__(self, client):
 		pass
 
-	def setRootContext(self, rootContext):
-		self.rt = REPLThread(rootContext)
+	def setRootContext(self, context):
+		self.rt = REPLThread(context)
 		self.rt.start()
 
 Class = REPL
@@ -18,6 +18,4 @@ class REPLThread(threading.Thread):
 		self.context = context
 
 	def run(self):
-		context = self.context
-		code.interact(local=locals()) 		
-
+		code.interact(local=self.context)

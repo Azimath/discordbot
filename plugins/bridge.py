@@ -31,7 +31,7 @@ class IRCBridge:
 
 	def joinChannelsOnIrc(self, channelList):
 		#this looping is for working around the race condition where a channel is not joined yet but we try to set the topic
-		outerList = channelList
+		outerList = list(channelList)#copy channelList
 		while outerList:
 			innerList = outerList
 			for c in innerList:
@@ -43,6 +43,7 @@ class IRCBridge:
 			self.updateIrcTopic(util.find(lambda a: a.name == c.replace("#IAA-","",1), self.server.channels))
 
 	def updateIrcTopic(self, channel):
+		print("update: %s" % channel)
 		if channel.topic:
 			self.ircThread.client.eventloop.schedule(
 				self.ircThread.client.set_topic,
@@ -52,7 +53,7 @@ class IRCBridge:
 #Discord -> IRC
 	def recvDiscordMsg(self, message):
 		if isinstance(message.channel, discord.PrivateChannel):
-			return
+			return#TODO
 
 		msgInternal = {
 			"nick":message.author.name,
