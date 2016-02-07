@@ -6,35 +6,6 @@ import json
 import random
 
 ####Helper stuff
-class COCallableSearchIterator():#commandobjectsiterator
-    def __init__(self, commandObjects, name):
-        self.commandObjects = commandObjects
-        self.name = name
-    def __iter__(self):
-        for commandObject in self.commandObjects:
-            for key, funcName in commandObject.commandDict.items():
-                if key == self.name:
-                    thing = getattr(commandObject, funcName)
-                    if callable(getattr(commandObject, funcName)):
-                        yield thing
-
-def callEvents(eventName, commandObjects, *args, **kwargs):
-    calledCount = 0
-    for method in COCallableSearchIterator(commandObjects, eventName):
-        method(*args, **kwargs)
-        calledCount += 1
-    return calledCount
-
-#TODO: what if?: !command is defined multiple times
-def callCommand(commandObjects, commandName, remainder, messageObj, *args, **kwargs):
-    for method in COCallableSearchIterator(commandObjects, commandName):
-        if commandObject.legacy:
-            getattr(commandObject, funcName)(messageObj)
-        else:
-            getattr(commandObject, funcName)(messageObj, remainder, *args, **kwargs)
-        return True#TODO: continue or not? => if yes, return counter instead of bool
-    return False
-
 def loadPlugins():
     global commandObjects
     global plugins
@@ -50,79 +21,112 @@ def loadPlugins():
         return modules
     
     plugins = load_all_modules_from_dir("plugins")
-    commandObjects = []
-    for plugin in plugins:
-        commandObjects.append(plugin.Class(client))
+    commandObjects = [plugin.Class(client) for plugin in plugins]
 
     callEvents("\\set_root_context_on_load", commandObjects, [locals(), globals()])
     print(str(commandObjects.__len__()) + " plugins loaded")
+
+class COCallablesIterator():#co = commandobjects
+    def __init__(self, commandObjects, name):
+        self.commandObjects = commandObjects
+        self.name = name
+    def __iter__(self):
+        for commandObject in self.commandObjects:
+            for key, funcName in commandObject.commandDict.items():
+                if key == self.name:
+                    thing = getattr(commandObject, funcName)
+                    if callable(getattr(commandObject, funcName)):
+                        yield thing
+
+def callEvents(eventName, commandObjects, *args, **kwargs):
+    calledCount = 0
+    for method in COCallablesIterator(commandObjects, eventName):
+        method(*args, **kwargs)
+        calledCount += 1
+    return calledCount
+
+#TODO: what if?: !command is defined multiple times
+def callCommand(commandObjects, commandName, remainder, messageObj, *args, **kwargs):
+    for method in COCallablesIterator(commandObjects, commandName):
+        if commandObject.legacy:
+            getattr(commandObject, funcName)(messageObj)
+        else:
+            getattr(commandObject, funcName)(messageObj, remainder, *args, **kwargs)
+        return True#TODO: continue or not? => if yes, return counter instead of bool
+    return False
+
 #####
 #####
 
-with open('config.json', 'r') as configfile:
-    config = json.loads(configfile.read())
-    
-client = discord.Client()
-client.login(config["DiscordEmail"], config["DiscordPassword"])
+if __name__ == "__main__":
+    with open('config.json', 'r') as configfile:
+        config = json.loads(configfile.read())
 
-def listen():
-    @client.event
-    def on_message(message):
-        global commandObjects
-        global plugins
+    client = discord.Client()
+    client.login(config["DiscordEmail"], config["DiscordPassword"])
 
-        callEvents("\\message_with_bot", commandObjects, message)
+    def listen():
+        @client.event
+        def on_message(message):
+            global commandObjects
+            global plugins
 
-        if message.author.id != client.user.id:#we ignore our own messages
-            callEvents("\\message", commandObjects, message)#shorthand for message_no_bot: should we even allow implicit?
-            callEvents("\\message_no_bot", commandObjects, message)
+            callEvents("\\message_with_bot", commandObjects, message)
 
-            if message.content.startswith("!help"):
-                args = message.content.replace("!help","",1).split()
-                if len(args) == 0:
-                    for plugin in commandObjects:
-                        client.send_message(message.author, "%s\n%s" % (str(plugin.__module__), str(plugin.__doc__)) )
+            if message.author.id != client.user.id:#we ignore our own messages
+                callEvents("\\message", commandObjects, message)#shorthand for message_no_bot: should we even allow implicit?
+                callEvents("\\message_no_bot", commandObjects, message)
                     
-            #elif message.content.startswith("!reload"):
-                #client.send_message(message.channel, "Reloading plugins")
-                #print("Reload started")
-                #commandObjects = []
-                #plugins = load_all_modules_from_dir("plugins")
-                #for plugin in plugins:
-                    #commandObjects.append(plugin.Class(client))
-                #client.send_message(message.channel, "Plugins reloaded")
+                #elif message.content.startswith("!reload"):
+                    #client.send_message(message.channel, "Reloading plugins")
+                    #print("Reload started")
+                    #commandObjects = []
+                    #plugins = load_all_modules_from_dir("plugins")
+                    #for plugin in plugins:
+                        #commandObjects.append(plugin.Class(client))
+                    #client.send_message(message.channel, "Plugins reloaded")
 
-            elif message.content.startswith("!"):
-                commandName = message.content.split()[0]
-                remainder = message.content.replace(commandName, "", 1)
-                found = callCommand(commandObjects, commandName, remainder, message)
-                if not found:
-                    client.send_message(message.channel, dunnos[random.randrange(dunnos.__len__())])
+                #commands
+                if message.content.startswith("!"):
+                    if message.content.startswith("!help"):
+                        args = message.content.replace("!help","",1).split()
+                        if len(args) == 0:
+                            for plugin in commandObjects:
+                                client.send_message(message.author, "%s\n%s" % (str(plugin.__module__), str(plugin.__doc__)) )
+                        return
+                    commandName = message.content.split()[0]
+                    remainder = message.content.replace(commandName, "", 1)
+                    found = callCommand(commandObjects, commandName, remainder, message)
+                    if not found:
+                        client.send_message(message.channel, dunnos[random.randrange(dunnos.__len__())])
+                    return
 
-            for commandObject in commandObjects:
-                for key, funcName in commandObject.commandDict.items():
-                    if key[0] != '!' and key[0:2] != "\\" and key in message.content:#if not command and not event then run keyword command
-                        if callable(getattr(commandObject, funcName)):
-                            getattr(commandObject, funcName)(message)
-                            break
+                #"keyword events"
+                for commandObject in commandObjects:
+                    for key, funcName in commandObject.commandDict.items():
+                        if key[0] != '!' and key[0:2] != "\\" and key in message.content:#if not command and not event then run keyword command
+                            if callable(getattr(commandObject, funcName)):
+                                getattr(commandObject, funcName)(message)
+                                break
+                return
 
-    @client.event
-    def on_channel_update(channel):
-        global commandObjects
-        callEvents("\\on_channel_update", commandObjects, channel)
+        @client.event
+        def on_channel_update(channel):
+            global commandObjects
+            callEvents("\\on_channel_update", commandObjects, channel)
 
-    @client.event
-    def on_ready():
-        global commandObjects
-        global plugins
+        @client.event
+        def on_ready():
+            global commandObjects
+            global plugins
 
-        print("Logged in as")
-        print(client.user.name)
-        print(client.user.id)
-        print("------")
-
-        loadPlugins()
+            print("Logged in as")
+            print(client.user.name)
+            print(client.user.id)
+            print("------")
     
-    client.run()
+            loadPlugins()
+    
+        client.run()
 
-listen()
+    listen()#hey, listen,
