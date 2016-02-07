@@ -35,5 +35,5 @@ class GetGetter:
                 global getGet
                 getGet = False
                 print("get stolen")
-    commandDict = {"\\" : "getStolen"}
+    commandDict = {"\\message" : "getStolen"}
 Class = GetGetter

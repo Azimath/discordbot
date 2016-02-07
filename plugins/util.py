@@ -1,5 +1,6 @@
   
 class Util:
+    legacy = True
     """This is a plugin for developer utilities to aid in programming and debugging.
        !info: pms information about the channel, server, and author"""    
     def __init__(self, client):

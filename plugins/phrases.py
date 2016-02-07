@@ -2,6 +2,7 @@ import random
 import json
 
 class Phrases:
+    legacy = True
     """A plugin for giving various kinds of random phrases.
        !lart user : uses the LART on the given user.
        !praise user : praises the user.

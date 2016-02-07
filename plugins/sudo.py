@@ -1,4 +1,5 @@
 class Sudo:
+	legacy = True
 	"""A plugin to make the bot say things in channels. Mods only.
 	!sudo channel stuff : says stuff in channel"""
 	def __init__(self, client):

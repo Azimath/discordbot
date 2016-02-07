@@ -1,6 +1,7 @@
 import random
 
 class Games:
+    legacy = True
     """This is a plugin for fun things you can use to play with [^_^].
        !flip, !coin: Flips a coin
        !trick: Does a super cool magic trick"""    

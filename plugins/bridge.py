@@ -1,3 +1,4 @@
+#TODO: >seen, >getlastmention
 #TODO: solve the channel joined/not joined but want to set topic somehow, peoperly. i.e. not with .sleep
 #TODO: auth + OP
 #TODO: something about usernames that will break the current from-irc highlighting method
@@ -12,7 +13,7 @@ import re
 
 #see recvDiscordMsg for the format of msgInternal
 class IRCBridge:
-	commandDict = {"\\":"recvDiscordMsg","\\on_channel_update":"updateIrcTopic"}
+	commandDict = {"\\message":"recvDiscordMsg","\\on_channel_update":"updateIrcTopic"}
 
 	def __init__(self, client):
 		self.client = client

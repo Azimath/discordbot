@@ -1,6 +1,7 @@
 import permissions
 
 class Admin:
+    legacy = True
     """This is a plugin for a few basic admin functions and the almighty censorship cannon.
        Feared by Jerries everywhere.
        !leave: Tells the bot to leave. Only works if you're Azimath.
