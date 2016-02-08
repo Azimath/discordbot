@@ -1,6 +1,7 @@
 import random
 import json
 
+
 class Phrases:
     legacy = True
     """A plugin for giving various kinds of random phrases.
@@ -9,7 +10,8 @@ class Phrases:
        !pal : is this pal?
        !mango : where is mang0?
        !eightball : Ask the magic eightball a question. Satisfaction not guarunteed.
-       !addphrase phrasebank phrase : adds phrase to the given phrasebank. The phrasebank for a given command is generally the plural of the command
+       !addphrase phrasebank phrase : adds phrase to the given phrasebank.
+          The phrasebank for a given command is generally the plural of the command.
        !baddragon : give me some sugah, baby
        !wiki : links to the iaa wiki
        !apply : links to the membership application
@@ -99,9 +101,11 @@ class Phrases:
             self.client.send_message(message.channel, "http://archiesonic.wikia.com/wiki/Special:Random")
         else:
             self.client.send_message(message.channel, "http://sonicfanon.wikia.com/wiki/Special:Random")
+
     def plot(self, message):
         if self.client.user in message.mentions:
-            self.client.send_message(message.channel, self.phrasebank["plots"][random.randrange(self.phrasebank["plots"].__len__())])
+            self.client.send_message(message.channel, self.phrasebank["plots"][random.randrange(len(self.phrasebank["plots"]))])
+
     def addphrase(self, message):
         perms = False
         for role in message.author.roles:
@@ -123,6 +127,9 @@ class Phrases:
             with open('phrasebank.json', 'w') as phrasefile:
                 phrasefile.write(json.dumps(self.phrasebank, indent=4))
                 self.client.send_message(message.channel, "Added phrase " + phrase)
-    commandDict = { "!lart" : "lart" , "!praise" : "praise", "!buydinner" : "buydinner" , "!baddragon" : "baddragon", "!pal" : "pal", "!mango" : "mango", "!mang0" : "mango", "!eightball" : "eightball", "!8ball" : "eightball", "!tests" : "tests", "!popori" : "popori", "!addphrase" : "addphrase", "┻━┻" : "unflip", "!floor" : "floor",
-                    "!wiki" : "wiki", "!apply" : "application", "!application" : "application", "!constitution" : "constitution", "!sonic" : "sonic", "!sanic" : "sonic", "plot" : "plot"}
+    commandDict = { "!lart":"lart", "!praise":"praise", "!buydinner":"buydinner", "!baddragon":"baddragon",
+                    "!pal":"pal", "!mango":"mango", "!mang0":"mango", "!eightball":"eightball", "!8ball":"eightball",
+                    "!tests":"tests", "!popori":"popori", "!addphrase":"addphrase", "┻━┻":"unflip", "!floor":"floor",
+                    "!wiki":"wiki", "!apply":"application", "!application":"application",
+                    "!constitution":"constitution", "!sonic":"sonic", "!sanic":"sonic", "plot":"plot"}
 Class = Phrases

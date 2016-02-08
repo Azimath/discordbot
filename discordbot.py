@@ -3,11 +3,12 @@ import pkgutil
 import sys
 import json
 
+
 ####Helper stuff
 def loadPlugins():
     global commandObjects
 
-    def load_all_modules_from_dir(dirname): #modded from: http://stackoverflow.com/questions/1057431/loading-all-modules-in-a-folder-in-python/8556471#8556471
+    def load_all_modules_from_dir(dirname):  #modded from: http://stackoverflow.com/questions/1057431/loading-all-modules-in-a-folder-in-python/8556471#8556471
         modules = []
         for importer, package_name, _ in pkgutil.iter_modules([dirname]):
             full_package_name = '%s.%s' % (dirname, package_name)
@@ -22,13 +23,15 @@ def loadPlugins():
 
     context = globals()
     context.update(locals())
-    callEvents("\\set_root_context_on_load", commandObjects, context)#TODO: probably dont need to pass locals()
+    callEvents("\\set_root_context_on_load", commandObjects, context)  #TODO: probably dont need to pass locals()
     print("%s plugins loaded" % len(commandObjects))
 
-class COCallablesIterator():#co = commandobjects
+
+class COCallablesIterator:  #co = commandobjects
     def __init__(self, commandObjects, name):
         self.commandObjects = commandObjects
         self.name = name
+
     def __iter__(self):
         for commandObject in self.commandObjects:
             for key, funcName in commandObject.commandDict.items():
@@ -37,12 +40,14 @@ class COCallablesIterator():#co = commandobjects
                     if callable(getattr(commandObject, funcName)):
                         yield thing, commandObject
 
+
 def callEvents(eventName, commandObjects, *args, **kwargs):
     calledCount = 0
     for method,commandObject in COCallablesIterator(commandObjects, eventName):
         method(*args, **kwargs)
         calledCount += 1
     return calledCount
+
 
 #TODO: what if?: !command is defined multiple times
 def callCommand(commandObjects, commandName, remainder, messageObj, *args, **kwargs):
@@ -51,11 +56,12 @@ def callCommand(commandObjects, commandName, remainder, messageObj, *args, **kwa
             method(messageObj)
         else:
             method(messageObj, remainder, *args, **kwargs)
-        return True#TODO: continue or not? => if yes, return counter instead of bool
+        return True  #TODO: continue or not? => if yes, return counter instead of bool
     return False
 
 #####
 #####
+
 
 if __name__ == "__main__":
     with open('config.json', 'r') as configfile:
@@ -69,8 +75,8 @@ if __name__ == "__main__":
         def on_message(message):
             callEvents("\\message_with_bot", commandObjects, message)
 
-            if message.author.id != client.user.id:#we ignore our own messages
-                callEvents("\\message", commandObjects, message)#shorthand for message_no_bot: should we even allow implicit?
+            if message.author.id != client.user.id:  #we ignore our own messages
+                callEvents("\\message", commandObjects, message)  #shorthand for message_no_bot: should we even allow implicit?
                 callEvents("\\message_no_bot", commandObjects, message)
 
                 #commands
@@ -81,11 +87,11 @@ if __name__ == "__main__":
                             for plugin in commandObjects:
                                 client.send_message(message.author, "%s\n%s" % (str(plugin.__module__), str(plugin.__doc__)) )
                         return
-                    commandName = message.content.split()[0]#TODO:im not sure if this should be done in *this* part of the code, but then how?
+                    commandName = message.content.split()[0]  #TODO:im not sure if this should be done in *this* part of the code, but then how?
                     remainder = message.content.replace(commandName, "", 1)
                     found = callCommand(commandObjects, commandName, remainder, message)
                     if not found:
-                        callEvents("\\command_not_found", commandObjects, commandName, message)#TODO: how much functionality should be plugins? taken to the extreme the bot could just be a "loader"
+                        callEvents("\\command_not_found", commandObjects, commandName, message)  #TODO: how much functionality should be plugins? taken to the extreme the bot could just be a "loader"
                     return
 
                 #"keyword events"
@@ -115,4 +121,4 @@ if __name__ == "__main__":
     
         client.run()
 
-    listen()#hey, listen,
+    listen()  #hey, listen,
