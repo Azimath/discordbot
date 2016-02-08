@@ -1,3 +1,4 @@
+import asyncio
   
 class Util:
     legacy = True
@@ -6,30 +7,30 @@ class Util:
     def __init__(self, client):
         self.client = client
         
-    def info(self, message):
+    async def info(self, message):
         target = message.author
         if message.mentions.__len__() == 1:
             targetUser = message.mentions[0]
-            self.client.send_message(target, "User name: " + targetUser.name + "\nUser id: " + targetUser.id + "\nUser discriminator: " + targetUser.discriminator)
+            await self.client.send_message(target, "User name: " + targetUser.name + "\nUser id: " + targetUser.id + "\nUser discriminator: " + targetUser.discriminator)
             # self.client.send_message(target, "User id: " + targetUser.id)
             # self.client.send_message(target, "User discriminator: " + targetUser.discriminator)
-            self.client.delete_message(message)
+            await self.client.delete_message(message)
         else:
-            self.client.send_message(target, "Channel name: " + message.channel.name + "\nChannel id: " + message.channel.id + "\nServer  name: " + message.server.name + "\nServer id: " + message.server.id + "\nAuthor name: " + message.author.name + "\nAuthor id: " + message.author.id)
+            await self.client.send_message(target, "Channel name: " + message.channel.name + "\nChannel id: " + message.channel.id + "\nServer  name: " + message.server.name + "\nServer id: " + message.server.id + "\nAuthor name: " + message.author.name + "\nAuthor id: " + message.author.id)
             # self.client.send_message(target, "Channel id: " + message.channel.id)
             # self.client.send_message(target, "Server  name: " + message.server.name)
             # self.client.send_message(target, "Server id: " + message.server.id)
             # self.client.send_message(target, "Author name: " + message.author.name)
             # self.client.send_message(target, "Author id: " + message.author.id)
               
-    def game(self, message):
+    async def game(self, message):
     
         class Game:
             name = ""
             def __init__(self, name):
                 self.name = name
                 
-        self.client.change_status(Game(message.content[6:]))
+        await self.client.change_status(Game(message.content[6:]))
     
     commandDict = { "!info" : "info", "!game" : "game"}
 

@@ -1,4 +1,5 @@
 import permissions
+import asyncio
 
 class Admin:
     legacy = True
@@ -11,36 +12,36 @@ class Admin:
         self.client = client
     
     @permissions.needs_owner    
-    def leave(self, message):
-        self.client.leave_server(message.channel.server)
+    async def leave(self, message):
+        await self.client.leave_server(message.channel.server)
     
     @permissions.needs_owner
-    def invite(self, message):
+    async def invite(self, message):
         print("Got an invite: " + message.content[8:])
-        self.client.accept_invite(message.content[8:])
+        await self.client.accept_invite(message.content[8:])
     
-    def newsPurge(self, message):
+    async def newsPurge(self, message):
         if message.author.id == "102980090970779648" and message.channel.id != "102984909320110080":
-            self.client.delete_message(message)
-
-    def registerNewUser(self, message):  
+            await self.client.delete_message(message)
+    
+    async def registerNewUser(self, message):  
         if message.mentions.__len__() == 0:
             id = message.author.id
             name = message.author.name
             if permissions.register(permissions.User(id, name, ["base"]), message):
-                self.client.send_message(message.channel, "User id " + message.author.id + " has been registered")
+                await self.client.send_message(message.channel, "User id " + message.author.id + " has been registered")
             else:
-                self.client.send_message(message.channel, "User id " + message.author.id + " is already registered")
+                await self.client.send_message(message.channel, "User id " + message.author.id + " is already registered")
         else:
             id = message.mentions[0].id
             name = message.mentions[0].name
             if permissions.register(permissions.User(id, name, ["base"]), message):
-                self.client.send_message(message.channel, "User id " + id + " has been registered")
+                await self.client.send_message(message.channel, "User id " + id + " has been registered")
             else:
-                self.client.send_message(message.channel, "User id " + id + " is already registered")
+                await self.client.send_message(message.channel, "User id " + id + " is already registered")
     
-    @permissions.needs_moderator       
-    def delete(self, message):
+    @permissions.needs_moderator
+    async def delete(self, message):
                 #find out if the sender has delete permissions
                 victim = None
                 channel = None
@@ -75,11 +76,11 @@ class Admin:
                         deleted = 0
                         for x in reversed(self.client.messages):
                             if x.author == victim and x.channel == channel and deleted < number:
-                                self.client.delete_message(x)
+                                await self.client.delete_message(x)
                                 deleted = deleted + 1
                                 print("deleted " + str(deleted))
                             if deleted >= number:
-                                self.client.send_message(channel, "Removed " + str(deleted) + " messages belonging to " + victim.name)
+                                await self.client.send_message(channel, "Removed " + str(deleted) + " messages belonging to " + victim.name)
                                 break
                         print("messages remaining: " + str(number-deleted))
                     else:

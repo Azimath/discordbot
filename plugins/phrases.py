@@ -1,5 +1,6 @@
 import random
 import json
+import asyncio
 
 class Phrases:
     legacy = True
@@ -23,86 +24,86 @@ class Phrases:
         with open('phrasebank.json', 'r') as lartfile:
             self.phrasebank = json.loads(lartfile.read())
             
-    def lart(self, message):
+    async def lart(self, message):
         lart = self.phrasebank["larts"][random.randrange(self.phrasebank["larts"].__len__())]
         target = message.content[6:]
         if not target:
             target = message.author.name
         lart = lart.replace("$who", target)
         print("Lart: " + lart)
-        self.client.send_message(message.channel, lart)
+        await self.client.send_message(message.channel, lart)
      
-    def praise(self, message):
+    async def praise(self, message):
         praise = self.phrasebank["praises"][random.randrange(self.phrasebank["praises"].__len__())]
         target = message.content[8:]
         if not target:
             target = message.author.name
         praise = praise.replace("$who", target)
         print("praise: " + praise)
-        self.client.send_message(message.channel, praise)
+        await self.client.send_message(message.channel, praise)
     
-    def buydinner(self, message):
+    async def buydinner(self, message):
         praise = self.phrasebank["praises"][random.randrange(self.phrasebank["praises"].__len__())]
         target = message.author.name
         praise = praise.replace("$who", target)
         print("praise: " + praise)
-        self.client.send_message(message.channel, praise)
+        await self.client.send_message(message.channel, praise)
         
-    def baddragon(self, message):
+    async def baddragon(self, message):
         dragon = "https://bad-dragon.com/products/" + self.phrasebank["dragons"][random.randrange(self.phrasebank["dragons"].__len__())]
         print("dragon: " + dragon)
-        self.client.send_message(message.channel, dragon)
+        await self.client.send_message(message.channel, dragon)
         
-    def pal(self, message):
+    async def pal(self, message):
         if random.randrange(100) == 0:
-            self.client.send_message(message.channel, "Go fuck yourself " + message.author.name)
+            await self.client.send_message(message.channel, "Go fuck yourself " + message.author.name)
         else:
-            self.client.send_message(message.channel, "Yes this is pal, yes this is 60 FPS")
+            await self.client.send_message(message.channel, "Yes this is pal, yes this is 60 FPS")
 
-    def mango(self, message):
-        self.client.send_message(message.channel, "mang0 is in jail for multishining a kangaroo BibleThump")
+    async def mango(self, message):
+        await self.client.send_message(message.channel, "mang0 is in jail for multishining a kangaroo BibleThump")
 
-    def eightball(self, message):
+    async def eightball(self, message):
         ball = self.phrasebank["8balls"][random.randrange(self.phrasebank["8balls"].__len__())]
         print("8ball: " + ball)
-        self.client.send_message(message.channel, ":8ball: " + ball)
+        await self.client.send_message(message.channel, ":8ball: " + ball)
         
-    def tests(self, message):
+    async def tests(self, message):
         target = message.author
-        self.client.send_message(target, "Take each of the following tests. Save a screenshot of each result.\nMBTI: http://www.humanmetrics.com/cgi-win/jtypes2.asp\nEnneagram: http://www.eclecticenergies.com/enneagram/test.php Take both tests for best results.\nBIG5: http://personality-testing.info/tests/BIG5.php\nTemperaments: http://personality-testing.info/tests/O4TS/")
+        await self.client.send_message(target, "Take each of the following tests. Save a screenshot of each result.\nMBTI: http://www.humanmetrics.com/cgi-win/jtypes2.asp\nEnneagram: http://www.eclecticenergies.com/enneagram/test.php Take both tests for best results.\nBIG5: http://personality-testing.info/tests/BIG5.php\nTemperaments: http://personality-testing.info/tests/O4TS/")
         # self.client.send_message(target, "MBTI: http://www.humanmetrics.com/cgi-win/jtypes2.asp")
         # self.client.send_message(target, "Enneagram: http://www.eclecticenergies.com/enneagram/test.php")
         # self.client.send_message(target, "Take both tests for best results.")
         # self.client.send_message(target, "BIG5: http://personality-testing.info/tests/BIG5.php")
         # self.client.send_message(target, "Temperaments: http://personality-testing.info/tests/O4TS/")    
     
-    def popori(self, message):
-        self.client.send_message(message.channel, "https://www.youtube.com/watch?v=gbNN3grTdDk")
+    async def popori(self, message):
+        await self.client.send_message(message.channel, "https://www.youtube.com/watch?v=gbNN3grTdDk")
     
-    def constitution(self, message):
-        self.client.send_message(message.channel, "https://docs.google.com/document/d/1XKFRQhzxwhjjtW1RnCc_ZhesRqavvM3F5z1LALfve48/")
+    async def constitution(self, message):
+        await self.client.send_message(message.channel, "https://docs.google.com/document/d/1XKFRQhzxwhjjtW1RnCc_ZhesRqavvM3F5z1LALfve48/")
         
-    def wiki(self, message):
-        self.client.send_message(message.channel, "http://iaa.wikia.com")
+    async def wiki(self, message):
+        await self.client.send_message(message.channel, "http://iaa.wikia.com")
      
-    def application(self, message):
-        self.client.send_message(message.channel, "https://docs.google.com/forms/d/1bURXLKIo30XLX3RASg2B8XVLsYpp6GYXn84IT2F9hbM/viewform")
+    async def application(self, message):
+        await self.client.send_message(message.channel, "https://docs.google.com/forms/d/1bURXLKIo30XLX3RASg2B8XVLsYpp6GYXn84IT2F9hbM/viewform")
         
-    def unflip(self, message):
-        self.client.send_message(message.channel, "┬─┬﻿ ノ( ゜-゜ノ)")
+    async def unflip(self, message):
+        await self.client.send_message(message.channel, "┬─┬﻿ ノ( ゜-゜ノ)")
         
-    def floor(self, message):
-        self.client.send_message(message.channel, "http://i.imgur.com/3OYeOxK.jpg")
+    async def floor(self, message):
+        await self.client.send_message(message.channel, "http://i.imgur.com/3OYeOxK.jpg")
     
-    def sonic(self, message):
+    async def sonic(self, message):
         if random.randint(0,1) != 0:
-            self.client.send_message(message.channel, "http://archiesonic.wikia.com/wiki/Special:Random")
+            await self.client.send_message(message.channel, "http://archiesonic.wikia.com/wiki/Special:Random")
         else:
-            self.client.send_message(message.channel, "http://sonicfanon.wikia.com/wiki/Special:Random")
-    def plot(self, message):
+            await self.client.send_message(message.channel, "http://sonicfanon.wikia.com/wiki/Special:Random")
+    async def plot(self, message):
         if self.client.user in message.mentions:
-            self.client.send_message(message.channel, self.phrasebank["plots"][random.randrange(self.phrasebank["plots"].__len__())])
-    def addphrase(self, message):
+            await self.client.send_message(message.channel, self.phrasebank["plots"][random.randrange(self.phrasebank["plots"].__len__())])
+    async def addphrase(self, message):
         perms = False
         for role in message.author.roles:
             if role.permissions.can_manage_messages:
@@ -122,7 +123,7 @@ class Phrases:
             
             with open('phrasebank.json', 'w') as phrasefile:
                 phrasefile.write(json.dumps(self.phrasebank, indent=4))
-                self.client.send_message(message.channel, "Added phrase " + phrase)
+                await self.client.send_message(message.channel, "Added phrase " + phrase)
     commandDict = { "!lart" : "lart" , "!praise" : "praise", "!buydinner" : "buydinner" , "!baddragon" : "baddragon", "!pal" : "pal", "!mango" : "mango", "!mang0" : "mango", "!eightball" : "eightball", "!8ball" : "eightball", "!tests" : "tests", "!popori" : "popori", "!addphrase" : "addphrase", "┻━┻" : "unflip", "!floor" : "floor",
                     "!wiki" : "wiki", "!apply" : "application", "!application" : "application", "!constitution" : "constitution", "!sonic" : "sonic", "!sanic" : "sonic", "plot" : "plot"}
 Class = Phrases

@@ -2,11 +2,12 @@ import threading
 import time
 import random
 import discord
+import asyncio
 
 getGet = False
-def TimeCheck(client):
+async def TimeCheck(client):
     global getGet
-    while True:
+    while not client.is_closed:
         currTime = time.gmtime(time.time())
         if currTime[3] == 5 and currTime[4] == 0 and getGet == False:
             getGet = True
@@ -14,20 +15,17 @@ def TimeCheck(client):
             print("Attempting to get get in " + str(getWait) + " seconds")
             startTime = time.time()
             while getGet == True:
-                time.sleep(1)
+                asyncio.sleep(1)
                 if time.time() > startTime + getWait:
-                    client.send_message(discord.Object(102981131074297856), "New Day Get")
+                    await client.send_message(discord.Object(102981131074297856), "New Day Get")
                     getGet = False
-            time.sleep(60)
-        time.sleep(10)
+            asyncio.sleep(60)
+        asyncio.sleep(10)
 
 class GetGetter:            
     def __init__(self, client):
         self.client = client
-        self.timeCheckerThread = threading.Thread(target=TimeCheck, kwargs={"client" : client})
-        self.timeCheckerThread.daemon = True
-        self.timeCheckerThread.start()
-
+        self.client.loop.create_task(TimeCheck(self.client))
 
     def getStolen(self, message):
         if message.server is not None:

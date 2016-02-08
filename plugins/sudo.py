@@ -1,10 +1,12 @@
+import asyncio
+
 class Sudo:
 	legacy = True
 	"""A plugin to make the bot say things in channels. Mods only.
 	!sudo channel stuff : says stuff in channel"""
 	def __init__(self, client):
 		self.client = client
-	def sudo(self, message):
+	async def sudo(self, message):
 		perms = False
 		for role in message.author.roles:
 			if role.permissions.can_manage_messages:
@@ -13,7 +15,7 @@ class Sudo:
 		args = message.content.split()
 		
 		if args.__len__() < 3:
-			self.client.send_message(message.channel, "Not enough args")
+			await self.client.send_message(message.channel, "Not enough args")
 			return
 		
 		sayingstart = [i for i, ltr in enumerate(message.content) if ltr == ':'][0]
@@ -24,6 +26,6 @@ class Sudo:
 		for target in message.mentions:
 			self.client.send_message(target, saying)
 
-		self.client.send_message(message.channel, "message sent")
+		await self.client.send_message(message.channel, "message sent")
 	commandDict = { "!sudo" : "sudo" }
 Class = Sudo

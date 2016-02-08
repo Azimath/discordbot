@@ -1,4 +1,5 @@
 import random
+import asyncio
 
 class Game:
 	def __init__(self, range=100):
@@ -26,9 +27,9 @@ class NumberGame:
 	def __init__(self, client):
 		self.client = client
 		self.games = {}	
-	def startgame(self, message):
+	async def startgame(self, message):
 		if message.channel.id in self.games:
-			self.client.send_message(message.channel, "Sorry, a game is already in progress")
+			await self.client.send_message(message.channel, "Sorry, a game is already in progress")
 			return
 		
 		args = message.content.split()
@@ -41,11 +42,11 @@ class NumberGame:
 				range = 100
 		newgame = Game(range)
 		self.games[message.channel.id] = newgame
-		self.client.send_message(message.channel, "Game started")
+		await self.client.send_message(message.channel, "Game started")
 		
-	def guess(self, message):
+	async def guess(self, message):
 		if not message.channel.id in self.games:
-			self.client.send_message(message.channel, "No game in progress for this channel")
+			await self.client.send_message(message.channel, "No game in progress for this channel")
 			return
 		
 		args = message.content.split()
@@ -58,27 +59,27 @@ class NumberGame:
 				guess = 0
 		
 		if self.games[message.channel.id].wasguessed(guess):
-			self.client.send_message(message.channel, "Sorry but " + str(guess) + " was already guessed")
+			await self.client.send_message(message.channel, "Sorry but " + str(guess) + " was already guessed")
 			return
 		
 		result = self.games[message.channel.id].guess(guess)
 		if result == 0:
-			self.client.send_message(message.channel, "User " + message.author.name + " won! With " + str(self.games[message.channel.id].guesses) + " guesses. !startgame to play again")
-			self.client.send_message(message.channel, "Guesses: " + str(self.games[message.channel.id].previousGuesses))
+			await self.client.send_message(message.channel, "User " + message.author.name + " won! With " + str(self.games[message.channel.id].guesses) + " guesses. !startgame to play again")
+			await self.client.send_message(message.channel, "Guesses: " + str(self.games[message.channel.id].previousGuesses))
 			self.games.pop(message.channel.id, None)
 		elif result == -1:
-			self.client.send_message(message.channel, "Guess " + str(guess) + " was too low. Number of guesses so far: " + str(self.games[message.channel.id].guesses) + ".")
+			await self.client.send_message(message.channel, "Guess " + str(guess) + " was too low. Number of guesses so far: " + str(self.games[message.channel.id].guesses) + ".")
 		elif result == 1:
-			self.client.send_message(message.channel, "Guess " + str(guess) + " was too high. Number of guesses so far: " + str(self.games[message.channel.id].guesses) + ".")
+			await self.client.send_message(message.channel, "Guess " + str(guess) + " was too high. Number of guesses so far: " + str(self.games[message.channel.id].guesses) + ".")
 		else:
-			self.client.send_message(message.channel, "What the fuck")
+			await self.client.send_message(message.channel, "What the fuck")
 
-	def stop(self, message):
+	async def stop(self, message):
 		if not message.channel.id in self.games:
-			self.client.send_message(message.channel, "Theres no game to stop")
+			await self.client.send_message(message.channel, "Theres no game to stop")
 			return
 		
 		self.games.pop(message.channel.id, None)
-		self.client.send_message(message.channel, "Game stopped")
+		await self.client.send_message(message.channel, "Game stopped")
 	commandDict = { "!startgame": "startgame", "!guess" : "guess", "!stop" : "stop" }
 Class = NumberGame

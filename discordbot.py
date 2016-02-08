@@ -2,9 +2,10 @@ import discord
 import pkgutil
 import sys
 import json
+import asyncio
 
 ####Helper stuff
-def loadPlugins():
+async def loadPlugins():
     global commandObjects
 
     def load_all_modules_from_dir(dirname): #modded from: http://stackoverflow.com/questions/1057431/loading-all-modules-in-a-folder-in-python/8556471#8556471
@@ -12,7 +13,7 @@ def loadPlugins():
         for importer, package_name, _ in pkgutil.iter_modules([dirname]):
             full_package_name = '%s.%s' % (dirname, package_name)
             if full_package_name not in sys.modules:
-                mod = importer.find_module(package_name).load_module(full_package_name)
+                mod = importer.find_module(package_name).load_module(package_name)
                 modules.append(mod)
                 print(mod)
         return modules
@@ -22,7 +23,7 @@ def loadPlugins():
 
     context = globals()
     context.update(locals())
-    callEvents("\\set_root_context_on_load", commandObjects, context)#TODO: probably dont need to pass locals()
+    await callEvents("\\set_root_context_on_load", commandObjects, context)#TODO: probably dont need to pass locals()
     print("%s plugins loaded" % len(commandObjects))
 
 class COCallablesIterator():#co = commandobjects
@@ -37,7 +38,7 @@ class COCallablesIterator():#co = commandobjects
                     if callable(getattr(commandObject, funcName)):
                         yield thing, commandObject
 
-def callEvents(eventName, commandObjects, *args, **kwargs):
+async def callEvents(eventName, commandObjects, *args, **kwargs):
     calledCount = 0
     for method,commandObject in COCallablesIterator(commandObjects, eventName):
         method(*args, **kwargs)
@@ -45,12 +46,13 @@ def callEvents(eventName, commandObjects, *args, **kwargs):
     return calledCount
 
 #TODO: what if?: !command is defined multiple times
-def callCommand(commandObjects, commandName, remainder, messageObj, *args, **kwargs):
+async def callCommand(commandObjects, commandName, remainder, messageObj, *args, **kwargs):
+    print("Running command " + commandName)
     for method,commandObject in COCallablesIterator(commandObjects, commandName):
         if commandObject.legacy:
-            method(messageObj)
+            await method(messageObj)
         else:
-            method(messageObj, remainder, *args, **kwargs)
+            await method(messageObj, remainder, *args, **kwargs)
         return True#TODO: continue or not? => if yes, return counter instead of bool
     return False
 
@@ -62,16 +64,15 @@ if __name__ == "__main__":
         config = json.loads(configfile.read())
 
     client = discord.Client()
-    client.login(config["DiscordEmail"], config["DiscordPassword"])
 
     def listen():
         @client.event
-        def on_message(message):
-            callEvents("\\message_with_bot", commandObjects, message)
+        async def on_message(message):
+            await callEvents("\\message_with_bot", commandObjects, message)
 
             if message.author.id != client.user.id:#we ignore our own messages
-                callEvents("\\message", commandObjects, message)#shorthand for message_no_bot: should we even allow implicit?
-                callEvents("\\message_no_bot", commandObjects, message)
+                await callEvents("\\message", commandObjects, message)#shorthand for message_no_bot: should we even allow implicit?
+                await callEvents("\\message_no_bot", commandObjects, message)
 
                 #commands
                 if message.content.startswith("!"):
@@ -79,13 +80,13 @@ if __name__ == "__main__":
                         args = message.content.replace("!help","",1).split()
                         if len(args) == 0:
                             for plugin in commandObjects:
-                                client.send_message(message.author, "%s\n%s" % (str(plugin.__module__), str(plugin.__doc__)) )
+                                await client.send_message(message.author, "%s\n%s" % (str(plugin.__module__), str(plugin.__doc__)) )
                         return
                     commandName = message.content.split()[0]#TODO:im not sure if this should be done in *this* part of the code, but then how?
                     remainder = message.content.replace(commandName, "", 1)
-                    found = callCommand(commandObjects, commandName, remainder, message)
+                    found = await callCommand(commandObjects, commandName, remainder, message)
                     if not found:
-                        callEvents("\\command_not_found", commandObjects, commandName, message)#TODO: how much functionality should be plugins? taken to the extreme the bot could just be a "loader"
+                        await callEvents("\\command_not_found", commandObjects, commandName, message)#TODO: how much functionality should be plugins? taken to the extreme the bot could just be a "loader"
                     return
 
                 #"keyword events"
@@ -94,16 +95,16 @@ if __name__ == "__main__":
                         #if not command and not event then run keyword command
                         if not key.startswith("!") and not key.startswith("\\") and key in message.content:
                             if callable(getattr(commandObject, funcName)):
-                                getattr(commandObject, funcName)(message)
+                                await getattr(commandObject, funcName)(message)
                                 break
                 return
 
         @client.event
-        def on_channel_update(channel):
-            callEvents("\\on_channel_update", commandObjects, channel)
+        async def on_channel_update(befor, after):
+            await callEvents("\\on_channel_update", commandObjects, after)
 
         @client.event
-        def on_ready():
+        async def on_ready():
             global commandObjects
 
             print("Logged in as")
@@ -111,8 +112,8 @@ if __name__ == "__main__":
             print(client.user.id)
             print("------")
     
-            loadPlugins()
+            await loadPlugins()
     
-        client.run()
+        client.run(config["DiscordEmail"], config["DiscordPassword"])
 
     listen()#hey, listen,

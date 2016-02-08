@@ -1,5 +1,6 @@
 import json
 import random
+import asyncio
 
 class Dunno:
 	commandDict = {"\\command_not_found":"dunno"}
@@ -8,7 +9,7 @@ class Dunno:
 		with open("plugins/dunnos.json","r") as dunnofile:
 			self.dunnos = json.load(dunnofile)
 
-	def dunno(self, commandName, message):
-		self.client.send_message(message.channel, random.sample(self.dunnos, 1)[0])
+	async def dunno(self, commandName, message):
+		await self.client.send_message(message.channel, random.sample(self.dunnos, 1)[0])
 Class = Dunno
 

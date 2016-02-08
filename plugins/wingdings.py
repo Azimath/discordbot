@@ -1,6 +1,6 @@
 import subprocess
 import discord
- 
+import asyncio 
 
 
 class WingDings:
@@ -10,23 +10,22 @@ class WingDings:
     def __init__(self, client):
         self.client = client
     
-    def translate(self, message):
+    async def translate(self, message):
         toSend = message.content[11:]
 
         p = subprocess.Popen(["java", "-cp", "./plugins", "WingDingsChan", message.content[11:]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         p.wait()
         output = p.stdout.read().decode('utf-8')
-        print(output)
         signal = p.stderr.read().decode('utf-8')
         if signal == "1":
-            self.client.send_message(message.channel, output)
+            await self.client.send_message(message.channel, output)
 
         else:
             splitPoint = output.find("-")
             translated = output[:splitPoint]
             plainText = output[splitPoint+1:]
-            self.client.send_message(message.author, plainText[:-1])
-            self.client.send_message(message.channel, translated)
+            await self.client.send_message(message.author, plainText[:-1])
+            await self.client.send_message(message.channel, translated)
     
     commandDict = {"!translate" : "translate"}
 Class = WingDings
