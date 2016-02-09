@@ -1,72 +1,49 @@
 import json
+from enum import Enum
 
-class User:
-    def __init__(self, id, name, permissions):
-        self.data = {}
-        self.data['id'] = id
-        self.data['name'] = name
-        self.data['permissions'] = permissions
-    
-    def hasPermission(self, perm):
-        for i in self.data['permissions']:
-            if perm == i:
-                return true
-        return false
-    def __json__(self):
-        return self.data
-        
-class CustomEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if hasattr(obj, '__json__'):
-            return obj.__json__()
-        return json.JSONEncoder.default(self, obj)
+#class User(dict):
+#    def hasPermission(self, perm):
+#        return perm in self['permissions']
 
-class CustomDecoder(json.JSONDecoder):
-    def decode(self, JSON_string):
-        datas = super(CustomDecoder, self).decode(JSON_string)
-        objs = []
-        for data in datas:
-            objs.append(User(data['id'], data['name'], data['permissions']))
-        return objs
-        
-userbank = []
- 
-with open('permissions.json', 'r') as userfile:
-    userbank = json.loads(userfile.read(), cls=CustomDecoder)
-    
-def hasPermission(userObject, permission):
-    user = next(x for x in userbank if x.data['id'] == userObject.id)
-    if user is not None:
-        return permission in user.data['permissions']
-    else:
-        return False
 
-def needs_admin(func):
-    def command(self, message):
-        if hasPermission(message.author, "admin"):
-            func(self, message)
+class Permissions(Enum):
+    admin = 1
+    owner = 2
+    moderator = 3
+
+
+def load():
+    global userbank
+    with open('permissions.json', 'r') as userfile:
+        #a dictionary of users: {id:{id: , name: , permissions:[Permissions...]}} indexed by user.id
+        userbank = json.load(userfile)
+
+
+def save():
+    with open('permissions.json', 'w') as userfile:
+            json.dump(userbank, userfile, indent=4)
+
+
+def register(userObj):
+    def toDict(userObj):
+        return {"id": userObj.id,
+                "name": userObj.name,
+                "permissions": list()}
+
+    uo = toDict(userObj)
+    isNew = uo["id"] in userbank
+    if isNew:
+        userbank[userObj.id] = uo
+        save()
+    return isNew
+
+
+def hasPermission(userObj, permission):
+    return permission in userbank[userObj.id]["permissions"]
+
+
+def needs_permission(func, permission):
+    def command(self, messageObj):
+        if hasPermission(messageObj.author, permission):
+            func(self, messageObj)
     return command
-
-def needs_owner(func):
-    def command(self, message):
-        if hasPermission(message.author, "owner"):
-            func(self, message)
-    return command
-
-def needs_moderator(func):
-    def command(self, message):
-        if hasPermission(message.author, "moderator"):
-            func(self, message)
-    return command
-    
-def register(user, message):
-    new = True
-    for i in userbank:
-        if i.data['id'] == user.data['id']:
-            new = False
-            return False
-    if new:
-        userbank.append(user)
-        with open('permissions.json', 'w') as userfile:
-            userfile.write(json.dumps(userbank, indent=4, cls=CustomEncoder))
-        return True
