@@ -1,5 +1,23 @@
 {
-    "8balls": [
+    "sonic":[
+        "http://archiesonic.wikia.com/wiki/Special:Random",
+        "http://sonicfanon.wikia.com/wiki/Special:Random"
+    ],
+    "pal": [
+        "Yes this is pal, yes this is 60 FPS",
+        "Go fuck yourself $who"
+    ],
+    "test": ["Take each of the following tests. Save a screenshot of each result.\nMBTI: http://www.humanmetrics.com/cgi-win/jtypes2.asp\nEnneagram: http://www.eclecticenergies.com/enneagram/test.php Take both tests for best results.\nBIG5: http://personality-testing.info/tests/BIG5.php\nTemperaments: http://personality-testing.info/tests/O4TS/"],
+    "directmap": {
+        "popori": "https://www.youtube.com/watch?v=gbNN3grTdDk",
+        "constitution": "https://docs.google.com/document/d/1XKFRQhzxwhjjtW1RnCc_ZhesRqavvM3F5z1LALfve48/",
+        "wiki": "http://iaa.wikia.com",
+        "application": "https://docs.google.com/forms/d/1bURXLKIo30XLX3RASg2B8XVLsYpp6GYXn84IT2F9hbM/viewform",
+        "unflip": "┬─┬﻿ ノ( ゜-゜ノ)",
+        "floor": "http://i.imgur.com/3OYeOxK.jpg",
+        "mango": "mang0 is in jail for multishining a kangaroo BibleThump"
+    },
+    "eightball": [
         "mods = gods", 
         "I don't give a fuck", 
         "Reply hazy try again", 
@@ -34,7 +52,7 @@
         "\u2601",
         "only if you are QPU-aligned"
     ], 
-    "plots": [
+    "plot": [
         "http://new2.fjcdn.com/thumbnails/comments/You+know+it+_e47e6b597d8bd91766e71b58a19082e3.gif", 
         "http://imgur.com/gallery/Bdyc8QF", 
         "http://imgur.com/gallery/5FegHxJ", 
@@ -42,19 +60,19 @@
         "http://media.giphy.com/media/q78HOh2ThsjTi/giphy.gif", 
         "http://imgur.com/gallery/42Cs5bF"
     ], 
-    "dragons": [
-        "nocturne", 
-        "roland", 
-        "bumblehooves", 
-        "kage", 
-        "mountaindrake", 
-        "stan", 
-        "crash", 
-        "trent", 
-        "snowleopard", 
-        "terra", 
-        "guardian", 
-        "pretzal", 
+    "baddragon": [
+        "nocturne",
+        "roland",
+        "bumblehooves",
+        "kage",
+        "mountaindrake",
+        "stan",
+        "crash",
+        "trent",
+        "snowleopard",
+        "terra",
+        "guardian",
+        "pretzal",
         "rex", 
         "scorn", 
         "sleipnir", 
@@ -126,7 +144,7 @@
         "lilseadragon", 
         "chico"
     ], 
-    "praises": [
+    "praise": [
         "loves $who", 
         "hugs $who", 
         "bakes $who a cake", 
@@ -140,7 +158,7 @@
         "forgives $who's countless past transgressions",
         "QPU-align's $who"
     ], 
-    "larts": [
+    "lart": [
         "stops loving $who", 
         "slaps $who around with a large trout", 
         "slaps $who around with a non-euclidean object", 

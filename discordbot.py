@@ -56,7 +56,7 @@ def callCommand(cos, commandName, remainder, messageObj, *args, **kwargs):
         if commandObject.legacy:
             method(messageObj)
         else:
-            method(messageObj, remainder, *args, **kwargs)
+            method(remainder, messageObj, *args, **kwargs)
         return True  #TODO: continue or not? => if yes, return counter instead of bool
     return False
 
