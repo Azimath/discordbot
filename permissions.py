@@ -1,4 +1,5 @@
 import json
+import asyncio
 
 class User:
     def __init__(self, id, name, permissions):
@@ -42,21 +43,21 @@ def hasPermission(userObject, permission):
         return False
 
 def needs_admin(func):
-    def command(self, message):
+    async def command(self, message):
         if hasPermission(message.author, "admin"):
-            func(self, message)
+            await func(self, message)
     return command
 
 def needs_owner(func):
-    def command(self, message):
+    async def command(self, message):
         if hasPermission(message.author, "owner"):
-            func(self, message)
+            await func(self, message)
     return command
 
 def needs_moderator(func):
-    def command(self, message):
+    async def command(self, message):
         if hasPermission(message.author, "moderator"):
-            func(self, message)
+            await func(self, message)
     return command
     
 def register(user, message):
