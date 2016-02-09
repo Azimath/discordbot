@@ -1,5 +1,6 @@
 import json
 import random
+import asyncio
 
 
 class Dunno:
@@ -7,11 +8,12 @@ class Dunno:
 
     def __init__(self, client):
         self.client = client
-        with open("plugins/dunnos.json","r") as dunnofile:
+        with open("plugins/dunnos.json", "r") as dunnofile:
             self.dunnos = json.load(dunnofile)
 
     def dunno(self, commandName, message):
-        self.client.send_message(message.channel, random.sample(self.dunnos, 1)[0])
+        danno = random.sample(self.dunnos, 1)[0]
+        asyncio.ensure_future(self.client.send_message(message.channel, danno))
 
 Class = Dunno
 

@@ -109,7 +109,7 @@ class IRCBridge:
         self.sendDiscordMsg(actionInternal, separator="")
 
     def sendDiscordMsg(self, msgInternal, separator=":"):
-        msgStr = "%s%s %s" % (msgInternal["nick"], separator,
+        msgStr = "**%s**%s %s" % (msgInternal["nick"], separator,
                               self.translateMsg(msgInternal["message"], TransType.discord))
         channel = translateChannel(msgInternal["channel"], TransType.discord, self.server.channels)
         if not channel:
@@ -144,7 +144,6 @@ class IrcClient(pydle.MinimalClient):
     #@pydle.coroutine  #may or may not be necessary
     def on_message(self, target, source, message):
         super().on_message(target, source, message)
-        print([target, source, message])
         if message == ">list":
             self.message(target, ", ".join(self.callbackdict["getOnlineList"]()))
             self.message(target, ", ".join([translateChannel(c, TransType.irc) for c in self.callbackdict["getChannelList"]()
