@@ -47,8 +47,19 @@ def hasPermission(userObj, permission):
     return permission in userbank[userObj.id]["permissions"]
 
 
-def needs_permission(func, permission):
-    def command(self, messageObj):
-        if hasPermission(messageObj.author, permission):
-            func(self, messageObj)
-    return command
+def needs_permission(permission):
+    def decorator(func):
+        def proxy(remainder, messageObj,*args, **kwargs):
+            if hasPermission(messageObj.author, permission):
+                func(remainder, messageObj, *args, **kwargs)
+        return proxy
+    return decorator
+
+def needs_permission_legacy(permission):
+    def decorator(func):
+        def proxy(messageObj,*args, **kwargs):
+            if hasPermission(messageObj.author, permission):
+                func(messageObj, *args, **kwargs)
+        return proxy
+    return decorator
+

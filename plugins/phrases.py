@@ -1,3 +1,4 @@
+import permissions
 import random
 import json
 import asyncio
@@ -85,6 +86,7 @@ class Phrases:
         return func
 
     #TODO: WARNING: not all phrasebank items are lists now, this will break if used with an item of the wrong type
+    @permissions.needs_permission(permissions.Permissions.moderator)  #TODO: idk what level is needed
     def addphrase(self, remainder, messageObj):
         if len(remainder.split()) < 2:
             raise Exception  #TODO
@@ -127,5 +129,5 @@ class Phrases:
                    "!sonic": "sonic",
                    "!sanic": "sonic",
                    "plot": "plot"
-                    }
+                   }
 Class = Phrases

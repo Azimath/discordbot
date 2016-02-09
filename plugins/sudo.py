@@ -1,6 +1,6 @@
 import re
 import discord
-
+import permissions
 
 class Sudo:
     """A plugin to make the bot say things in channels. Mods only.
@@ -8,6 +8,7 @@ class Sudo:
     def __init__(self, client):
         self.client = client
 
+    @permissions.needs_permission(permissions.Permissions.moderator)
     def sudo(self, remainder, messageObj):
         if len(remainder.split()) < 2:
             self.client.send_message(messageObj.channel, "Not enough args")
