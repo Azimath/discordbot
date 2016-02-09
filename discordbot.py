@@ -73,7 +73,7 @@ if __name__ == "__main__":
             if message.author.id != client.user.id:#we ignore our own messages
                 await callEvents("\\message", commandObjects, message)#shorthand for message_no_bot: should we even allow implicit?
                 await callEvents("\\message_no_bot", commandObjects, message)
-
+                #print("Got message")
                 #commands
                 if message.content.startswith("!"):
                     if message.content.startswith("!help"):
