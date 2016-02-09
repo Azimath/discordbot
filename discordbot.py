@@ -8,12 +8,13 @@ import json
 def loadPlugins():
     global commandObjects
 
-    def load_all_modules_from_dir(dirname):  #modded from: http://stackoverflow.com/questions/1057431/loading-all-modules-in-a-folder-in-python/8556471#8556471
+    #see: http://stackoverflow.com/questions/1057431/loading-all-modules-in-a-folder-in-python/8556471#8556471
+    def load_all_modules_from_dir(dirname):
         modules = []
         for importer, package_name, _ in pkgutil.iter_modules([dirname]):
             full_package_name = '%s.%s' % (dirname, package_name)
-            if full_package_name not in sys.modules:
-                mod = importer.find_module(package_name).load_module(full_package_name)
+            if full_package_name not in sys.modules:  #TODO:get a proper plugin framework, idk if this needs to be changed like the following line was (see commit history)
+                mod = importer.find_module(package_name).load_module(package_name)
                 modules.append(mod)
                 print(mod)
         return modules
@@ -28,12 +29,12 @@ def loadPlugins():
 
 
 class COCallablesIterator:  #co = commandobjects
-    def __init__(self, commandObjects, name):
-        self.commandObjects = commandObjects
+    def __init__(self, cos, name):
+        self.cos = cos
         self.name = name
 
     def __iter__(self):
-        for commandObject in self.commandObjects:
+        for commandObject in self.cos:
             for key, funcName in commandObject.commandDict.items():
                 if key == self.name:
                     thing = getattr(commandObject, funcName)
@@ -41,17 +42,17 @@ class COCallablesIterator:  #co = commandobjects
                         yield thing, commandObject
 
 
-def callEvents(eventName, commandObjects, *args, **kwargs):
+def callEvents(eventName, cos, *args, **kwargs):
     calledCount = 0
-    for method,commandObject in COCallablesIterator(commandObjects, eventName):
+    for method, commandObject in COCallablesIterator(cos, eventName):
         method(*args, **kwargs)
         calledCount += 1
     return calledCount
 
 
 #TODO: what if?: !command is defined multiple times
-def callCommand(commandObjects, commandName, remainder, messageObj, *args, **kwargs):
-    for method,commandObject in COCallablesIterator(commandObjects, commandName):
+def callCommand(cos, commandName, remainder, messageObj, *args, **kwargs):
+    for method, commandObject in COCallablesIterator(cos, commandName):
         if commandObject.legacy:
             method(messageObj)
         else:
@@ -68,24 +69,22 @@ if __name__ == "__main__":
         config = json.loads(configfile.read())
 
     client = discord.Client()
-    client.login(config["DiscordEmail"], config["DiscordPassword"])
 
     def listen():
         @client.event
-        def on_message(message):
+        async def on_message(message):
             callEvents("\\message_with_bot", commandObjects, message)
 
             if message.author.id != client.user.id:  #we ignore our own messages
-                callEvents("\\message", commandObjects, message)  #shorthand for message_no_bot: should we even allow implicit?
                 callEvents("\\message_no_bot", commandObjects, message)
 
                 #commands
                 if message.content.startswith("!"):
                     if message.content.startswith("!help"):
-                        args = message.content.replace("!help","",1).split()
+                        args = message.content.replace("!help", "", 1).split()
                         if len(args) == 0:
                             for plugin in commandObjects:
-                                client.send_message(message.author, "%s\n%s" % (str(plugin.__module__), str(plugin.__doc__)) )
+                                client.send_message(message.author, "%s\n%s" % (str(plugin.__module__), str(plugin.__doc__)))
                         return
                     commandName = message.content.split()[0]  #TODO:im not sure if this should be done in *this* part of the code, but then how?
                     remainder = message.content.replace(commandName, "", 1)
@@ -105,11 +104,11 @@ if __name__ == "__main__":
                 return
 
         @client.event
-        def on_channel_update(channel):
-            callEvents("\\on_channel_update", commandObjects, channel)
+        async def on_channel_update(before, after):
+            callEvents("\\on_channel_update", commandObjects, after)
 
         @client.event
-        def on_ready():
+        async def on_ready():
             global commandObjects
 
             print("Logged in as")
@@ -119,6 +118,6 @@ if __name__ == "__main__":
     
             loadPlugins()
     
-        client.run()
+        client.run(config["DiscordEmail"], config["DiscordPassword"])
 
     listen()  #hey, listen,
