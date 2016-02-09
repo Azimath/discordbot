@@ -53,7 +53,7 @@ def callEvents(eventName, cos, *args, **kwargs):
 #TODO: what if?: !command is defined multiple times
 def callCommand(cos, commandName, remainder, messageObj, *args, **kwargs):
     for method, commandObject in COCallablesIterator(cos, commandName):
-        if commandObject.legacy:
+        if hasattr(commandObject, "legacy") and commandObject.legacy:
             method(messageObj)
         else:
             method(remainder, messageObj, *args, **kwargs)

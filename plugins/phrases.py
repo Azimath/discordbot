@@ -2,7 +2,7 @@ import permissions
 import random
 import json
 import asyncio
-
+from discord import utils as util
 
 #there are: mention+keword replies, comand replies:[static, random]
 #TODO: move static data to json file
@@ -50,8 +50,6 @@ class Phrases:
                     if self.client.id not in messageObj.mentions:
                         return
 
-                args = remainder.split()
-
                 if command == "buydinner":
                     phrasetype = "praise"
                 else:
@@ -63,18 +61,29 @@ class Phrases:
                     selector = random.randrange(len(self.phrasebank[phrasetype]))
 
                 if command in ["pal", "buydinner"]:
-                    mention = messageObj.author.id
-                elif command in ["praises", "lart"]:
-                    mention = args[0]  #TODO: reverse lookup
+                    mention = messageObj.author
+                elif command in ["praise", "lart"]:
+                    remainder = remainder.strip()
+                    if remainder:
+                        found = util.get(messageObj.server.members, name=remainder)  #TODO: reverse lookup
+                        if found:
+                            mention = found
+                        else:
+                            mention = remainder
+                    else:
+                        mention = messageObj.author
                 else:
                     pass
 
                 if command == "baddragon":
                     msg = "https://bad-dragon.com/products/%s" % self.phrasebank[selector]
                 elif command in ["praise", "lart", "pal", "buydinner"]:
-                    msg = self.phrasebank[selector].replace("$who", "<@%s>" % mention)
+                    try:  #discord
+                        msg = self.phrasebank[command][selector].replace("$who", "<@%s>" % mention.id)
+                    except AttributeError:  #string
+                        msg = self.phrasebank[command][selector].replace("$who", mention)
                 else:
-                    msg = self.phrasebank[selector]
+                    msg = self.phrasebank[command][selector]
 
                 if command in ["tests"]:
                     channelType = "pm"
