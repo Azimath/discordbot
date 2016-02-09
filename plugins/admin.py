@@ -1,4 +1,4 @@
-import permissions
+import asyncio
 
 class Admin:
     legacy = True
@@ -10,36 +10,36 @@ class Admin:
     def __init__(self, client):
         self.client = client
     
-    @permissions.needs_owner    
+    @permissions.needs_role_legacy(permissions.RoleEnum.owner)
     def leave(self, message):
-        self.client.leave_server(message.channel.server)
+        asyncio.ensure_future(self.client.leave_server(message.channel.server))
     
-    @permissions.needs_owner
+    @permissions.needs_role_legacy(permissions.RoleEnum.owner)
     def invite(self, message):
         print("Got an invite: " + message.content[8:])
-        self.client.accept_invite(message.content[8:])
+        asyncio.ensure_future(self.client.accept_invite(message.content[8:]))
     
     def newsPurge(self, message):
         if message.author.id == "102980090970779648" and message.channel.id != "102984909320110080":
-            self.client.delete_message(message)
+            asyncio.ensure_future(self.client.delete_message(message))
 
     def registerNewUser(self, message):  
         if message.mentions.__len__() == 0:
             id = message.author.id
             name = message.author.name
             if permissions.register(permissions.User(id, name, ["base"]), message):
-                self.client.send_message(message.channel, "User id " + message.author.id + " has been registered")
+                asyncio.ensure_future(self.client.send_message(message.channel, "User id " + message.author.id + " has been registered"))
             else:
-                self.client.send_message(message.channel, "User id " + message.author.id + " is already registered")
+                asyncio.ensure_future(self.client.send_message(message.channel, "User id " + message.author.id + " is already registered"))
         else:
             id = message.mentions[0].id
             name = message.mentions[0].name
             if permissions.register(permissions.User(id, name, ["base"]), message):
-                self.client.send_message(message.channel, "User id " + id + " has been registered")
+                asyncio.ensure_future(self.client.send_message(message.channel, "User id " + id + " has been registered"))
             else:
-                self.client.send_message(message.channel, "User id " + id + " is already registered")
+                asyncio.ensure_future(self.client.send_message(message.channel, "User id " + id + " is already registered"))
     
-    @permissions.needs_moderator       
+    @permissions.needs_role_legacy(permissions.RoleEnum.moderator)
     def delete(self, message):
                 #find out if the sender has delete permissions
                 victim = None
@@ -75,11 +75,11 @@ class Admin:
                         deleted = 0
                         for x in reversed(self.client.messages):
                             if x.author == victim and x.channel == channel and deleted < number:
-                                self.client.delete_message(x)
+                                asyncio.ensure_future(self.client.delete_message(x))
                                 deleted = deleted + 1
                                 print("deleted " + str(deleted))
                             if deleted >= number:
-                                self.client.send_message(channel, "Removed " + str(deleted) + " messages belonging to " + victim.name)
+                                asyncio.ensure_future(self.client.send_message(channel, "Removed " + str(deleted) + " messages belonging to " + victim.name))
                                 break
                         print("messages remaining: " + str(number-deleted))
                     else:

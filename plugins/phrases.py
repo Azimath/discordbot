@@ -1,8 +1,8 @@
-import permissions
 import random
 import json
 import asyncio
 from discord import utils as util
+
 
 #there are: mention+keword replies, comand replies:[static, random]
 #TODO: move static data to json file
@@ -95,7 +95,7 @@ class Phrases:
         return func
 
     #TODO: WARNING: not all phrasebank items are lists now, this will break if used with an item of the wrong type
-    @permissions.needs_permission(permissions.Permissions.moderator)  #TODO: idk what level is needed
+    @permissions.needs_role(permissions.RoleEnum.moderator)  #TODO: idk what level is needed
     def addphrase(self, remainder, messageObj):
         if len(remainder.split()) < 2:
             raise Exception  #TODO

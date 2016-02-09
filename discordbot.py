@@ -3,6 +3,10 @@ import pkgutil
 import sys
 import json
 
+#yay, bad bad "superglobal" things?
+import builtins
+import permissions
+builtins.permissions = permissions
 
 ####Helper stuff
 def loadPlugins():
