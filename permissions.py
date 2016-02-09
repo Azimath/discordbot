@@ -38,6 +38,11 @@ def register(userObj):
     return isNew
 
 
+def addPerm(userObj, perm):
+    userbank[userObj.id]["permissions"].append(perm)
+    save()
+
+
 def hasPermission(userObj, permission):
     return permission in userbank[userObj.id]["permissions"]
 
