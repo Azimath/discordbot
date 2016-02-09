@@ -14,7 +14,7 @@ class Sudo:
             return
 
         partitiond = remainder.lstrip().partition(" ")
-        channelids = [re.match("<#([0-9]+)>", s) for s in partitiond[0].split(":")]
+        channelids = [re.match("<#([0-9]+)>", s).group(1) for s in partitiond[0].split(":")]
         #is there even a point to multichannel?
         channels = [discord.Object(i) for i in channelids]
         message = partitiond[2]
