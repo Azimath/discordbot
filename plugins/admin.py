@@ -74,9 +74,9 @@ class Admin:
                         print("authorized, channel is " + channel.name + " target is " + victim.name)
                         print("deleting " + str(number) + " messages")
                         deleted = 0
-                        for x in reversed(self.client.messages):
-                            if x.author == victim and x.channel == channel and deleted < number:
-                                await self.client.delete_message(x)
+                        async for msg in self.client.logs_from(channel, limit=100*number):
+                            if msg.author == victim and deleted < number:
+                                await self.client.delete_message(msg)
                                 deleted = deleted + 1
                                 print("deleted " + str(deleted))
                             if deleted >= number:
