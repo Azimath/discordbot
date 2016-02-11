@@ -90,7 +90,7 @@ def hasRole(userObj, serverObj, role):
     if serverRolesGlobal[serverObj].mode == ModeEnum.discord:
         return role in userObj.roles
     elif serverRolesGlobal[serverObj].mode == ModeEnum.internal:
-        return
+        return role in permissionstree["perms"][serverObj.id][userObj.id]["roles"]
     else:
         raise NotImplemented
 
