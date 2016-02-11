@@ -7,21 +7,34 @@ class RoleEnum:
     owner = "owner"
     moderator = "moderator"
 
+class ModeEnum:
+    discord = "discordRoles"
+    internal = "internal"
 
 #TODO: this is "groups" basically (?)
 class ServerRoles:
-    def __init__(self, server):
-        #if server is not configured, default deny. TODO: this should be ok?
+    def __init__(self, server, permissionmode):
+        #if server is not configured, default deny. TODO: this should wok ok like this?
         if server.id not in permissionstree["config"]:
             self.admin, self.owner, self.moderator = (None, None, None)
             return
 
-        def getRoleID(role):
-            return permissionstree["config"][server.id][role]
+        self.mode = permissionstree["config"][server.id]["permissionsMode"]
 
-        self.admin = util.get(server.roles, id=getRoleID(RoleEnum.admin))
-        self.owner = util.get(server.roles, id=getRoleID(RoleEnum.owner))
-        self.moderator = util.get(server.roles, id=getRoleID(RoleEnum.moderator))
+        if self.mode == ModeEnum.discord:
+            def getRoleID(role):
+                return permissionstree["config"][server.id][role]
+
+            self.admin = util.get(server.roles, id=getRoleID(RoleEnum.admin))
+            self.owner = util.get(server.roles, id=getRoleID(RoleEnum.owner))
+            self.moderator = util.get(server.roles, id=getRoleID(RoleEnum.moderator))
+
+        elif permissionmode == ModeEnum.internal:
+            self.admin = RoleEnum.admin
+            self.owner = RoleEnum.owner
+            self.moderator = RoleEnum.moderator
+        else:
+            raise NotImplemented
 
     def getRole(self, enumElement):
         if enumElement == RoleEnum.admin:
@@ -73,19 +86,26 @@ load()
 #        save()
 
 
-def hasRole(userObj, role):
-    return role in userObj.roles
+def hasRole(userObj, serverObj, role):
+    if serverRolesGlobal[serverObj].mode == ModeEnum.discord:
+        return role in userObj.roles
+    elif serverRolesGlobal[serverObj].mode == ModeEnum.internal:
+        return
+    else:
+        raise NotImplemented
 
 
 def needs_role(enumRole):
     def decorator(func):
-        def proxy(self, remainder, messageObj, *args, **kwargs):
+        def funcproxy(self, remainder, messageObj, *args, **kwargs):
             if messageObj.server not in serverRolesGlobal:
                 serverRolesGlobal[messageObj.server] = ServerRoles(messageObj.server)
             role = serverRolesGlobal[messageObj.server].getRole(enumRole)
-            if hasRole(messageObj.author, role):
-                func(self, remainder, messageObj, *args, **kwargs)
-        return proxy
+            if hasRole(messageObj.author, messageObj.server, role):
+                return func(self, remainder, messageObj, *args, **kwargs)
+            else:
+                raise PermissionError
+        return funcproxy
     return decorator
 
 
@@ -95,8 +115,10 @@ def needs_role_legacy(enumRole):
             if messageObj.server not in serverRolesGlobal:
                 serverRolesGlobal[messageObj.server] = ServerRoles(messageObj.server)
             role = serverRolesGlobal[messageObj.server].getRole(enumRole)
-            if hasRole(messageObj.author, role):
-                func(messageObj, *args, **kwargs)
+            if hasRole(messageObj.author, messageObj.server, role):
+                return func(self, messageObj, *args, **kwargs)
+            else:
+                raise PermissionError
         return proxy
     return decorator
 
