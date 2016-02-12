@@ -19,7 +19,7 @@ class Dunno:
         except:
             pass
 
-        danno = random.choice(self.dunnos, 1).replace("$who", "<@%s>" % messageObj.author.id)
+        danno = random.choice(self.dunnos).replace("$who", "<@%s>" % messageObj.author.id)
         asyncio.ensure_future(self.client.send_message(messageObj.channel, danno))
 
 Class = Dunno
