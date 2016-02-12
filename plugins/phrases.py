@@ -100,7 +100,7 @@ class Phrases:
         if len(remainder.split()) < 2:
             raise Exception  #TODO
 
-        partitiond = remainder.lstrip().partition(" ")[0]
+        partitiond = remainder.lstrip().partition(" ")
         phrasebanktarget = partitiond[0]
         phrase = partitiond[2]
 

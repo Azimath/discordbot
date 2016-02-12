@@ -1,3 +1,5 @@
+#TODO: helper functions for commands that accept users as parameters
+#TODO: proper command parsing
 import discord
 import pkgutil
 import sys
@@ -8,6 +10,7 @@ import asyncio
 import builtins
 import permissions
 builtins.permissions = permissions
+
 
 ####Helper stuff
 def loadPlugins():

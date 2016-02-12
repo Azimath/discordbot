@@ -57,6 +57,8 @@ class IRCBridge:
     def __init__(self, client):
         self.client = client
 
+        self.prevmessages = list()
+
         self.server = util.get(self.client.servers, id=config["DiscordServerID"])
 
         self.ircThread = IrcThread(self)  #pass IRCBridge instance so we can access the necessary callbacks
@@ -69,6 +71,10 @@ class IRCBridge:
     def recvDiscordMsg(self, message):
         if isinstance(message.channel, discord.PrivateChannel):
             return  #TODO
+
+        if message.author.id == self.client.user.id and message.content in self.prevmessages:
+            self.prevmessages.remove(message.content)
+            return
 
         if not message.server.id == config["DiscordServerID"]:
             return  #TODO maybe filter at a higher level? multi server?
@@ -116,6 +122,7 @@ class IRCBridge:
             print("Message '%s' ignored, no such channel: %s , trans: %s" %
                   (msgInternal["message"], msgInternal["channel"], channel))
             return
+        self.prevmessages.append(msgStr)
         asyncio.ensure_future(self.client.send_message(channel, msgStr), loop=self.client.loop)
 
     def getOnlineList(self):

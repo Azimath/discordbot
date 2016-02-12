@@ -1,93 +1,133 @@
+#NOTE: this code uses "permissions", it needs to be imported by a namespace that
+#sets the "permissions" builtin to the imported permissions module.
 import asyncio
+import discord.utils as util
+import json
+
+global permissions#to make pycharm happy about it existing
+
+with open('plugins/admin.json', 'r') as configfile:
+    config = json.load(configfile)
+
 
 class Admin:
-    legacy = True
     """This is a plugin for a few basic admin functions and the almighty censorship cannon.
        Feared by Jerries everywhere.
        !leave: Tells the bot to leave. Only works if you're Azimath.
        !invite: Invites the bot to a new server. Only works if you're Azimath.
-       !delete @Target <channel> numberofmessages : Deletes numberofmessages sent by Target. If no channel is specified assumes channel it was sent in."""    
+       !delete @Target <channel> numberofmessages : Deletes numberofmessages sent by Target.
+            If no channel is specified assumes channel it was sent in."""
     def __init__(self, client):
         self.client = client
     
-    @permissions.needs_role_legacy(permissions.RoleEnum.owner)
-    def leave(self, message):
-        asyncio.ensure_future(self.client.leave_server(message.channel.server))
+    @permissions.needs_role(permissions.RoleEnum.owner)
+    def leave(self, remainder, messageObj):
+        asyncio.ensure_future(self.client.leave_server(messageObj.channel.server))
     
-    @permissions.needs_role_legacy(permissions.RoleEnum.owner)
-    def invite(self, message):
-        print("Got an invite: " + message.content[8:])
-        asyncio.ensure_future(self.client.accept_invite(message.content[8:]))
+    @permissions.needs_role(permissions.RoleEnum.owner)
+    def invite(self, remainder, messageObj):
+        print("Got an invite: " + remainder)
+        asyncio.ensure_future(self.client.accept_invite(remainder))
     
-    def newsPurge(self, message):
-        if message.author.id == "102980090970779648" and message.channel.id != "102984909320110080":
-            asyncio.ensure_future(self.client.delete_message(message))
+    def newsPurge(self, messageObj):
+        permittedChannelId = config["newsChannelId"]
+        permittedChannel = util.get(messageObj.server.channels, id=permittedChannelId)
+        serverId = config["serverId"]
 
-    def registerNewUser(self, message):  
-        if message.mentions.__len__() == 0:
-            id = message.author.id
-            name = message.author.name
-            if permissions.register(permissions.User(id, name, ["base"]), message):
-                asyncio.ensure_future(self.client.send_message(message.channel, "User id " + message.author.id + " has been registered"))
-            else:
-                asyncio.ensure_future(self.client.send_message(message.channel, "User id " + message.author.id + " is already registered"))
+        if messageObj.channel != permittedChannel and messageObj.server.id == serverId:
+            asyncio.ensure_future(self.client.delete_message(messageObj))
+            asyncio.ensure_future(self.client.send_message(
+                permittedChannel, "moved message from %s: %s" % (messageObj.author.name, messageObj.content))
+                )
+
+    def registerNewUser(self, remainder, messageObj):
+
+        if messageObj.mentions:
+            status = permissions.addUser(messageObj.server, messageObj.mentions[0])
+        elif not remainder.strip():
+            status = permissions.addUser(messageObj.server, messageObj.author)
         else:
-            id = message.mentions[0].id
-            name = message.mentions[0].name
-            if permissions.register(permissions.User(id, name, ["base"]), message):
-                asyncio.ensure_future(self.client.send_message(message.channel, "User id " + id + " has been registered"))
-            else:
-                asyncio.ensure_future(self.client.send_message(message.channel, "User id " + id + " is already registered"))
-    
-    @permissions.needs_role_legacy(permissions.RoleEnum.moderator)
-    def delete(self, message):
-                #find out if the sender has delete permissions
-                victim = None
-                channel = None
-                command = message.content.split() #probably the best way to do this, right?
-                if len(command) > 1: #parse the fuck out of it
-                    if len(message.mentions) == 0:
-                        victim = None
-                    elif len(message.mentions) > 1:
-                        channel = None
-                    else:
-                        victim = message.mentions[0]
-                    
-                    if len(command) > 2:
-                        for n in range(1, command.__len__()):
-                            try:
-                                number = int(command[n])
-                                break
-                            except:
-                                number = 1
-                    
-                    if len(message.channel_mentions) == 0:
-                        channel = message.channel
-                    elif len(message.channel_mentions) > 1:
-                        channel = None
-                    else:
-                        channel = message.channel_mentions[0]
-                #actually do the stuff
-                
-                    if victim is not None and channel is not None:
-                        print("authorized, channel is " + channel.name + " target is " + victim.name)
-                        print("deleting " + str(number) + " messages")
-                        deleted = 0
-                        for x in reversed(self.client.messages):
-                            if x.author == victim and x.channel == channel and deleted < number:
-                                asyncio.ensure_future(self.client.delete_message(x))
-                                deleted = deleted + 1
-                                print("deleted " + str(deleted))
-                            if deleted >= number:
-                                asyncio.ensure_future(self.client.send_message(channel, "Removed " + str(deleted) + " messages belonging to " + victim.name))
-                                break
-                        print("messages remaining: " + str(number-deleted))
-                    else:
-                        print("Invalid victim or channel")
-                        print(victim == None)
-                        print(channel == None)
-                    
-                    
-    commandDict = { "!invite" : "invite", "!leave" : "leave", "!delete" : "delete", "!add" : "registerNewUser", "!register" : "registerNewUser", "a.msn.com" : "newsPurge" }
+            raise NotImplemented
+        asyncio.ensure_future(self.client.send_message(messageObj.channel, status[1]))
 
+    @permissions.needs_role(permissions.RoleEnum.owner)
+    def addUserRole(self, remainder, messageObj):
+        args = remainder.split()
+        if len(args) != 2 and not len(messageObj.mentions):
+            raise Exception
+
+        role = permissions.RoleEnum.lookUp(args[1])
+        status = permissions.addUserRole(messageObj.server, messageObj.mentions[0], role)
+        asyncio.ensure_future(self.client.send_message(messageObj.channel, status[1]))
+
+    @permissions.needs_role(permissions.RoleEnum.owner)  #WARNING: TODO: does this get run in the correct context?
+    def reloadPermissionsConfig(self, remainder, messageObj):
+        permissions.reloadConfig()
+
+    @permissions.needs_role(permissions.RoleEnum.globalroot)
+    def setPermissionsMode(self, remainder, messageObj):
+        args = remainder.split()
+        if len(args) != 1:
+            raise Exception
+
+        mode = permissions.ModeEnum.lookUp(args[0])
+        permissions.setPermissionsMode(messageObj.server, mode)
+
+    @permissions.needs_role(permissions.RoleEnum.owner)
+    def setPermissionsRoleId(self, remainder, messageObj):
+        if len(remainder.split()) < 2:
+            raise Exception  #TODO
+
+        partitiond = remainder.lstrip().partition(" ")
+        rolestr = partitiond[0]
+        groupstr = partitiond[2]
+
+        gid = util.get(messageObj.server.roles, name=groupstr).id
+        role = permissions.RoleEnum.lookUp(rolestr)
+        status = permissions.setPermissionRoleId(messageObj.server, role, gid)
+        asyncio.ensure_future(self.client.send_message(messageObj.channel, status[1]))
+
+    @permissions.needs_role(permissions.RoleEnum.moderator)
+    def delete(self, remainder, messageObj):
+        args = remainder.split()
+        if len(args) not in [1, 2, 3] and not len(messageObj.mentions):
+            raise Exception
+
+        if len(args) == 1:
+            number = int(args[0])
+            targetUser = messageObj.author
+            targetChannel = messageObj.channel
+        elif len(args) == 2:
+            number = int(args[1])
+            targetUser = messageObj.mentions[0]
+            targetChannel = messageObj.channel
+        else:
+            number = int(args[2])
+            targetUser = messageObj.mentions[1]
+            targetChannel = messageObj.channel_mentions[0]
+
+        print("deleting %s messages channel is %s target is %s" % (number, targetChannel, targetUser))
+        asyncio.ensure_future(self.asyncDeleteMessages(targetChannel, targetUser, number, messageObj))
+
+    async def asyncDeleteMessages(self, targetChannel, targetUser, number, messageObj):
+        count = 0
+        while count < number:
+            async for msg in self.client.logs_from(targetChannel, limit=20, before=messageObj):
+                if count < number and msg.author == targetUser:
+                    await self.client.delete_message(msg)
+                    count += 1
+                    print("-", end="")
+        await self.client.delete_message(messageObj)
+
+    commandDict = {"!invite": "invite",
+                   "!leave": "leave",
+                   "!delete": "delete",
+                   "!add": "registerNewUser",
+                   "!addrole": "addUserRole",
+                   "!register": "registerNewUser",
+                   "!reloadpermissionsconfig": "reloadPermissionsConfig",
+                   "a.msn.com": "newsPurge",
+                   "!setpmode": "setPermissionsMode",
+                   "!setrolegroup": "setPermissionsRoleId"
+                   }
 Class = Admin
