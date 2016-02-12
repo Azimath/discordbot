@@ -123,7 +123,7 @@ class IRCBridge:
                   (msgInternal["message"], msgInternal["channel"], channel))
             return
         self.prevmessages.append(msgStr)
-        asyncio.ensure_future(self.client.send_message(channel, msgStr), loop=self.client.loop)
+        asyncio.run_coroutine_threadsafe(self.client.send_message(channel, msgStr), loop=self.client.loop)
 
     def getOnlineList(self):
         return [x.name for x in self.server.members if x.status == discord.Status.online]
