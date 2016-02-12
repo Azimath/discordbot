@@ -63,3 +63,4 @@ target/
 permissions.json
 config.json
 bridge.json
+admin.json
