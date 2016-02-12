@@ -1,3 +1,4 @@
+#TODO: threadsafing
 #TODO: >seen, >getlastmention
 #TODO: auth + OP
 #TODO: something about usernames that will break the current from-irc highlighting method
@@ -61,7 +62,7 @@ class IRCBridge:
 
         self.server = util.get(self.client.servers, id=config["DiscordServerID"])
 
-        self.ircThread = IrcThread(self)  #pass IRCBridge instance so we can access the necessary callbacks
+        self.ircThread = IrcThread(self, self.client.loop)  #pass IRCBridge instance so we can access the necessary callbacks
         self.ircThread.start()
 
     def updateIrcTopic(self, discordChannel):
@@ -101,11 +102,52 @@ class IRCBridge:
             while channel not in self.ircThread.client.channels:
                 time.sleep(0.5)
 
-        msgStr = "%s:\t%s" % (colorize_nick(msgInternal["nick"]),
-                              self.translateMsg(msgInternal["message"], TransType.irc))
+        msgStr = self.toIrcMsg(msgInternal)
         self.ircThread.client.eventloop.schedule(self.ircThread.client.message, channel, msgStr)
 
+    def toIrcMsg(self, msgInternal):
+        msgStr = "%s:\t%s" % (colorize_nick(msgInternal["nick"]),
+                              self.translateMsg(msgInternal["message"], TransType.irc))
+        return msgStr
+
+    def asyncBridgeMessageHistory(self, channel, number):
+        iChan = translateChannel(channel, TransType.irc)
+        messages_fut = asyncio.run_coroutine_threadsafe(self.asyncGetMessages(channel, number), loop=self.client.loop)
+        result = messages_fut.result()
+        for m in reversed(result):
+            self.ircThread.client.eventloop.schedule(self.ircThread.client.message, iChan, m)
+        print("DONE")
+
+    async def asyncGetMessages(self, channel, number):
+        dChan = translateChannel(channel, TransType.discord, self.server.channels)
+        iChan = translateChannel(channel, TransType.irc)
+        count = 0
+        lastMsg = None
+        async for msg in self.client.logs_from(dChan, limit=1, before=lastMsg):
+            lastMsg = msg
+
+        messages = []
+        while count < number:
+            async for msg in self.client.logs_from(dChan, limit=5, before=lastMsg):
+                if count < number:
+                    msgInternal = {
+                        "nick": msg.author.name,
+                        "channel": iChan,
+                        "message": msg.content
+                        }
+                    msgStr = self.toIrcMsg(msgInternal)
+                    msgStr = "%s: %s" % (str(msg.timestamp)[11:-7], msgStr)  #TODO: hack, do it right lol
+
+                    messages.append(msgStr)
+                    count += 1
+                    print("+", end="")
+                lastMsg = msg
+
+        return messages
+
 #IRC -> Discord
+    #IMPORTANT: recvIrcMsg -> recvIrcAction -> sendDiscordMessage chain runs in (is called from, as a callback)
+    #IrcClient thread, hence the need for _threadsafe
     def recvIrcMsg(self, msgInternal):
         self.sendDiscordMsg(msgInternal)
 
@@ -144,24 +186,32 @@ Class = IRCBridge
 
 
 class IrcClient(pydle.MinimalClient):
-    def __init__(self, callbackdict):
+    def __init__(self, callbackdict, discordEventLoop):
         super().__init__(config["BotNick"])
         self.callbackdict = callbackdict
+        self.discordEventLoop = discordEventLoop
 
     #@pydle.coroutine  #may or may not be necessary
     def on_message(self, target, source, message):
         super().on_message(target, source, message)
-        if message == ">list":
-            self.message(target, ", ".join(self.callbackdict["getOnlineList"]()))
-            self.message(target, ", ".join([translateChannel(c, TransType.irc) for c in self.callbackdict["getChannelList"]()
-                                            if c.type == discord.ChannelType.text and c.server.id == config["DiscordServerID"]]))
-            return
 
         msgInternal = {
             "nick": source,
             "channel": translateChannel(target, TransType.canonical),
             "message": message
             }
+
+        if message == ">list":
+            self.message(target, ", ".join(self.callbackdict["getOnlineList"]()))
+            self.message(target, ", ".join([translateChannel(c, TransType.irc) for c in self.callbackdict["getChannelList"]()
+                                            if c.type == discord.ChannelType.text and c.server.id == config["DiscordServerID"]]))
+            return
+        elif message.startswith(">hist "):
+            number = int(message.replace(">hist ", "").strip())
+            channel = translateChannel(target, TransType.canonical)
+            self.callbackdict["asyncBridgeMessageHistory"](channel, number)
+            return
+
         self.callbackdict["onMessage"](msgInternal)
 
     def on_connect(self):
@@ -193,18 +243,18 @@ class IrcClient(pydle.MinimalClient):
                            discordChannel.topic.replace("\n", ""))  #character is invalid in IRC protocol (?) TODO
 
 
-#IMPORTANT: .eventloop only gets set when .connect is run, hence the synchronisation by .isRunning
 class IrcThread(threading.Thread):
-    def __init__(self, ircBridgeInstance):
+    def __init__(self, ircBridgeInstance, discordEventLoop):
         self.isRunning = False
         super().__init__(daemon=True)
         callbackdict = {
             "onMessage": ircBridgeInstance.recvIrcMsg,
             "onCtcpAction": ircBridgeInstance.recvIrcAction,
             "getOnlineList": ircBridgeInstance.getOnlineList,
-            "getChannelList": ircBridgeInstance.client.get_all_channels
+            "getChannelList": ircBridgeInstance.client.get_all_channels,
+            "asyncBridgeMessageHistory": ircBridgeInstance.asyncBridgeMessageHistory
             }
-        self.client = IrcClient(callbackdict)
+        self.client = IrcClient(callbackdict, discordEventLoop)
 
     def run(self):
         self.client.connect(config["ServerIP"], config["ServerPort"])
