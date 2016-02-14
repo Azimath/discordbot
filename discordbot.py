@@ -107,7 +107,7 @@ if __name__ == "__main__":
                         #if not command and not event then run keyword command
                         if not key.startswith("!") and not key.startswith("\\") and key in message.content:
                             if callable(getattr(commandObject, funcName)):
-                                getattr(commandObject, funcName)(message)
+                                getattr(commandObject, funcName)(None, message) # HACK to make plot and unflip work, probably need to create new call type for this
                                 break
                 return
 

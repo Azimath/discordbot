@@ -47,7 +47,7 @@ class Phrases:
                 msg = self.phrasebank["directmap"][command]
             else:
                 if command in ["plot"]:
-                    if self.client.id not in messageObj.mentions:
+                    if self.client.user not in messageObj.mentions:
                         return
 
                 if command == "buydinner":
@@ -56,7 +56,7 @@ class Phrases:
                     phrasetype = command
 
                 if command == "pal":
-                    selector = int(bool(random.randrange(100)))
+                    selector = int(not bool(random.randrange(100)))
                 else:
                     selector = random.randrange(len(self.phrasebank[phrasetype]))
 
@@ -76,14 +76,16 @@ class Phrases:
                     pass
 
                 if command == "baddragon":
-                    msg = "https://bad-dragon.com/products/%s" % self.phrasebank[selector]
+                    msg = "https://bad-dragon.com/products/%s" % self.phrasebank[phrasetype][selector]
+                elif command == "eightball":
+                    msg = ":8bal:" % self.phrasebank[phrasetype][selector]
                 elif command in ["praise", "lart", "pal", "buydinner"]:
                     try:  #discord
-                        msg = self.phrasebank[command][selector].replace("$who", "<@%s>" % mention.id)
+                        msg = self.phrasebank[phrasetype][selector].replace("$who", "<@%s>" % mention.id)
                     except AttributeError:  #string
-                        msg = self.phrasebank[command][selector].replace("$who", mention)
+                        msg = self.phrasebank[phrasetype][selector].replace("$who", mention)
                 else:
-                    msg = self.phrasebank[command][selector]
+                    msg = self.phrasebank[phrasetype][selector]
 
                 if command in ["tests"]:
                     channelType = "pm"
@@ -129,7 +131,7 @@ class Phrases:
                    "!tests": "tests",
                    "!popori": "popori",
                    "!addphrase": "addphrase",
-                   "┻━┻": "unflip",
+                   "┻": "unflip",
                    "!floor": "floor",
                    "!wiki": "wiki",
                    "!apply": "application",
