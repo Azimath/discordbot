@@ -124,6 +124,27 @@ class Phrases:
             with open('phrasebank.json', 'w') as phrasefile:
                 phrasefile.write(json.dumps(self.phrasebank, indent=4))
                 await self.client.send_message(message.channel, "Added phrase " + phrase)
-    commandDict = { "!lart" : "lart" , "!praise" : "praise", "!buydinner" : "buydinner" , "!baddragon" : "baddragon", "!pal" : "pal", "!mango" : "mango", "!mang0" : "mango", "!eightball" : "eightball", "!8ball" : "eightball", "!tests" : "tests", "!popori" : "popori", "!addphrase" : "addphrase", "┻━┻" : "unflip", "!floor" : "floor",
-                    "!wiki" : "wiki", "!apply" : "application", "!application" : "application", "!constitution" : "constitution", "!sonic" : "sonic", "!sanic" : "sonic", "plot" : "plot"}
+    commandDict = { 
+                    "!lart" : "lart",
+                    "!praise" : "praise",
+                    "!buydinner" : "buydinner",
+                    "!baddragon" : "baddragon",
+                    "!pal" : "pal",
+                    "!mango" : "mango",
+                    "!mang0" : "mango",
+                    "!eightball" : "eightball",
+                    "!8ball" : "eightball",
+                    "!tests" : "tests",
+                    "!popori" : "popori",
+                    "!addphrase" : "addphrase",
+                    "┻" : "unflip",
+                    "!floor" : "floor",
+                    "!wiki" : "wiki",
+                    "!apply" : "application",
+                    "!application" : "application",
+                    "!constitution" : "constitution",
+                    "!sonic" : "sonic",
+                    "!sanic" : "sonic",
+                    "plot" : "plot"
+                    }
 Class = Phrases
