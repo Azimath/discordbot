@@ -43,52 +43,51 @@ class Phrases:
     def reply(self, command):
         def func(remainder, messageObj):
             channelType = None
+            if command in ["plot"]:
+                if self.client.user not in messageObj.mentions:
+                    return
+
+            if command == "buydinner":
+                phrasetype = "praise"
+            else:
+                phrasetype = command
+
+            if command == "pal":
+                selector = int(not bool(random.randrange(100)))
+            else:
+                selector = random.randrange(len(self.phrasebank[phrasetype]))
+
+            if command in ["pal", "buydinner"]:
+                mention = messageObj.author
+            elif command in ["praise", "lart"]:
+                remainder = remainder.strip()
+                if remainder:
+                    found = util.get(messageObj.server.members, name=remainder)  #TODO: reverse lookup
+                    if found:
+                        mention = found
+                    else:
+                        mention = remainder
+                else:
+                    mention = messageObj.author
+            else:
+                pass
+
             if command in self.phrasebank["directmap"]:
                 msg = self.phrasebank["directmap"][command]
+            elif command == "baddragon":
+                msg = "https://bad-dragon.com/products/%s" % self.phrasebank[phrasetype][selector]
+            elif command == "eightball":
+                msg = ":8bal:" % self.phrasebank[phrasetype][selector]
+            elif command in ["praise", "lart", "pal", "buydinner"]:
+                try:  #discord
+                    msg = self.phrasebank[phrasetype][selector].replace("$who", "<@%s>" % mention.id)
+                except AttributeError:  #string
+                    msg = self.phrasebank[phrasetype][selector].replace("$who", mention)
             else:
-                if command in ["plot"]:
-                    if self.client.user not in messageObj.mentions:
-                        return
+                msg = self.phrasebank[phrasetype][selector]
 
-                if command == "buydinner":
-                    phrasetype = "praise"
-                else:
-                    phrasetype = command
-
-                if command == "pal":
-                    selector = int(not bool(random.randrange(100)))
-                else:
-                    selector = random.randrange(len(self.phrasebank[phrasetype]))
-
-                if command in ["pal", "buydinner"]:
-                    mention = messageObj.author
-                elif command in ["praise", "lart"]:
-                    remainder = remainder.strip()
-                    if remainder:
-                        found = util.get(messageObj.server.members, name=remainder)  #TODO: reverse lookup
-                        if found:
-                            mention = found
-                        else:
-                            mention = remainder
-                    else:
-                        mention = messageObj.author
-                else:
-                    pass
-
-                if command == "baddragon":
-                    msg = "https://bad-dragon.com/products/%s" % self.phrasebank[phrasetype][selector]
-                elif command == "eightball":
-                    msg = ":8bal:" % self.phrasebank[phrasetype][selector]
-                elif command in ["praise", "lart", "pal", "buydinner"]:
-                    try:  #discord
-                        msg = self.phrasebank[phrasetype][selector].replace("$who", "<@%s>" % mention.id)
-                    except AttributeError:  #string
-                        msg = self.phrasebank[phrasetype][selector].replace("$who", mention)
-                else:
-                    msg = self.phrasebank[phrasetype][selector]
-
-                if command in ["tests"]:
-                    channelType = "pm"
+            if command in ["tests"]:
+                channelType = "pm"
 
             print("%s: %s" % (command, msg))
             channel = messageObj.author if channelType == "pm" else messageObj.channel
