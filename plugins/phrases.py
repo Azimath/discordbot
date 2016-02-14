@@ -21,7 +21,7 @@ class Phrases:
         self.client = client
 
         self.phrasebank = {}
-        with open('phrasebank.json', 'r') as lartfile:
+        with open('plugins/phrasebank.json', 'r') as lartfile:
             self.phrasebank = json.loads(lartfile.read())
 
     def lart(self, message):
