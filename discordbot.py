@@ -87,7 +87,8 @@ if __name__ == "__main__":
                 callEvents("\\message_no_bot", commandObjects, message)
 
                 #commands
-                if message.content.startswith("!"):
+                #if message.content.startswith("!"):
+                if message.content.startswith("!") and ''.join(set(message.content)) != "!":
                     if message.content.startswith("!help"):
                         args = message.content.replace("!help", "", 1).split()
                         if len(args) == 0:
