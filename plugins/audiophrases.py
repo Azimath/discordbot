@@ -80,9 +80,11 @@ class AudioPhrases:
                     self.player.stop()
                 self.player = await self.voice.create_ytdl_player(message.content.split()[1])
                 self.player.start()
+                await self.client.change_status(discord.Game(name=self.player.title))
                 await self.client.send_message(message.channel, "Now playing " + self.player.title)
                 print("User " + message.author.name + ":" + message.author.id + " started video: " + message.content.split()[1])
-                await self.client.delete_message(message)    
+                await self.client.delete_message(message)
+                
     async def stop(self, message):
         if self.voice is not None:
             if self.player.is_playing():
