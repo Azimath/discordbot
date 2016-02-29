@@ -16,7 +16,8 @@ class Phrases:
        !apply : links to the membership application
        !tests : PMs the user links to all required membership tests
        !constitution : links to the constitution
-       !sonic : links to a random page on either the archie sonic wiki or the sonic fanon wiki"""    
+       !sonic : links to a random page on either the archie sonic wiki or the sonic fanon wiki
+       !tingle : links to a random tingler"""    
     def __init__(self, client):
         self.client = client
         
@@ -53,6 +54,11 @@ class Phrases:
         dragon = "https://bad-dragon.com/products/" + self.phrasebank["dragons"][random.randrange(self.phrasebank["dragons"].__len__())]
         print("dragon: " + dragon)
         await self.client.send_message(message.channel, dragon)
+        
+    async def tingle(self, message):
+        tingle = "http://amazon.com/" + self.phrasebank["tingles"][random.randrange(self.phrasebank["tingles"].__len__())]
+        print("tingle: " + tingle)
+        await self.client.send_message(message.channel, tingle)
         
     async def pal(self, message):
         if random.randrange(100) == 0:
@@ -145,6 +151,7 @@ class Phrases:
                     "!constitution" : "constitution",
                     "!sonic" : "sonic",
                     "!sanic" : "sonic",
-                    "plot" : "plot"
+                    "plot" : "plot",
+                    "!tingle" : "tingle"
                     }
 Class = Phrases
