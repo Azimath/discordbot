@@ -3,6 +3,7 @@ import pkgutil
 import sys
 import json
 import asyncio
+import inspect
 
 ####Helper stuff
 async def loadPlugins():
@@ -41,7 +42,10 @@ class COCallablesIterator():#co = commandobjects
 async def callEvents(eventName, commandObjects, *args, **kwargs):
     calledCount = 0
     for method,commandObject in COCallablesIterator(commandObjects, eventName):
-        method(*args, **kwargs)
+        if not inspect.iscoroutine(method) and not inspect.iscoroutinefunction(method):
+            method(*args, **kwargs)
+        else:
+            await method(*args, **kwargs)
         calledCount += 1
     return calledCount
 
