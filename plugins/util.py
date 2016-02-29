@@ -1,4 +1,5 @@
 import asyncio
+import discord
   
 class Util:
     legacy = True
@@ -24,14 +25,13 @@ class Util:
             # self.client.send_message(target, "Author id: " + message.author.id)
               
     async def game(self, message):
+        await self.client.change_status(discord.Game(name=message.content[6:]))
     
-        class Game:
-            name = ""
-            def __init__(self, name):
-                self.name = name
-                
-        await self.client.change_status(Game(message.content[6:]))
-    
-    commandDict = { "!info" : "info", "!game" : "game"}
+    async def embeds(self, message):
+        print(str(len(message.embeds)) + " embeds in message")
+        for embed in message.embeds:
+            await self.client.send_message(message.author, str(dir(embed)))
+            
+    commandDict = { "!info" : "info", "!game" : "game", "!embeds" : "embeds"}
 
 Class = Util
