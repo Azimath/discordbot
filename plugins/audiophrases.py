@@ -78,7 +78,8 @@ class AudioPhrases:
         if message.channel.is_private:
             await self.client.send_message(message.channel, "Go fuck yourself")
             await self.client.send_message(discord.utils.get(self.client.get_all_channels(), server__name="IAA-Official", name='genearl', type=discord.ChannelType.text), message.author.name + " should go fuck themselves")
-
+            return
+			
         await self.client.send_message(message.channel, "Loading song at the request of " + message.author.name)
         
         if self.player is not None:
