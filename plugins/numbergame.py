@@ -19,11 +19,11 @@ class Game:
 		elif guess > self.targetNumber:
 			return 1
 class NumberGame:
-	legacy = True
 	"""A plugin that plays a simple high-low number guessing game.
 	!startgame <range> : starts a game with a number between 1 and range. range is 100 if not given.
 	!guess number : Enters a guess, then tells you if it is high, low, or correct. A correct guess ends the game. Guesses that have been guessed before are not acccepted.
 	!stop : stops the game in the current channel"""
+	legacy = True
 	def __init__(self, client):
 		self.client = client
 		self.games = {}	

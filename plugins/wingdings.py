@@ -4,9 +4,9 @@ import asyncio
 
 
 class WingDings:
-    legacy = True
     """A plugin for translating to and from WingDings. All credit goes to Dublo.
     !translate <message> : :snowflake::white_square_button::cancer::black_small_square::small_orange_diamond::black_circle::cancer::large_orange_diamond::scorpius::small_orange_diamond:       :cancer:       :white_circle::scorpius::small_orange_diamond::small_orange_diamond::cancer::capricorn::scorpius:       :large_orange_diamond::white_small_square:       :white_small_square::white_square_button:       :sagittarius::white_square_button::white_small_square::white_circle:       :sparkle::pisces::black_small_square::capricorn::thumbsdown::pisces::black_small_square::capricorn::small_orange_diamond:"""
+    legacy = True
     def __init__(self, client):
         self.client = client
     

@@ -2,9 +2,10 @@ import asyncio
 import discord
   
 class Util:
-    legacy = True
     """This is a plugin for developer utilities to aid in programming and debugging.
-       !info: pms information about the channel, server, and author"""    
+       !info: pms information about the channel, server, and author
+       !game: sets the name of the game the bot is playing"""
+    legacy = True
     def __init__(self, client):
         self.client = client
         

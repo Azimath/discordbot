@@ -22,14 +22,13 @@ def voiceCommandExclusive(func):
     return command
     
 class AudioPhrases:
-    legacy = True
     """A plugin for playing various sound clips.
         !setcd : Changes the cooldown between commands. Default is 30 seconds.
         !swoosh : plays the iron chef swoosh
         !destruction : from EVO 2014 Axe vs Silent Wolf
         !darksouls : you have died
         !disaster : the $6mil echoslam"""
-        
+    legacy = True    
     def __init__(self, client):
         self.client = client
         self.voice = None

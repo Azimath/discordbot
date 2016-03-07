@@ -3,7 +3,6 @@ import json
 import asyncio
 
 class Phrases:
-    legacy = True
     """A plugin for giving various kinds of random phrases.
        !lart user : uses the LART on the given user.
        !praise user : praises the user.
@@ -17,7 +16,8 @@ class Phrases:
        !tests : PMs the user links to all required membership tests
        !constitution : links to the constitution
        !sonic : links to a random page on either the archie sonic wiki or the sonic fanon wiki
-       !tingle : links to a random tingler"""    
+       !tingle : links to a random tingler"""
+    legacy = True
     def __init__(self, client):
         self.client = client
         

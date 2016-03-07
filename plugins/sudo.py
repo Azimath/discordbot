@@ -1,9 +1,9 @@
 import asyncio
 
 class Sudo:
-	legacy = True
 	"""A plugin to make the bot say things in channels. Mods only.
 	!sudo channel stuff : says stuff in channel"""
+	legacy = True
 	def __init__(self, client):
 		self.client = client
 	async def sudo(self, message):

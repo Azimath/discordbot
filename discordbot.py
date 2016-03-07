@@ -84,7 +84,7 @@ if __name__ == "__main__":
                         args = message.content.replace("!help","",1).split()
                         if len(args) == 0:
                             for plugin in commandObjects:
-                                await client.send_message(message.author, "%s\n%s" % (str(plugin.__module__), str(plugin.__doc__)) )
+                                await client.send_message(message.author, "%s\n%s" % (str(plugin.__module__), inspect.getdoc(plugin)) )
                         return
                     commandName = message.content.split()[0]#TODO:im not sure if this should be done in *this* part of the code, but then how?
                     remainder = message.content.replace(commandName, "", 1)

@@ -2,12 +2,12 @@ import permissions
 import asyncio
 
 class Admin:
-    legacy = True
     """This is a plugin for a few basic admin functions and the almighty censorship cannon.
        Feared by Jerries everywhere.
        !leave: Tells the bot to leave. Only works if you're Azimath.
        !invite: Invites the bot to a new server. Only works if you're Azimath.
        !delete @Target <channel> numberofmessages : Deletes numberofmessages sent by Target. If no channel is specified assumes channel it was sent in."""    
+    legacy = True
     def __init__(self, client):
         self.client = client
     
