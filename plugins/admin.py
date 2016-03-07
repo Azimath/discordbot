@@ -6,6 +6,8 @@ class Admin:
        Feared by Jerries everywhere.
        !leave: Tells the bot to leave. Only works if you're Azimath.
        !invite: Invites the bot to a new server. Only works if you're Azimath.
+       !register: adds you to the permissions system
+       !addnode: adds a permissions node to a user if you are a manager
        !delete @Target <channel> numberofmessages : Deletes numberofmessages sent by Target. If no channel is specified assumes channel it was sent in."""    
     legacy = True
     def __init__(self, client):
@@ -40,6 +42,19 @@ class Admin:
             else:
                 await self.client.send_message(message.channel, "User id " + id + " is already registered")
     
+    @permissions.needs_permissionsManager
+    async def addNode(self, message):
+        if message.mentions.__len__() == 0:
+            await self.client.send_message(message.channel, "Specify one or more users")
+        else:
+            permNode = message.content.split()[-1]
+            if permNode == "manager":
+                return
+                
+            for user in message.mentions:
+                permissions.addPermission(user, permNode)
+            await self.client.send_message(message.channel, "Permissions added")      
+                  
     @permissions.needs_moderator
     async def delete(self, message):
                 #find out if the sender has delete permissions
@@ -89,6 +104,7 @@ class Admin:
                         print(channel == None)
                     
                     
-    commandDict = { "!invite" : "invite", "!leave" : "leave", "!delete" : "delete", "!add" : "registerNewUser", "!register" : "registerNewUser", "a.msn.com" : "newsPurge" }
+    commandDict = { "!invite" : "invite", "!leave" : "leave", "!delete" : "delete", "!add" : "registerNewUser", "!register" : "registerNewUser", "a.msn.com" : "newsPurge",
+    "!addnode" : "addNode" }
 
 Class = Admin

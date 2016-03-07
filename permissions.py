@@ -35,6 +35,16 @@ userbank = []
 with open('permissions.json', 'r') as userfile:
     userbank = json.loads(userfile.read(), cls=CustomDecoder)
     
+def addPermission(userObject, permission):
+    user = next(x for x in userbank if x.data['id'] == userObject.id) 
+    if user is not None:
+        user.data['permissions'].append(permission)
+        with open('permissions.json', 'w') as userfile:
+            userfile.write(json.dumps(userbank, indent=4, cls=CustomEncoder))
+        return True
+    else:
+        return False
+         
 def hasPermission(userObject, permission):
     user = next(x for x in userbank if x.data['id'] == userObject.id)
     if user is not None:
@@ -60,6 +70,18 @@ def needs_moderator(func):
             await func(self, message)
     return command
     
+def needs_base(func):
+    async def command(self, message):
+        if hasPermission(message.author, "base"):
+            await func(self, message)
+    return command    
+    
+def needs_permissionsManager(func):
+    async def command(self, message):
+        if hasPermission(message.author, "manager"):
+            await func(self, message)
+    return command
+    
 def register(user, message):
     new = True
     for i in userbank:
@@ -67,6 +89,7 @@ def register(user, message):
             new = False
             return False
     if new:
+        user.data['permissions'].append("base")
         userbank.append(user)
         with open('permissions.json', 'w') as userfile:
             userfile.write(json.dumps(userbank, indent=4, cls=CustomEncoder))
