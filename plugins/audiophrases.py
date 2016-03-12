@@ -27,7 +27,8 @@ class AudioPhrases:
         !swoosh : plays the iron chef swoosh
         !destruction : from EVO 2014 Axe vs Silent Wolf
         !darksouls : you have died
-        !disaster : the $6mil echoslam"""
+        !disaster : the $6mil echoslam
+        !deedah : a frame perfect Deeeeee Dah"""
     legacy = True    
     def __init__(self, client):
         self.client = client
@@ -63,6 +64,11 @@ class AudioPhrases:
     @voiceCommandExclusive
     async def disaster(self, message):
         self.player = self.voice.create_ffmpeg_player("/home/pi/discordbot/sounds/disaster.mp3")
+        self.player.start()
+        
+    @voiceCommandExclusive
+    async def deedah(self, message):
+        self.player = self.voice.create_ffmpeg_player("/home/pi/discordbot/sounds/deedah.mp3")
         self.player.start()
         
     @voiceCommandExclusive
@@ -109,5 +115,5 @@ class AudioPhrases:
             await self.client.send_message(message.channel, "Invalid input")
             
     commandDict = { "!swoosh" : "swoosh", "!destruction" : "destruction", "!setcd" : "setcd", "!darksouls" : "darksouls", "!danksouls" : "darksouls",
-                    "!youtube" : "youtube", "!join" : "join", "!stop" : "stop", "!disaster" : "disaster", "!disastah" : "disaster"}
+                    "!youtube" : "youtube", "!join" : "join", "!stop" : "stop", "!disaster" : "disaster", "!disastah" : "disaster", "!deedah" : "deedah"}
 Class = AudioPhrases

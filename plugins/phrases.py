@@ -109,6 +109,11 @@ class Phrases:
     async def plot(self, message):
         if self.client.user in message.mentions:
             await self.client.send_message(message.channel, self.phrasebank["plots"][random.randrange(self.phrasebank["plots"].__len__())])
+    
+    async def respects(self, message):
+        if message.content.__len__() == 1:
+            await self.client.send_message(message.channel, message.author.name + " has paid their respects.")
+        
     async def addphrase(self, message):
         perms = False
         for role in message.author.roles:
@@ -130,28 +135,12 @@ class Phrases:
             with open('phrasebank.json', 'w') as phrasefile:
                 phrasefile.write(json.dumps(self.phrasebank, indent=4))
                 await self.client.send_message(message.channel, "Added phrase " + phrase)
-    commandDict = { 
-                    "!lart" : "lart",
-                    "!praise" : "praise",
-                    "!buydinner" : "buydinner",
-                    "!baddragon" : "baddragon",
-                    "!pal" : "pal",
-                    "!mango" : "mango",
-                    "!mang0" : "mango",
-                    "!eightball" : "eightball",
-                    "!8ball" : "eightball",
-                    "!tests" : "tests",
-                    "!popori" : "popori",
-                    "!addphrase" : "addphrase",
-                    "┻" : "unflip",
-                    "!floor" : "floor",
-                    "!wiki" : "wiki",
-                    "!apply" : "application",
-                    "!application" : "application",
-                    "!constitution" : "constitution",
-                    "!sonic" : "sonic",
-                    "!sanic" : "sonic",
-                    "plot" : "plot",
-                    "!tingle" : "tingle"
-                    }
+                
+    commandDict = { "!lart" : "lart", "!praise" : "praise", "!buydinner" : "buydinner", "!baddragon" : "baddragon",
+                    "!pal" : "pal", "!mango" : "mango", "!mang0" : "mango", "!eightball" : "eightball",
+                    "!8ball" : "eightball", "!tests" : "tests", "!popori" : "popori", "!addphrase" : "addphrase",
+                    "┻" : "unflip", "!floor" : "floor", "!wiki" : "wiki", "!apply" : "application",
+                    "!application" : "application", "!constitution" : "constitution", "!sonic" : "sonic",
+                    "!sanic" : "sonic", "plot" : "plot", "F" : "respects",
+                    "!tingle" : "tingle" }
 Class = Phrases
