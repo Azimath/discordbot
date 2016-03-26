@@ -2,6 +2,10 @@ import discord
 import asyncio
 import permissions
 import time
+import re
+from youtube_dl import YoutubeDL
+import json
+
 
 def voiceCommandExclusive(func):
     async def command(self, message):
@@ -24,11 +28,12 @@ def voiceCommandExclusive(func):
 class AudioPhrases:
     """A plugin for playing various sound clips.
         !setcd : Changes the cooldown between commands. Default is 30 seconds.
-        !swoosh : plays the iron chef swoosh
-        !destruction : from EVO 2014 Axe vs Silent Wolf
-        !darksouls : you have died
-        !disaster : the $6mil echoslam
-        !deedah : a frame perfect Deeeeee Dah"""
+        !sound <soundname> : plays <soundname> sound clip from our library
+        !listsounds : lists the sounds in our library
+        !addsound <name> <link> : downloads the sound from a youtube_dl compatible <link> and puts it in our library as <name>
+        !youtube <link> : plays the audio from any youtube_dl compatible page
+        """
+        
     legacy = True    
     def __init__(self, client):
         self.client = client
@@ -39,6 +44,10 @@ class AudioPhrases:
         
         if not discord.opus.is_loaded():
             discord.opus.load_opus('/usr/include/opus')
+        
+        self.audiobank = {}
+        with open('audiobank.json', 'r') as database:
+            self.audiobank = json.loads(database.read())
         #asyncio.ensure_future(join())
         
     async def join(self, message=None):
@@ -50,31 +59,44 @@ class AudioPhrases:
                 await self.voice.disconnect()
             self.voice = await self.client.join_voice_channel(discord.utils.get(message.server.channels, name=message.content[6:], type=discord.ChannelType.voice)) # there is no better way to do this
     
-    @voiceCommandExclusive
-    async def swoosh(self, message):           
-        self.lastTime = time.time()
-        self.player = self.voice.create_ffmpeg_player("/home/pi/discordbot/sounds/swoosh.mp3")
-        self.player.start()
-
-    @voiceCommandExclusive
-    async def destruction(self, message):
-        self.player = self.voice.create_ffmpeg_player("/home/pi/discordbot/sounds/destruction.mp3")
-        self.player.start()
+    @permissions.needs_admin
+    async def addSound(self, message):
+        name = message.content.split()[1]
+        link = message.content.split()[2]
+        filename = re.sub('[-.() ]', '', name)
+        filepath = "/home/pi/discordbot/sounds/" + filename + ".mp3"
+        
+        ydlopts = { "outtmpl" : filepath
+                    #, 'format': 'bestaudio/best'
+                    # ,'postprocessors': [{
+                        # 'key': 'FFmpegExtractAudio',
+                        # 'preferredcodec': 'mp3',
+                        # 'preferredquality': '192',
+                    # }]
+                    }
+        with YoutubeDL(ydlopts) as ydl:
+            ydl.download([link])
+        
+        self.audiobank.update({name : filepath})
+        with open('audiobank.json', 'w') as database:
+                database.write(json.dumps(self.audiobank, indent=4))
+                await self.client.send_message(message.channel, "Added sound " + name)
+    
+    async def listSounds(self, message):
+        result = "Available audio clips: \n"
+        for key in self.audiobank:
+            result = result + key + "\n"
+        await self.client.send_message(message.channel, result)
     
     @voiceCommandExclusive
-    async def disaster(self, message):
-        self.player = self.voice.create_ffmpeg_player("/home/pi/discordbot/sounds/disaster.mp3")
-        self.player.start()
+    async def sound(self, message):
+        sound = message.content.split()[-1]
         
-    @voiceCommandExclusive
-    async def deedah(self, message):
-        self.player = self.voice.create_ffmpeg_player("/home/pi/discordbot/sounds/deedah.mp3")
-        self.player.start()
-        
-    @voiceCommandExclusive
-    async def darksouls(self, message):
-        self.player = self.voice.create_ffmpeg_player("/home/pi/discordbot/sounds/darksouls.mp3")
-        self.player.start()
+        if sound in self.audiobank:
+            self.player = self.voice.create_ffmpeg_player(self.audiobank[sound])
+            self.player.start()
+        else:
+            self.client.send_message(message.channel, "Sound not found")
         
     def setgamenone(self):
         asyncio.ensure_future(self.client.change_status(None))
@@ -87,9 +109,6 @@ class AudioPhrases:
             return
 			
         await self.client.send_message(message.channel, "Loading song at the request of " + message.author.name)
-        
-        if self.player is not None:
-            self.player.stop()
         
         self.player = await self.voice.create_ytdl_player(message.content.split()[1], after=self.setgamenone)
         self.player.start()
@@ -114,6 +133,5 @@ class AudioPhrases:
         except ValueError:
             await self.client.send_message(message.channel, "Invalid input")
             
-    commandDict = { "!swoosh" : "swoosh", "!destruction" : "destruction", "!setcd" : "setcd", "!darksouls" : "darksouls", "!danksouls" : "darksouls",
-                    "!youtube" : "youtube", "!join" : "join", "!stop" : "stop", "!disaster" : "disaster", "!disastah" : "disaster", "!deedah" : "deedah"}
+    commandDict = { "!listsounds" : "listSounds", "!sound" : "sound", "!setcd" : "setcd", "!youtube" : "youtube", "!join" : "join", "!stop" : "stop", "!addsound" : "addSound"}
 Class = AudioPhrases
