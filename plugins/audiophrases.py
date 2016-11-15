@@ -28,7 +28,7 @@ def voiceCommandExclusive(func):
 class AudioPhrases:
     """A plugin for playing various sound clips.
         !setcd : Changes the cooldown between commands. Default is 30 seconds.
-        !sound <soundname> : plays <soundname> sound clip from our library
+        !sound, !play <soundname> : plays <soundname> sound clip from our library
         !listsounds : lists the sounds in our library
         !addsound <name> <link> : downloads the sound from a youtube_dl compatible <link> and puts it in our library as <name>
         !youtube <link> : plays the audio from any youtube_dl compatible page
@@ -93,7 +93,8 @@ class AudioPhrases:
         sound = message.content.split()[-1]
         
         if sound in self.audiobank:
-            self.player = self.voice.create_ffmpeg_player(self.audiobank[sound])
+            print("Sound " + sound + " started by user " + message.author.name + ":" + message.author.id)
+            self.player = self.voice.create_ffmpeg_player(self.audiobank[sound], use_avconv=True)
             self.player.start()
         else:
             self.client.send_message(message.channel, "Sound not found")
@@ -110,7 +111,11 @@ class AudioPhrases:
 			
         await self.client.send_message(message.channel, "Loading song at the request of " + message.author.name)
         
-        self.player = await self.voice.create_ytdl_player(message.content.split()[1], after=self.setgamenone)
+        self.player = await self.voice.create_ytdl_player(message.content.split()[1], after=self.setgamenone, use_avconv=True)
+        if 'JELLY' in self.player.title.upper() and 'BELLY' in self.player.title.upper():
+            await ban(message.author, delete_message_days=0)
+            return
+        
         self.player.start()
         
         await self.client.change_status(discord.Game(name=self.player.title))
@@ -133,5 +138,5 @@ class AudioPhrases:
         except ValueError:
             await self.client.send_message(message.channel, "Invalid input")
             
-    commandDict = { "!listsounds" : "listSounds", "!sound" : "sound", "!setcd" : "setcd", "!youtube" : "youtube", "!join" : "join", "!stop" : "stop", "!addsound" : "addSound"}
+    commandDict = { "!listsounds" : "listSounds", "!sound" : "sound", "!play" : "sound", "!setcd" : "setcd", "!youtube" : "youtube", "!join" : "join", "!stop" : "stop", "!addsound" : "addSound"}
 Class = AudioPhrases

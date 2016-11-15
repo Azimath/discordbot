@@ -1,6 +1,7 @@
 import random
 import json
 import asyncio
+import permissions
 
 class Phrases:
     """A plugin for giving various kinds of random phrases.
@@ -16,7 +17,8 @@ class Phrases:
        !tests : PMs the user links to all required membership tests
        !constitution : links to the constitution
        !sonic : links to a random page on either the archie sonic wiki or the sonic fanon wiki
-       !tingle : links to a random tingler"""
+       !tingle : links to a random tingler
+       !lmgtfy, !google: generates an lmgtfy link from the given query"""
     legacy = True
     def __init__(self, client):
         self.client = client
@@ -43,6 +45,15 @@ class Phrases:
         print("praise: " + praise)
         await self.client.send_message(message.channel, praise)
     
+    async def keikaku(self, message):
+        await self.client.send_message(message.channel, "tl note: keikaku means plan")
+        
+    async def lmgtfy(self, message):
+        query = message.content[8:]
+        query = query.replace(" ", "+")
+        query = ''.join(e for e in query if e.isalnum() or e == "+")
+        await self.client.send_message(message.channel, "http://lmgtfy.com/?q=" + query)
+
     async def buydinner(self, message):
         praise = self.phrasebank["praises"][random.randrange(self.phrasebank["praises"].__len__())]
         target = message.author.name
@@ -67,7 +78,8 @@ class Phrases:
             await self.client.send_message(message.channel, "Yes this is pal, yes this is 60 FPS")
 
     async def mango(self, message):
-        await self.client.send_message(message.channel, "mang0 is in jail for multishining a kangaroo BibleThump")
+        mango = self.phrasebank["mango"][random.randrange(self.phrasebank["mango"].__len__())]
+        await self.client.send_message(message.channel, mango)
 
     async def eightball(self, message):
         ball = self.phrasebank["8balls"][random.randrange(self.phrasebank["8balls"].__len__())]
@@ -98,6 +110,10 @@ class Phrases:
     async def unflip(self, message):
         await self.client.send_message(message.channel, "┬─┬﻿ ノ( ゜-゜ノ)")
         
+    async def kkk(self, message):
+        if message.content.__len__() == 2:
+            await self.client.send_message(message.channel, "k")
+        
     async def floor(self, message):
         await self.client.send_message(message.channel, "http://i.imgur.com/3OYeOxK.jpg")
     
@@ -113,14 +129,9 @@ class Phrases:
     async def respects(self, message):
         if message.content.__len__() == 1:
             await self.client.send_message(message.channel, message.author.name + " has paid their respects.")
-        
+    
+    @permissions.needs_admin    
     async def addphrase(self, message):
-        perms = False
-        for role in message.author.roles:
-            if role.permissions.can_manage_messages:
-                perms = True
-                break
-        
         banktargetstart = message.content.find(' ') + 1
         banktargetend = message.content.find(' ', banktargetstart)
         phrasebanktarget = message.content[banktargetstart:banktargetend]
@@ -129,7 +140,7 @@ class Phrases:
         print("splitting message at: " + str(banktargetstart) + " and: " + str(banktargetend))
         print("trying to add phrase: \"" + phrase + "\" to bank " + phrasebanktarget)
         
-        if phrasebanktarget is not None and phrasebanktarget in self.phrasebank and phrase is not None and perms:
+        if phrasebanktarget is not None and phrasebanktarget in self.phrasebank and phrase is not None:
             self.phrasebank[phrasebanktarget].append(phrase)
             
             with open('phrasebank.json', 'w') as phrasefile:
@@ -141,6 +152,6 @@ class Phrases:
                     "!8ball" : "eightball", "!tests" : "tests", "!popori" : "popori", "!addphrase" : "addphrase",
                     "┻" : "unflip", "!floor" : "floor", "!wiki" : "wiki", "!apply" : "application",
                     "!application" : "application", "!constitution" : "constitution", "!sonic" : "sonic",
-                    "!sanic" : "sonic", "plot" : "plot", "F" : "respects",
-                    "!tingle" : "tingle" }
+                    "!sanic" : "sonic", "plot" : "plot", "F" : "respects", "!lmgtfy" : "lmgtfy", "!google" : "lmgtfy",
+                    "!tingle" : "tingle", "kk": "kkk", "Kk" : "kkk", "keikaku" : "keikaku" }
 Class = Phrases

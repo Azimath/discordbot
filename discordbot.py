@@ -110,6 +110,7 @@ if __name__ == "__main__":
         @client.event
         async def on_ready():
             global commandObjects
+            #client.accept_invite("0ZfBcRuFC55zMkeA")
 
             print("Logged in as")
             print(client.user.name)
@@ -118,6 +119,6 @@ if __name__ == "__main__":
     
             await loadPlugins()
     
-        client.run(config["DiscordEmail"], config["DiscordPassword"])
+        client.run("MjQ1ODE0NDE3NjA5MDY0NDQ4.CwRkRA.k6UxRHr_8rxJDEmNIXoN-syLVjs")
 
     listen()#hey, listen,
