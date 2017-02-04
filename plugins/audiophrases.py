@@ -1,10 +1,12 @@
 import discord
+import discord.voice_client
 import asyncio
 import permissions
 import time
 import re
 from youtube_dl import YoutubeDL
 import json
+import subprocess
 
 
 def voiceCommandExclusive(func):
@@ -39,7 +41,7 @@ class AudioPhrases:
         self.client = client
         self.voice = None
         self.player = None
-        self.cd = 30
+        self.cd = 2
         self.lastTime = time.time() - self.cd # for cooldowns
         
         if not discord.opus.is_loaded():
@@ -58,7 +60,11 @@ class AudioPhrases:
             if self.voice is not None:
                 await self.voice.disconnect()
             self.voice = await self.client.join_voice_channel(discord.utils.get(message.server.channels, name=message.content[6:], type=discord.ChannelType.voice)) # there is no better way to do this
-    
+
+    async def disconnect(self, message):
+        if self.voice is not None:
+            await self.voice.disconnect()
+
     @permissions.needs_admin
     async def addSound(self, message):
         name = message.content.split()[1]
@@ -98,10 +104,28 @@ class AudioPhrases:
             self.player.start()
         else:
             self.client.send_message(message.channel, "Sound not found")
+    
+    @voiceCommandExclusive
+    async def radio(self, message):
+        if len(message.content.split()) < 2:
+            self.client.send_message(message.channel, "Not enough args for !radio")
+            return
         
-    def setgamenone(self):
-        asyncio.ensure_future(self.client.change_status(None))
+        freq = message.content.split()[1]
         
+        if len(message.content.split()) > 2:
+            modulation = message.content.split()[2]
+        else:
+            modulation = "wbfm"
+        
+        self.voice.encoder_options(sample_rate=48000, channels=1)
+        rtlfm = subprocess.Popen(["rtl_fm", "-f", freq, "-M", modulation, "-g" ,"0", "-r", "48k", "-l", "1"], stdout=subprocess.PIPE)
+        
+        self.player = discord.voice_client.ProcessPlayer(rtlfm, self.voice, None)
+        self.player.start()
+        
+        self.client.send_message(message.channel, "Radio Started")
+    
     @voiceCommandExclusive
     async def youtube(self, message):
         if message.channel.is_private:
@@ -111,14 +135,11 @@ class AudioPhrases:
 			
         await self.client.send_message(message.channel, "Loading song at the request of " + message.author.name)
         
-        self.player = await self.voice.create_ytdl_player(message.content.split()[1], after=self.setgamenone, use_avconv=True)
-        if 'JELLY' in self.player.title.upper() and 'BELLY' in self.player.title.upper():
-            await ban(message.author, delete_message_days=0)
-            return
+        self.player = await self.voice.create_ytdl_player(message.content.split()[1], use_avconv=True)
         
         self.player.start()
         
-        await self.client.change_status(discord.Game(name=self.player.title))
+        await self.client.change_presence(game=discord.Game(name=self.player.title))
         await self.client.send_message(message.channel, "Now playing " + self.player.title)
         print("User " + message.author.name + ":" + message.author.id + " started video: " + message.content.split()[1])
         await self.client.delete_message(message)
@@ -138,5 +159,5 @@ class AudioPhrases:
         except ValueError:
             await self.client.send_message(message.channel, "Invalid input")
             
-    commandDict = { "!listsounds" : "listSounds", "!sound" : "sound", "!play" : "sound", "!setcd" : "setcd", "!youtube" : "youtube", "!join" : "join", "!stop" : "stop", "!addsound" : "addSound"}
+    commandDict = { "!listsounds" : "listSounds", "!sound" : "sound", "!play" : "sound", "!setcd" : "setcd", "!youtube" : "youtube", "!join" : "join", "!stop" : "stop", "!addsound" : "addSound", "!disconnect" : "disconnect", "!radio": "radio"}
 Class = AudioPhrases
