@@ -119,6 +119,6 @@ if __name__ == "__main__":
     
             await loadPlugins()
     
-        client.run("MjQ1ODE0NDE3NjA5MDY0NDQ4.CwRkRA.k6UxRHr_8rxJDEmNIXoN-syLVjs")
+        client.run(config["DiscordToken"])
 
     listen()#hey, listen,
