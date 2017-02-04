@@ -1,3 +1,4 @@
+from urllib import request
 import permissions
 import asyncio
 
@@ -54,7 +55,24 @@ class Admin:
             for user in message.mentions:
                 permissions.addPermission(user, permNode)
             await self.client.send_message(message.channel, "Permissions added")      
-                  
+    
+    @permissions.needs_moderator
+    async def setAvatar(self, message):
+        if message.attachments is not None:
+            #print("Got " + str(len(message.attachments)) + " attachments, setting image")
+            for x in message.attachments:
+                #print("Checking attachment " + x["url"])
+                if x["url"] is not None:
+                    #print("Downloading attachment")
+                    req = request.Request(x["url"], headers={
+                        "User-Agent": "A discord bot"
+                      })
+                    image = request.urlopen(req).read()
+                    await self.client.edit_profile(avatar=image)
+                    await self.client.send_message(message.channel, "Avatar set!")
+                    return
+            self.client.send_message(message.channel, "Couldnt get an image")          
+    
     @permissions.needs_moderator
     async def delete(self, message):
                 #find out if the sender has delete permissions
@@ -105,6 +123,6 @@ class Admin:
                     
                     
     commandDict = { "!invite" : "invite", "!leave" : "leave", "!delete" : "delete", "!add" : "registerNewUser", "!register" : "registerNewUser", "a.msn.com" : "newsPurge",
-    "!addnode" : "addNode" }
+    "!addnode" : "addNode", "!setavatar" : "setAvatar"}
 
 Class = Admin
