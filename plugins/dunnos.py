@@ -1,15 +1,34 @@
 import json
 import random
 import asyncio
+import commands
 
-class Dunno:
-	commandDict = {"\\command_not_found":"dunno"}
-	def __init__(self, client):
-		self.client = client
-		with open("plugins/dunnos.json","r") as dunnofile:
-			self.dunnos = json.load(dunnofile)
+client = None
 
-	async def dunno(self, commandName, message):
-		await self.client.send_message(message.channel, random.sample(self.dunnos, 1)[0])
-Class = Dunno
-
+with open("plugins/dunnos.json","r") as dunnofile:
+    config = json.load(dunnofile)
+            
+@commands.registerEventHander(triggerType="\\commandNotFound", name="dunno") 
+async def dunno(triggerMessage):
+    if triggerMessage.channel.id in config["channels"]:
+    	await client.send_message(triggerMessage.channel, random.sample(config["dunnos"], 1)[0])
+    	
+@commands.registerEventHander(triggerType="\\command", name="dunnos.enable") 
+async def enable(triggerMessage):
+	if triggerMessage.channel.id in config["channels"]:
+		await client.send_message(triggerMessage.channel, "Dunnos already enabled here")
+	else:
+		config["channels"].append(triggerMessage.channel.id)
+		with open("plugins/dunnos.json", "w") as dunnofile:
+			json.dump(config, dunnofile, indent=4)
+		await client.send_message(triggerMessage.channel, "Dunnos enabled for this channel")
+		
+@commands.registerEventHander(triggerType="\\command", name="dunnos.disable") 
+async def disable(triggerMessage):
+	if triggerMessage.channel.id not in config["channels"]:
+		await client.send_message(triggerMessage.channel, "Dunnos already disabled here")
+	else:
+		config["channels"] = list(filter(lambda a: a != triggerMessage.channel.id, config["channels"]))
+		with open("plugins/dunnos.json", "w") as dunnofile:
+			json.dump(config, dunnofile, indent=4)
+		await client.send_message(triggerMessage.channel, "Dunnos disabled for this channel")

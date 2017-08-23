@@ -1,163 +1,224 @@
 import discord
 import discord.voice_client
+
 import asyncio
+
 import permissions
+import commands
+
 import time
 import re
 from youtube_dl import YoutubeDL
 import json
 import subprocess
 
+cd = 2
+lastTime = time.time() - cd # for cooldowns
 
 def voiceCommandExclusive(func):
-    async def command(self, message):
-        if self.voice is None:
-           self.voice = await self.client.join_voice_channel(discord.utils.get(self.client.get_all_channels(), server__name="IAA-Official", name='Genearl', type=discord.ChannelType.voice)) # there is no better way to do this
-        
-        if time.time() > self.lastTime + self.cd:
-            if not self.voice.is_connected():
-                await self.client.send_message(message.channel, "Error: not connected to voice")
+    global player
+    global voice
+    async def command(triggerMessage):
+        global voice
+        global lastTime
+        if voice is None:
+            channel = None
+            for c in client.get_all_channels():
+                if c.type==discord.ChannelType.voice and triggerMessage.author in c.voice_members:
+                    channel = c
+                    break
+            
+            if channel is not None:            
+                voice = await client.join_voice_channel(channel) # there is no better way to do this
             else:
-                if self.player is not None:
-                    if hasattr(self.player, "is_playing"):
-                        if self.player.is_playing():
-                            await self.client.send_message(message.channel, "Fuck you")
+                return
+        #print(str(time.time()) + ">" + str(lastTime) + "+" + str(cd))
+        if time.time() > lastTime + cd:
+            if not voice.is_connected():
+                await client.send_message(triggerMessage.channel, "Error: not connected to voice")
+            else:
+                if player is not None:
+                    if hasattr(player, "is_playing"):
+                        if player.is_playing():
+                            await client.send_message(triggerMessage.channel, "Fuck you")
                             return
-                self.lastTime = time.time()
-                await func(self,message)
+                lastTime = time.time()
+                await func(triggerMessage)
     return command
     
-class AudioPhrases:
-    """A plugin for playing various sound clips.
-        !setcd : Changes the cooldown between commands. Default is 30 seconds.
-        !sound, !play <soundname> : plays <soundname> sound clip from our library
-        !listsounds : lists the sounds in our library
-        !addsound <name> <link> : downloads the sound from a youtube_dl compatible <link> and puts it in our library as <name>
-        !youtube <link> : plays the audio from any youtube_dl compatible page
-        """
-        
-    legacy = True    
-    def __init__(self, client):
-        self.client = client
-        self.voice = None
-        self.player = None
-        self.cd = 2
-        self.lastTime = time.time() - self.cd # for cooldowns
-        
-        if not discord.opus.is_loaded():
-            discord.opus.load_opus('/usr/include/opus')
-        
-        self.audiobank = {}
-        with open('audiobank.json', 'r') as database:
-            self.audiobank = json.loads(database.read())
-        #asyncio.ensure_future(join())
-        
-    async def join(self, message=None):
-        if message is None:
-            if self.voice is None:
-                self.voice = await self.client.join_voice_channel(discord.utils.get(self.client.get_all_channels(), server__name="IAA-Official", name='Genearl', type=discord.ChannelType.voice)) # there is no better way to do this
-        else:
-            if self.voice is not None:
-                await self.voice.disconnect()
-            self.voice = await self.client.join_voice_channel(discord.utils.get(message.server.channels, name=message.content[6:], type=discord.ChannelType.voice)) # there is no better way to do this
+"""A plugin for playing various sound clips.
+    !setcd : Changes the cooldown between commands. Default is 30 seconds.
+    !sound, !play <soundname> : plays <soundname> sound clip from our library
+    !listsounds : lists the sounds in our library
+    !addsound <name> <link> : downloads the sound from a youtube_dl compatible <link> and puts it in our library as <name>
+    !youtube <link> : plays the audio from any youtube_dl compatible page
+    """
+client = None
+voice = None
+player = None
+message = None
 
-    async def disconnect(self, message):
-        if self.voice is not None:
-            await self.voice.disconnect()
+if not discord.opus.is_loaded():
+    discord.opus.load_opus('/usr/include/opus')
 
-    @permissions.needs_admin
-    async def addSound(self, message):
-        name = message.content.split()[1]
-        link = message.content.split()[2]
-        filename = re.sub('[-.() ]', '', name)
-        filepath = "/home/pi/discordbot/sounds/" + filename + ".mp3"
+audiobank = {}
+with open('audiobank.json', 'r') as database:
+    audiobank = json.loads(database.read())
+    #asyncio.ensure_future(join())
+
+@commands.registerEventHander(name="join")    
+async def join(triggerMessage):
+    global voice
+    if voice is not None:
+        await voice.disconnect()
+    if len(triggerMessage.content.split()) < 2:
+        channel = None
+        for c in client.get_all_channels():
+            if c.type==discord.ChannelType.voice and triggerMessage.author in c.voice_members:
+                channel = c
+                print("Got channel " + c.name)
+                break
         
-        ydlopts = { "outtmpl" : filepath
-                    #, 'format': 'bestaudio/best'
-                    # ,'postprocessors': [{
-                        # 'key': 'FFmpegExtractAudio',
-                        # 'preferredcodec': 'mp3',
-                        # 'preferredquality': '192',
-                    # }]
-                    }
-        with YoutubeDL(ydlopts) as ydl:
-            ydl.download([link])
-        
-        self.audiobank.update({name : filepath})
-        with open('audiobank.json', 'w') as database:
-                database.write(json.dumps(self.audiobank, indent=4))
-                await self.client.send_message(message.channel, "Added sound " + name)
+        if channel is not None:            
+            voice = await client.join_voice_channel(channel) # there is no better way to do this
+    else:
+        voice = await client.join_voice_channel(discord.utils.get(triggerMessage.server.channels, name=triggerMessage.content[6:], type=discord.ChannelType.voice)) # there is no better way to do this
+
+@commands.registerEventHander(name="disconnect") 
+async def disconnect(triggerMessage):
+    if voice is not None:
+        await voice.disconnect()
+
+@commands.registerEventHander(name="addsound") 
+@permissions.needs_admin
+async def addSound(triggerMessage):
+    name = triggerMessage.content.split()[1]
+    link = triggerMessage.content.split()[2]
+    filename = re.sub('[-.() ]', '', name)
+    filepath = "/home/pi/discordbot/sounds/" + filename + ".mp3"
     
-    async def listSounds(self, message):
-        result = "Available audio clips: \n"
-        for key in self.audiobank:
-            result = result + key + "\n"
-        await self.client.send_message(message.channel, result)
+    ydlopts = { "outtmpl" : filepath
+                #, 'format': 'bestaudio/best'
+                 ,'postprocessors': [{
+                     'key': 'FFmpegExtractAudio',
+                     'preferredcodec': 'mp3',
+                     'preferredquality': '192',
+                 }]
+                }
+    with YoutubeDL(ydlopts) as ydl:
+        ydl.download([link])
     
-    @voiceCommandExclusive
-    async def sound(self, message):
-        sound = message.content.split()[-1]
-        
-        if sound in self.audiobank:
-            print("Sound " + sound + " started by user " + message.author.name + ":" + message.author.id)
-            self.player = self.voice.create_ffmpeg_player(self.audiobank[sound], use_avconv=True)
-            self.player.start()
-        else:
-            self.client.send_message(message.channel, "Sound not found")
+    audiobank.update({name : filepath})
+    with open('audiobank.json', 'w') as database:
+            database.write(json.dumps(audiobank, indent=4))
+            await client.send_message(triggerMessage.channel, "Added sound " + name)
+
+@commands.registerEventHander(name="listsounds") 
+async def listSounds(triggerMessage):
+    result = "Available audio clips: \n"
+    for key in sorted(audiobank.keys()):
+        result = result + key + "\n"
+    await client.send_message(triggerMessage.channel, result)
+
+@commands.registerEventHander(name="sound")
+@commands.registerEventHander(name="play")  
+@voiceCommandExclusive
+async def sound(triggerMessage):
+    global player
+    sound = triggerMessage.content.split()[-1]
     
-    @voiceCommandExclusive
-    async def radio(self, message):
-        if len(message.content.split()) < 2:
-            self.client.send_message(message.channel, "Not enough args for !radio")
-            return
-        
-        freq = message.content.split()[1]
-        
-        if len(message.content.split()) > 2:
-            modulation = message.content.split()[2]
-        else:
-            modulation = "wbfm"
-        
-        self.voice.encoder_options(sample_rate=48000, channels=1)
-        rtlfm = subprocess.Popen(["rtl_fm", "-f", freq, "-M", modulation, "-g" ,"0", "-r", "48k", "-l", "1"], stdout=subprocess.PIPE)
-        
-        self.player = discord.voice_client.ProcessPlayer(rtlfm, self.voice, None)
-        self.player.start()
-        
-        self.client.send_message(message.channel, "Radio Started")
+    if sound in audiobank:
+        print("Sound " + sound + " started by user " + triggerMessage.author.name + ":" + triggerMessage.author.id)
+        player = voice.create_ffmpeg_player(audiobank[sound], use_avconv=True)
+        player.start()
+    else:
+        client.send_message(triggerMessage.channel, "Sound not found")
+
+@commands.registerEventHander(name="radio") 
+@voiceCommandExclusive
+async def radio(triggerMessage):
+    global player
+    if len(triggerMessage.content.split()) < 2:
+        client.send_message(triggerMessage.channel, "Not enough args for !radio")
+        return
     
-    @voiceCommandExclusive
-    async def youtube(self, message):
-        if message.channel.is_private:
-            await self.client.send_message(message.channel, "Go fuck yourself")
-            await self.client.send_message(discord.utils.get(self.client.get_all_channels(), server__name="IAA-Official", name='genearl', type=discord.ChannelType.text), message.author.name + " should go fuck themselves")
-            return
-			
-        await self.client.send_message(message.channel, "Loading song at the request of " + message.author.name)
-        
-        self.player = await self.voice.create_ytdl_player(message.content.split()[1], use_avconv=True)
-        
-        self.player.start()
-        
-        await self.client.change_presence(game=discord.Game(name=self.player.title))
-        await self.client.send_message(message.channel, "Now playing " + self.player.title)
-        print("User " + message.author.name + ":" + message.author.id + " started video: " + message.content.split()[1])
-        await self.client.delete_message(message)
-                
-    async def stop(self, message):
-        if self.voice is not None:
-            if self.player.is_playing():
-                self.player.stop()
-                if hasattr(self.player, "yt"):
-                    await self.client.change_status(None)
+    freq = triggerMessage.content.split()[1]
     
-    @permissions.needs_moderator
-    async def setcd(self, message):
-        try:
-            self.cd = int(message.content[7:])
-            await self.client.send_message(message.channel, "Cooldown is now " + message.content[7:] + " seconds")
-        except ValueError:
-            await self.client.send_message(message.channel, "Invalid input")
-            
-    commandDict = { "!listsounds" : "listSounds", "!sound" : "sound", "!play" : "sound", "!setcd" : "setcd", "!youtube" : "youtube", "!join" : "join", "!stop" : "stop", "!addsound" : "addSound", "!disconnect" : "disconnect", "!radio": "radio"}
-Class = AudioPhrases
+    if len(triggerMessage.content.split()) > 2:
+        modulation = triggerMessage.content.split()[2]
+    else:
+        modulation = "wbfm"
+    
+    voice.encoder_options(sample_rate=48000, channels=1)
+    rtlfm = subprocess.Popen(["rtl_fm", "-f", freq, "-M", modulation, "-g" ,"0", "-r", "48k", "-l", "1"], stdout=subprocess.PIPE)
+    
+    player = discord.voice_client.ProcessPlayer(rtlfm, voice, None)
+    player.start()
+    
+    client.send_message(triggerMessage.channel, "Radio Started")
+
+@commands.registerEventHander(name="youtube")
+@commands.registerEventHander(name="websound")  
+@voiceCommandExclusive
+async def youtube(triggerMessage):
+    global player
+    global message
+    if triggerMessage.channel.is_private:
+        await client.send_message(triggerMessage.channel, "Go fuck yourself")
+        await client.send_message(discord.utils.get(client.get_all_channels(), server__name="IAA-Official", name='genearl', type=discord.ChannelType.text), triggerMessage.author.name + " should go fuck themselves")
+        return
+        
+    await client.send_message(triggerMessage.channel, "Loading song at the request of " + triggerMessage.author.name)
+    
+    player = await voice.create_ytdl_player(triggerMessage.content.split()[1], use_avconv=True)
+    
+    player.start()
+    
+    await client.change_presence(game=discord.Game(name=player.title))
+    message = await client.send_message(triggerMessage.channel, "Now playing " + player.title)
+    
+    await client.add_reaction(message, '\u23ef')
+    await client.add_reaction(message, '\u23f9')
+    
+    print("User " + triggerMessage.author.name + ":" + triggerMessage.author.id + " started video: " + triggerMessage.content.split()[1])
+    await client.delete_message(triggerMessage)
+
+@commands.registerEventHander(triggerType="\\reactionChanged", name="soundControl")
+async def soundControl(triggerMessage, reaction, user):
+    global message
+    if(type(reaction.emoji) is str) and voice.is_connected() and client.user != user and message.id == triggerMessage.id:
+        if(reaction.emoji == '\u25b6') and not player.is_playing() and not player.is_done():
+            print("Play Music")
+            player.resume()
+        elif(reaction.emoji == '\u23ef') and not player.is_done():
+            print("Play/pause")
+            if player.is_playing():
+                player.pause()
+            else:
+                player.resume()
+        elif(reaction.emoji == '\u23f8') and player.is_playing():
+            print("Pause")
+            player.pause()
+        elif(reaction.emoji == '\u23f9') and not player.is_done():
+            print("Stop")
+            player.stop()
+            await client.clear_reactions(triggerMessage)
+    #print(user.name.encode('unicode_escape').decode('ascii'))
+        
+@commands.registerEventHander(name="stop") 
+async def stop(triggerMessage):
+    if voice is not None:
+        if player.is_playing():
+            player.stop()
+            if hasattr(player, "yt"):
+                await client.change_status(None)
+
+@commands.registerEventHander(name="setcd") 
+@permissions.needs_moderator
+async def setcd(triggerMessage):
+    global cd
+    try:
+        cd = int(triggerMessage.content[7:])
+        await client.send_message(triggerMessage.channel, "Cooldown is now " + triggerMessage.content[7:] + " seconds")
+    except ValueError:
+        await client.send_message(triggerMessage.channel, "Invalid input")

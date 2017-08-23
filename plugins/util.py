@@ -1,38 +1,37 @@
 import asyncio
 import discord
-  
-class Util:
-    """This is a plugin for developer utilities to aid in programming and debugging.
-       !info: pms information about the channel, server, and author
-       !game: sets the name of the game the bot is playing"""
-    legacy = True
-    def __init__(self, client):
-        self.client = client
-        
-    async def info(self, message):
-        target = message.author
-        if message.mentions.__len__() == 1:
-            targetUser = message.mentions[0]
-            await self.client.send_message(target, "User name: " + targetUser.name + "\nUser id: " + targetUser.id + "\nUser discriminator: " + targetUser.discriminator)
-            # self.client.send_message(target, "User id: " + targetUser.id)
-            # self.client.send_message(target, "User discriminator: " + targetUser.discriminator)
-            await self.client.delete_message(message)
-        else:
-            await self.client.send_message(target, "Channel name: " + message.channel.name + "\nChannel id: " + message.channel.id + "\nServer  name: " + message.server.name + "\nServer id: " + message.server.id + "\nAuthor name: " + message.author.name + "\nAuthor id: " + message.author.id)
-            # self.client.send_message(target, "Channel id: " + message.channel.id)
-            # self.client.send_message(target, "Server  name: " + message.server.name)
-            # self.client.send_message(target, "Server id: " + message.server.id)
-            # self.client.send_message(target, "Author name: " + message.author.name)
-            # self.client.send_message(target, "Author id: " + message.author.id)
-              
-    async def game(self, message):
-        await self.client.change_status(discord.Game(name=message.content[6:]))
-    
-    async def embeds(self, message):
-        print(str(len(message.embeds)) + " embeds in message")
-        for embed in message.embeds:
-            await self.client.send_message(message.author, str(dir(embed)))
-            
-    commandDict = { "!info" : "info", "!game" : "game", "!embeds" : "embeds"}
+import commands
 
-Class = Util
+
+"""This is a plugin for developer utilities to aid in programming and debugging.
+   !info: pms information about the channel, server, and author
+   !game: sets the name of the game the bot is playing"""
+
+client = None
+
+@commands.registerEventHander(name="info")
+async def info(triggerMessage):
+    target = triggerMessage.author
+    if triggerMessage.mentions.__len__() == 1:
+        targetUser = triggerMessage.mentions[0]
+        await client.send_message(target, "User name: " + targetUser.name + "\nUser id: " + targetUser.id + "\nUser discriminator: " + targetUser.discriminator)
+        # client.send_message(target, "User id: " + targetUser.id)
+        # client.send_message(target, "User discriminator: " + targetUser.discriminator)
+        await client.delete_message(message)
+    else:
+        await client.send_message(target, "Channel name: " + triggerMessage.channel.name + "\nChannel id: " + triggerMessage.channel.id + "\nServer  name: " + triggerMessage.server.name + "\nServer id: " + triggerMessage.server.id + "\nAuthor name: " + triggerMessage.author.name + "\nAuthor id: " + triggerMessage.author.id)
+        # client.send_message(target, "Channel id: " + triggerMessage.channel.id)
+        # client.send_message(target, "Server  name: " + triggerMessage.server.name)
+        # client.send_message(target, "Server id: " + triggerMessage.server.id)
+        # client.send_message(target, "Author name: " + triggerMessage.author.name)
+        # client.send_message(target, "Author id: " + triggerMessage.author.id)
+
+@commands.registerEventHander(name="game")
+async def game(triggerMessage):
+    await client.change_presence(discord.Game(triggerMessage.content[6:]))
+
+@commands.registerEventHander(name="embeds")
+async def embeds(triggerMessage):
+    print(str(len(triggerMessage.embeds)) + " embeds in message")
+    for embed in triggerMessage.embeds:
+        await client.send_message(triggerMessage.author, str(dir(embed)))

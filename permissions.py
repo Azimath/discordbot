@@ -53,36 +53,36 @@ def hasPermission(userObject, permission):
         return False
 
 def needs_admin(func):
-    async def command(self, message):
-        if hasPermission(message.author, "admin"):
-            await func(self, message)
+    async def command(triggerMessage):
+        if hasPermission(triggerMessage.author, "admin"):
+            await func(triggerMessage)
     return command
 
 def needs_owner(func):
-    async def command(self, message):
-        if hasPermission(message.author, "owner"):
-            await func(self, message)
+    async def command(triggerMessage):
+        if hasPermission(triggerMessage.author, "owner"):
+            await func(triggerMessage)
     return command
 
 def needs_moderator(func):
-    async def command(self, message):
-        if hasPermission(message.author, "moderator"):
-            await func(self, message)
+    async def command(triggerMessage):
+        if hasPermission(triggerMessage.author, "moderator"):
+            await func(triggerMessage)
     return command
     
 def needs_base(func):
-    async def command(self, message):
-        if hasPermission(message.author, "base"):
-            await func(self, message)
+    async def command(triggerMessage):
+        if hasPermission(triggerMessage.author, "base"):
+            await func(triggerMessage)
     return command    
     
 def needs_permissionsManager(func):
-    async def command(self, message):
-        if hasPermission(message.author, "manager"):
-            await func(self, message)
+    async def command(triggerMessage):
+        if hasPermission(triggerMessage.author, "manager"):
+            await func(triggerMessage)
     return command
     
-def register(user, message):
+def register(user, triggerMessage):
     new = True
     for i in userbank:
         if i.data['id'] == user.data['id']:

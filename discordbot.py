@@ -4,11 +4,16 @@ import sys
 import json
 import asyncio
 import inspect
+import time
+import threading
+
+import commands
+
+loaded = False
 
 ####Helper stuff
 async def loadPlugins():
-    global commandObjects
-
+    
     def load_all_modules_from_dir(dirname): #modded from: http://stackoverflow.com/questions/1057431/loading-all-modules-in-a-folder-in-python/8556471#8556471
         modules = []
         for importer, package_name, _ in pkgutil.iter_modules([dirname]):
@@ -18,107 +23,81 @@ async def loadPlugins():
                 modules.append(mod)
                 print(mod)
         return modules
-    
+        
     plugins = load_all_modules_from_dir("plugins")
-    commandObjects = [plugin.Class(client) for plugin in plugins]
-
+    for plugin in plugins:
+        plugin.client = client
+    
     context = globals()
     context.update(locals())
-    await callEvents("\\set_root_context_on_load", commandObjects, context)#TODO: probably dont need to pass locals()
-    print("%s plugins loaded" % len(commandObjects))
+    await commands.executeEvent(triggerType="\\set_root_context_on_load", rootContext=context)#TODO: probably dont need to pass locals()
+    print("%s plugins loaded" % len(plugins))
 
-class COCallablesIterator():#co = commandobjects
-    def __init__(self, commandObjects, name):
-        self.commandObjects = commandObjects
-        self.name = name
-    def __iter__(self):
-        for commandObject in self.commandObjects:
-            for key, funcName in commandObject.commandDict.items():
-                if key == self.name:
-                    thing = getattr(commandObject, funcName)
-                    if callable(getattr(commandObject, funcName)):
-                        yield thing, commandObject
-
-async def callEvents(eventName, commandObjects, *args, **kwargs):
-    calledCount = 0
-    for method,commandObject in COCallablesIterator(commandObjects, eventName):
-        if not inspect.iscoroutine(method) and not inspect.iscoroutinefunction(method):
-            method(*args, **kwargs)
-        else:
-            await method(*args, **kwargs)
-        calledCount += 1
-    return calledCount
-
-#TODO: what if?: !command is defined multiple times
-async def callCommand(commandObjects, commandName, remainder, messageObj, *args, **kwargs):
-    print("Running command " + commandName)
-    for method,commandObject in COCallablesIterator(commandObjects, commandName):
-        if commandObject.legacy:
-            await method(messageObj)
-        else:
-            await method(messageObj, remainder, *args, **kwargs)
-        return True#TODO: continue or not? => if yes, return counter instead of bool
-    return False
-
-#####
-#####
-
+def timeLoop(asyncLoop):
+    while True:
+        time.sleep(1)
+        asyncLoop.call_soon_threadsafe(asyncio.async, commands.executeEvent(triggerType="\\timeTick"))
+        
 if __name__ == "__main__":
+    print("Loading config")
     with open('config.json', 'r') as configfile:
         config = json.loads(configfile.read())
 
+    print("Config loaded")
     client = discord.Client()
 
     def listen():
         @client.event
+        async def on_reaction_add(reaction, user):
+            await commands.executeEvent(triggerType="\\reactionChanged", triggerMessage=reaction.message, reaction=reaction, user=user)
+            
+        @client.event
+        async def on_reaction_remove(reaction, user):
+            await commands.executeEvent(triggerType="\\reactionChanged", triggerMessage=reaction.message, reaction=reaction, user=user)
+        
+        @client.event
         async def on_message(message):
-            await callEvents("\\message_with_bot", commandObjects, message)
+            await commands.executeEvent(triggerType="\\message", triggerMessage=message)
 
             if message.author.id != client.user.id:#we ignore our own messages
-                await callEvents("\\message", commandObjects, message)#shorthand for message_no_bot: should we even allow implicit?
-                await callEvents("\\message_no_bot", commandObjects, message)
+                await commands.executeEvent(triggerType="\\messageNoBot", triggerMessage=message)
                 #print("Got message")
                 #commands
                 if message.content.startswith("!"):
-                    if message.content.startswith("!help"):
-                        args = message.content.replace("!help","",1).split()
-                        if len(args) == 0:
-                            for plugin in commandObjects:
-                                await client.send_message(message.author, "%s\n%s" % (str(plugin.__module__), inspect.getdoc(plugin)) )
-                        return
-                    commandName = message.content.split()[0]#TODO:im not sure if this should be done in *this* part of the code, but then how?
-                    remainder = message.content.replace(commandName, "", 1)
-                    found = await callCommand(commandObjects, commandName, remainder, message)
-                    if not found:
-                        await callEvents("\\command_not_found", commandObjects, commandName, message)#TODO: how much functionality should be plugins? taken to the extreme the bot could just be a "loader"
-                    return
-
-                #"keyword events"
-                for commandObject in commandObjects:
-                    for key, funcName in commandObject.commandDict.items():
-                        #if not command and not event then run keyword command
-                        if not key.startswith("!") and not key.startswith("\\") and key in message.content:
-                            if callable(getattr(commandObject, funcName)):
-                                await getattr(commandObject, funcName)(message)
-                                break
+                    commandName = message.content.split()[0][1:]#TODO:im not sure if this should be done in *this* part of the code, but then how?
+                    print("Got command " + commandName)
+                    await commands.executeEvent(triggerType="\\command", name=commandName, triggerMessage=message)
                 return
 
         @client.event
-        async def on_channel_update(befor, after):
-            await callEvents("\\on_channel_update", commandObjects, after)
+        async def on_channel_update(before, after):
+            await commands.executeEvent(triggerType="\\channelUpdate", before=before, after=after)
 
         @client.event
         async def on_ready():
-            global commandObjects
-            #client.accept_invite("0ZfBcRuFC55zMkeA")
+            global loaded
 
             print("Logged in as")
             print(client.user.name)
             print(client.user.id)
             print("------")
-    
-            await loadPlugins()
-    
+            
+            if not loaded:
+                await loadPlugins()
+            
+                loop = asyncio.get_event_loop()
+                timeTickThread = threading.Thread(target=timeLoop, kwargs={"asyncLoop":loop})
+                timeTickThread.daemon = True
+                timeTickThread.start()
+                
+                loaded = True
+        
+        @client.event
+        async def on_error(event, *args, **kwargs):
+            sys.exit(event)
+            
+        loaded = False
         client.run(config["DiscordToken"])
-
+    
+    print("Logging in")
     listen()#hey, listen,
