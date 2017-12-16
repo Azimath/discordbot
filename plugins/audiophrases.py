@@ -69,10 +69,8 @@ with open('audiobank.json', 'r') as database:
 @commands.registerEventHander(name="join")    
 async def join(triggerMessage):
     global voice
-    if voice is not None:
-        await voice.disconnect()
+    channel = None
     if len(triggerMessage.content.split()) < 2:
-        channel = None
         for c in client.get_all_channels():
             if c.type==discord.ChannelType.voice and triggerMessage.author in c.voice_members:
                 channel = c
@@ -80,9 +78,17 @@ async def join(triggerMessage):
                 break
         
         if channel is not None:            
+            if voice is not None:
+                await voice.disconnect()
             voice = await client.join_voice_channel(channel) # there is no better way to do this
     else:
-        voice = await client.join_voice_channel(discord.utils.get(triggerMessage.server.channels, name=triggerMessage.content[6:], type=discord.ChannelType.voice)) # there is no better way to do this
+        channel = discord.utils.get(triggerMessage.server.channels, name=triggerMessage.content[6:], type=discord.ChannelType.voice)
+        if channel is not None:
+            if voice is not None:
+                await voice.disconnect()
+            voice = await client.join_voice_channel(channel) # there is no better way to do this
+        else:
+            await client.send_message(triggerMessage.channel, "That's not a valid voice channel on this server!")
 
 @commands.registerEventHander(name="disconnect") 
 async def disconnect(triggerMessage):
@@ -128,7 +134,7 @@ async def sound(triggerMessage):
     sound = triggerMessage.content.split()[-1]
     
     if sound in audiobank:
-        print("Sound " + sound + " started by user " + triggerMessage.author.name + ":" + triggerMessage.author.id)
+        print("Sound " + sound + " started by user " + triggerMessage.author.id)
         player = voice.create_ffmpeg_player(audiobank[sound], use_avconv=True)
         player.start()
     else:
@@ -180,29 +186,33 @@ async def youtube(triggerMessage):
     await client.add_reaction(message, '\u23ef')
     await client.add_reaction(message, '\u23f9')
     
-    print("User " + triggerMessage.author.name + ":" + triggerMessage.author.id + " started video: " + triggerMessage.content.split()[1])
+    print("User " + triggerMessage.author.id + " started video: " + triggerMessage.content.split()[1])
     await client.delete_message(triggerMessage)
 
 @commands.registerEventHander(triggerType="\\reactionChanged", name="soundControl")
 async def soundControl(triggerMessage, reaction, user):
     global message
-    if(type(reaction.emoji) is str) and voice.is_connected() and client.user != user and message.id == triggerMessage.id:
-        if(reaction.emoji == '\u25b6') and not player.is_playing() and not player.is_done():
-            print("Play Music")
-            player.resume()
-        elif(reaction.emoji == '\u23ef') and not player.is_done():
-            print("Play/pause")
-            if player.is_playing():
-                player.pause()
-            else:
+    if message is None:
+        return
+        
+    if message.id is not None:
+        if(type(reaction.emoji) is str) and voice.is_connected() and client.user != user and message.id == triggerMessage.id:
+            if(reaction.emoji == '\u25b6') and not player.is_playing() and not player.is_done():
+                print("Play Music")
                 player.resume()
-        elif(reaction.emoji == '\u23f8') and player.is_playing():
-            print("Pause")
-            player.pause()
-        elif(reaction.emoji == '\u23f9') and not player.is_done():
-            print("Stop")
-            player.stop()
-            await client.clear_reactions(triggerMessage)
+            elif(reaction.emoji == '\u23ef') and not player.is_done():
+                print("Play/pause")
+                if player.is_playing():
+                    player.pause()
+                else:
+                    player.resume()
+            elif(reaction.emoji == '\u23f8') and player.is_playing():
+                print("Pause")
+                player.pause()
+            elif(reaction.emoji == '\u23f9') and not player.is_done():
+                print("Stop")
+                player.stop()
+                await client.clear_reactions(triggerMessage)
     #print(user.name.encode('unicode_escape').decode('ascii'))
         
 @commands.registerEventHander(name="stop") 

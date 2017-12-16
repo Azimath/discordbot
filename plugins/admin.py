@@ -2,7 +2,7 @@ from urllib import request
 import permissions
 import commands
 import asyncio
-
+import json
 
 """This is a plugin for a few basic admin functions and the almighty censorship cannon.
    Feared by Jerries everywhere.
@@ -89,19 +89,30 @@ class RestartException(Exception):
 async def restart(triggerMessage):
     raise RestartException
 
-@commands.registerEventHander(name="scoobertName")
+@commands.registerEventHander(name="nameall")
 @permissions.needs_moderator 
-async def scoobertNameLog(triggerMessage):
+async def changeAllNames(triggerMessage):
     names = {}
-    for member in client.get_server("102981131074297856").members:
+    for member in triggerMessage.server.members:
         names.update({ member.id : member.nick})
         try:
-            await client.change_nickname(member,None)
+            await client.change_nickname(member, triggerMessage.content.split()[1])
         except:
             print("Couldn't scoobert " + member.name.encode('ascii', 'ignore').decode('ascii'))
-    #with open('names.json', 'w') as database:
-            #database.write(json.dumps(names, indent=4))
+    with open('names.json', 'w') as database:
+            database.write(json.dumps(names, indent=4))
 
+@commands.registerEventHander(name="revertnames")
+@permissions.needs_moderator 
+async def unchangeAllNames(triggerMessage):
+    with open('names.json', 'r') as database:
+        names = json.loads(database.read())
+        for member in triggerMessage.server.members:
+            try:
+                await client.change_nickname(member, names[member.id])
+            except:
+                print("Couldn't unscoobert " + member.name.encode('ascii', 'ignore').decode('ascii'))
+            
 @commands.registerEventHander(name="delete")
 @permissions.needs_moderator
 async def delete(triggerMessage):
@@ -133,16 +144,16 @@ async def delete(triggerMessage):
             channel = triggerMessage.channel_mentions[0]
     #actually do the stuff
     
-        if victim is not None and channel is not None:
-            print("authorized, channel is " + channel.name + " target is " + victim.name)
+        if channel is not None:
+            #print("authorized, channel is " + channel.name + " target is " + victim.name)
             print("deleting " + str(number) + " messages")
             deleted = 0
             async for msg in client.logs_from(channel, limit=100*number):
-                if msg.author == victim and deleted < number:
+                if (msg.author == victim or victim is None) and deleted < number:
                     await client.delete_message(msg)
                     deleted = deleted + 1
                     #print("deleted " + str(deleted))
-                if deleted >= number:
+                if deleted >= number and victim is not None:
                     await client.send_message(channel, triggerMessage.author.name + " removed " + str(deleted) + " messages belonging to " + victim.name)
                     break
             #print("messages remaining: " + str(number-deleted))

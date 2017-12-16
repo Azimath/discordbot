@@ -94,6 +94,7 @@ if __name__ == "__main__":
         
         @client.event
         async def on_error(event, *args, **kwargs):
+            await client.close()
             sys.exit(event)
             
         loaded = False

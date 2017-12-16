@@ -33,10 +33,10 @@ async def refreshDragons(triggerMessage):
     
     oldnum = len(phrasebank["dragons"])
     
-    response = await aiohttp.request('GET', 'https://bad-dragon.com/products/getproducts')
+    response = await aiohttp.request('GET', 'https://bad-dragon.com/api/products')
     body = await response.text()
     
-    phrasebank["dragons"] = [x["link_url"] for x in json.loads(body)]
+    phrasebank["dragons"] = [x["sku"] for x in json.loads(body)]
     
     with open('phrasebank.json', "w") as lartfile:
             json.dump(phrasebank, lartfile, indent=4)
@@ -44,7 +44,7 @@ async def refreshDragons(triggerMessage):
     await client.send_message(triggerMessage.channel, "Downloaded new dragons. There are now " + str(len(phrasebank["dragons"])) 
                                                       + " dragons. Got " + str(len(phrasebank["dragons"])-oldnum) + " new dragons")
     if len(phrasebank["dragons"]) - oldnum > 0:
-        await client.send_message(triggerMessage.channel, "@everyone")
+        pass#await client.send_message(triggerMessage.channel, "@everyone")
 
 @commands.registerEventHander(name="lart")
 async def lart(triggerMessage):
@@ -90,7 +90,7 @@ async def buydinner(triggerMessage):
 async def baddragon(triggerMessage):
     dragon = random.choice(phrasebank["dragons"])
     print("dragon: " + dragon)
-    await client.send_message(triggerMessage.channel, dragon)
+    await client.send_message(triggerMessage.channel, "https://bad-dragon.com/products/"+dragon)
 
 @commands.registerEventHander(name="tingle")
 async def tingle(triggerMessage):
@@ -113,7 +113,7 @@ async def mango(triggerMessage):
 @commands.registerEventHander(name="8ball")
 async def eightball(triggerMessage):
     ball = random.choice(phrasebank["8balls"])
-    print("8ball: " + ball)
+    #print("8ball: " + ball)
     await client.send_message(triggerMessage.channel, ":8ball: " + ball)
 
 @commands.registerEventHander(name="tests")
