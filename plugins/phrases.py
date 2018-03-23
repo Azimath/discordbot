@@ -71,63 +71,9 @@ async def praise(triggerMessage):
 async def keikaku(triggerMessage):
     await client.send_message(triggerMessage.channel, "tl note: keikaku means plan")
 
-      
-@commands.registerEventHander(triggerType="\\messageNoBot", name="help")
-@commands.messageHandlerFilter("help")
-async def keikaku(triggerMessage):
-    await client.send_message(triggerMessage.author, "admin\r\n
-This is a plugin for a few basic admin functions and the almighty censorship cannon.\r\n
-Feared by Jerries everywhere.\r\n
-!leave: Tells the bot to leave. Only works if you're Azimath.\r\n
-!invite: Invites the bot to a new server. Only works if you're Azimath.\r\n
-!register: adds you to the permissions system\r\n
-!addnode: adds a permissions node to a user if you are a manager\r\n
-!delete @Target <channel> numberofmessages : Deletes numberofmessages sent by Target. If no channel is specified assumes channel it was sent in.\r\n
-audiophrases\r\n
-A plugin for playing various sound clips.\r\n
-!setcd : Changes the cooldown between commands. Default is 30 seconds.\r\n
-!sound, !play <soundname> : plays <soundname> sound clip from our library\r\n
-!listsounds : lists the sounds in our library\r\n
-!addsound <name> <link> : downloads the sound from a youtube_dl compatible <link> and puts it in our library as <name>\r\n
-!youtube <link> : plays the audio from any youtube_dl compatible page\r\n
-daygetter\r\n
-None\r\n
-dunnos\r\n
-None\r\n
-games\r\n
-This is a plugin for fun things you can use to play with [^_^].\r\n
-!flip, !coin: Flips a coin\r\n
-!trick: Does a super cool magic trick\r\n
-numbergame\r\n
-A plugin that plays a simple high-low number guessing game.\r\n
-!startgame <range> : starts a game with a number between 1 and range. range is 100 if not given.\r\n
-!guess number : Enters a guess, then tells you if it is high, low, or correct. A correct guess ends the game. Guesses that have been guessed before are not acccepted.\r\n
-!stop : stops the game in the current channel\r\n
-phrases\r\n
-A plugin for giving various kinds of random phrases.\r\n
-!lart user : uses the LART on the given user.\r\n
-!praise user : praises the user.\r\n
-!pal : is this pal?\r\n
-!mango : where is mang0?\r\n
-!eightball : Ask the magic eightball a question. Satisfaction not guarunteed.\r\n
-!addphrase phrasebank phrase : adds phrase to the given phrasebank. The phrasebank for a given command is generally the plural of the command\r\n
-!baddragon : give me some sugah, baby\r\n
-!wiki : links to the iaa wiki\r\n
-!apply : links to the membership application\r\n
-!tests : PMs the user links to all required membership tests\r\n
-!constitution : links to the constitution\r\n
-!sonic : links to a random page on either the archie sonic wiki or the sonic fanon wiki\r\n
-!tingle : links to a random tingler\r\n
-sudo\r\n
-A plugin to make the bot say things in channels. Mods only.\r\n
-!sudo channel stuff : says stuff in channel\r\n
-util\r\n
-This is a plugin for developer utilities to aid in programming and debugging.\r\n
-!info: pms information about the channel, server, and author\r\n
-!game: sets the name of the game the bot is playing\r\n
-wingdings\r\n
-A plugin for translating to and from WingDings. All credit goes to Dublo.\r\n
-!translate <message> : :snowflake::white_square_button::cancer::black_small_square::small_orange_diamond::black_circle::cancer::large_orange_diamond::scorpius::small_orange_diamond:       :cancer:       :white_circle::scorpius::small_orange_diamond::small_orange_diamond::cancer::capricorn::scorpius:       :large_orange_diamond::white_small_square:       :white_small_square::white_square_button:       :sagittarius::white_square_button::white_small_square::white_circle:       :sparkle::pisces::black_small_square::capricorn::thumbsdown::pisces::black_small_square::capricorn::small_orange_diamond:")
+@commands.registerEventHander(name="help")
+async def help(triggerMessage):
+    await client.send_message(triggerMessage.author, phrasebank["help"][0])
       
 @commands.registerEventHander(name="lmgtfy")
 async def lmgtfy(triggerMessage):
