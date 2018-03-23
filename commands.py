@@ -63,10 +63,13 @@ async def executeEvent(triggerType="\\command", name=None, **kwargs):
         
     if name is not None:
         #print(triggerType + " " + name)
-        if triggerType == "\\command" and not name in triggerHandlers[triggerType]:
-            await executeEvent(triggerType="\\commandNotFound", name=None, **kwargs)
-        else:       
-            await triggerHandlers[triggerType][name].handler(**kwargs)
+        try:
+            if triggerType == "\\command" and not name in triggerHandlers[triggerType]:
+                await executeEvent(triggerType="\\commandNotFound", name=None, **kwargs)
+            else:       
+                await triggerHandlers[triggerType][name].handler(**kwargs)
+        except:
+            pass
     else:
         for k, v in triggerHandlers[triggerType].items():
             #print("Running " + k)

@@ -67,11 +67,12 @@ async def praise(triggerMessage):
     await client.send_message(triggerMessage.channel, praise)
 
 @commands.registerEventHander(triggerType="\\messageNoBot", name="keikaku")
-@commands.messageHandlerFilter("keikaku")
+@commands.messageHandlerFilter("keikaku", filterType="cqc")
 async def keikaku(triggerMessage):
     await client.send_message(triggerMessage.channel, "tl note: keikaku means plan")
 
       
+<<<<<<< HEAD
 @commands.registerEventHander(triggerType="\\messageNoBot", name="help")
 @commands.messageHandlerFilter("help")
 async def keikaku(triggerMessage):
@@ -128,6 +129,11 @@ This is a plugin for developer utilities to aid in programming and debugging.\n
 wingdings\n
 A plugin for translating to and from WingDings. All credit goes to Dublo.\n
 !translate <message> : :snowflake::white_square_button::cancer::black_small_square::small_orange_diamond::black_circle::cancer::large_orange_diamond::scorpius::small_orange_diamond:       :cancer:       :white_circle::scorpius::small_orange_diamond::small_orange_diamond::cancer::capricorn::scorpius:       :large_orange_diamond::white_small_square:       :white_small_square::white_square_button:       :sagittarius::white_square_button::white_small_square::white_circle:       :sparkle::pisces::black_small_square::capricorn::thumbsdown::pisces::black_small_square::capricorn::small_orange_diamond:""")
+=======
+@commands.registerEventHander(name="help")
+async def help(triggerMessage):
+    await client.send_message(triggerMessage.author, phrasebank["help"])
+>>>>>>> patch-3
       
 @commands.registerEventHander(name="lmgtfy")
 async def lmgtfy(triggerMessage):

@@ -1,6 +1,8 @@
 import json
 import asyncio
 
+client = None
+
 class User:
     def __init__(self, id, name, permissions):
         self.data = {}
@@ -56,30 +58,40 @@ def needs_admin(func):
     async def command(triggerMessage):
         if hasPermission(triggerMessage.author, "admin"):
             await func(triggerMessage)
+        else:
+            await client.send_message(triggerMessage.channel, "Get admin permission dummy")
     return command
 
 def needs_owner(func):
     async def command(triggerMessage):
         if hasPermission(triggerMessage.author, "owner"):
             await func(triggerMessage)
+        else:
+            await client.send_message(triggerMessage.channel, "Get owner permission dummy")
     return command
 
 def needs_moderator(func):
     async def command(triggerMessage):
         if hasPermission(triggerMessage.author, "moderator"):
             await func(triggerMessage)
+        else:
+            await client.send_message(triggerMessage.channel, "Get moderator permission dummy")
     return command
     
 def needs_base(func):
     async def command(triggerMessage):
         if hasPermission(triggerMessage.author, "base"):
             await func(triggerMessage)
+        else:
+            await client.send_message(triggerMessage.channel, "You're not in the permission system dummy")
     return command    
     
 def needs_permissionsManager(func):
     async def command(triggerMessage):
         if hasPermission(triggerMessage.author, "manager"):
             await func(triggerMessage)
+        else:
+            await client.send_message(triggerMessage.channel, "Get manager permission dummy")
     return command
     
 def register(user, triggerMessage):

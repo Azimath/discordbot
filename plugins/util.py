@@ -28,7 +28,7 @@ async def info(triggerMessage):
 
 @commands.registerEventHander(name="game")
 async def game(triggerMessage):
-    await client.change_presence(discord.Game(triggerMessage.content[6:]))
+    await client.change_presence(game=discord.Game(name=triggerMessage.content[6:]))
 
 @commands.registerEventHander(name="embeds")
 async def embeds(triggerMessage):
