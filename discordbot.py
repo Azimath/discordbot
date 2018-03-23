@@ -8,9 +8,24 @@ import time
 import threading
 
 import commands
+import permissions
 
+import PyREPL
+interactive = None
 loaded = False
 
+import traceback
+import warnings
+import sys
+
+def warn_with_traceback(message, category, filename, lineno, file=None, line=None):
+
+    log = file if hasattr(file,'write') else sys.stderr
+    traceback.print_stack(file=log)
+    log.write(warnings.formatwarning(message, category, filename, lineno, line))
+
+warnings.showwarning = warn_with_traceback
+warnings.simplefilter("always")
 ####Helper stuff
 async def loadPlugins():
     
@@ -30,13 +45,14 @@ async def loadPlugins():
     
     context = globals()
     context.update(locals())
-    await commands.executeEvent(triggerType="\\set_root_context_on_load", rootContext=context)#TODO: probably dont need to pass locals()
+    #await commands.executeEvent(triggerType="\\set_root_context_on_load", rootContext=context)#TODO: probably dont need to pass locals()
+    interactive.setRootContext(context)
     print("%s plugins loaded" % len(plugins))
 
 def timeLoop(asyncLoop):
     while True:
         time.sleep(1)
-        asyncLoop.call_soon_threadsafe(asyncio.async, commands.executeEvent(triggerType="\\timeTick"))
+        asyncLoop.call_soon_threadsafe(asyncio.ensure_future, commands.executeEvent(triggerType="\\timeTick"))
         
 if __name__ == "__main__":
     print("Loading config")
@@ -45,7 +61,8 @@ if __name__ == "__main__":
 
     print("Config loaded")
     client = discord.Client()
-
+    permissions.client = client
+    interactive = PyREPL.REPL(client)
     def listen():
         @client.event
         async def on_reaction_add(reaction, user):

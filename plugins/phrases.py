@@ -67,7 +67,7 @@ async def praise(triggerMessage):
     await client.send_message(triggerMessage.channel, praise)
 
 @commands.registerEventHander(triggerType="\\messageNoBot", name="keikaku")
-@commands.messageHandlerFilter("keikaku")
+@commands.messageHandlerFilter("keikaku", filterType="cqc")
 async def keikaku(triggerMessage):
     await client.send_message(triggerMessage.channel, "tl note: keikaku means plan")
 
