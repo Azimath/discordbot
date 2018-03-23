@@ -74,6 +74,7 @@ async def keikaku(triggerMessage):
 @commands.registerEventHander(name="help")
 async def help(triggerMessage):
     await client.send_message(triggerMessage.author, phrasebank["help"][0])
+    await client.send_message(triggerMessage.author, phrasebank["help"][1])
       
 @commands.registerEventHander(name="lmgtfy")
 async def lmgtfy(triggerMessage):
