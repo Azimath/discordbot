@@ -2,7 +2,8 @@ import commands
 import discord
 import requests
 from io import BytesIO
-from PIL import Image
+from PIL import Image, ImageFilter
+import random
 
 client = None
 
@@ -37,8 +38,15 @@ async def morejpeg(triggerMessage):
         await client.send_message(triggerMessage.channel, "Couldn't get image")
         return
         
-    img = Image.open(BytesIO(r.content)).convert("RGB") #https://stackoverflow.com/a/13024547
+    translationX = random.choice([-12,-4,0,4,12])
+    translationY = random.choice([-12,-4,0,4,12])
     
+    img = Image.open(BytesIO(r.content)).convert("RGB") #https://stackoverflow.com/a/13024547
+    img = img.transform(img.size, Image.AFFINE, (1,0,translationX,0,1,translationY)).transpose(Image.ROTATE_90)
+    img.save("more.jpeg", quality = 1)
+    
+    img = Image.open("more.jpeg").transpose(Image.ROTATE_270)
+    img = img.transform(img.size, Image.AFFINE, (1,0,-translationX,0,1,-translationY))
     img.save("more.jpeg", quality = 1)
     with open("more.jpeg", "rb") as image:
         await client.send_file(triggerMessage.channel, image, filename="more.jpeg", content="Now with more JPEG")
