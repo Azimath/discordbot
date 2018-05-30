@@ -89,7 +89,8 @@ async def checkGalatine():
         
         #print(onlineGPrimeOffers)
 
-nextTime = datetime.now(tz)
+nextTime = datetime.now(tz) + timedelta(days=1)
+nextTime.replace(hour = 1, minute = 0, second = 0)
 
 @commands.registerEventHander(triggerType="\\timeTick", name="duckhunt")
 async def passiveDuckSearch():
@@ -98,14 +99,17 @@ async def passiveDuckSearch():
         return
     
     nextTime = datetime.now(tz)
-    nextTime += timedelta(days=1)
-    nextTime.replace(hour = 1, minute = 0, second = 0)
+    nextTime += timedelta(hours=1)
+    nextTime.replace(minute = 0, second = 0)
     
     print("Updating market overall data")
     
     itemsToBuy = {}
     items = None
     
+    with open('WarframePotentialDucks.json', 'r') as itemfile:
+        itemsToBuy = json.loads(itemfile.read())
+        
     with open('WarframeItems.json', 'r') as itemfile:
         items = json.loads(itemfile.read())
     
@@ -114,7 +118,9 @@ async def passiveDuckSearch():
     nextEdit = 20
     for index, item in enumerate(items):
         ducats = items[item]['ducats']
-                    
+        if index % 6 != int(datetime.now(tz).hour/4):
+            continue
+            
         itemOrdersRequest = requests.get('https://api.warframe.market/v1/items/'+item+'/orders')
         
         if itemOrdersRequest.status_code != 200:
@@ -125,12 +131,12 @@ async def passiveDuckSearch():
         
         prices = []
         for order in itemOrders:
-            if order['order_type'] == 'sell' and order['user']['status'] == 'online' and order['platform'] == 'pc':
+            if order['order_type'] == 'sell' and order['user']['status'] == 'online' and order['platform'] == 'pc' and order['region'] == 'en':
                 prices.append(order['platinum'])
                 
         prices.sort()
         if len(prices) > 0:
-            itemsToBuy[item] = {'name' : items[item]['name'], 'best' : ducats/prices[0], 'median' : ducats/prices[int(len(prices)/2)]}
+            itemsToBuy[item] = {'name' : items[item]['name'], 'best' : ducats/prices[0], 'median' : ducats/prices[int(len(prices)/2)], 'ducats' : items[item]['ducats']}
             
         if index > nextEdit:
             print("Passive update progress: {:0.2f}%".format(100.0*index/len(items)))
@@ -151,14 +157,17 @@ async def getDuckListings(triggerMessage):
     itemsToBuy = []
     items = None
     
-    with open('WarframeItems.json', 'r') as itemfile:
+    with open('WarframePotentialDucks.json', 'r') as itemfile:
         items = json.loads(itemfile.read())
     
-    await client.send_message(triggerMessage.channel, "Beginning ducat search with " + str(len(items)) + " items")
+    interestingItems = {k: v for k, v in items.items() if v['best'] > 8}
+    
+    await client.send_message(triggerMessage.channel, "Searching through " + str(len(interestingItems)) + " interesting items")
     progressMessage = await client.send_message(triggerMessage.channel, "Progress: 0%")
     
-    for index, item in enumerate(items):
-        ducats = items[item]['ducats']
+    for index, item in enumerate(interestingItems):
+        startTime = time.time()
+        ducats = interestingItems[item]['ducats']
                     
         itemOrdersRequest = requests.get('https://api.warframe.market/v1/items/'+item+'/orders')
         
@@ -170,21 +179,34 @@ async def getDuckListings(triggerMessage):
         
         prices = []
         for order in itemOrders:
-            if order['order_type'] == 'sell' and order['user']['status'] == 'online' and order['platform'] == 'pc':
+            if order['order_type'] == 'sell' and order['user']['status'] == 'online' and order['platform'] == 'pc' and order['region'] == 'en':
                 prices.append(order['platinum'])
                 
         prices.sort()
         if len(prices) > 0:
             if ducats/prices[0] > 8:
-                #print(item['item_name'] + " : " + str(ducats) + " ducats, best: " + str(ducats/prices[0]) + " ducats per plat, median: " + str(ducats/prices[int(len(prices)/2)]) + " ducats per plat")
-                itemsToBuy.append((items[item]['name'],ducats/prices[0],ducats/prices[int(len(prices)/2)]))
+                itemsToBuy.append((interestingItems[item]['name'],ducats,ducats/prices[0],ducats/prices[int(len(prices)/2)]))
         
-        await client.edit_message(progressMessage, "Progress: {:0.2f}%".format(100.0*index/len(items)))
-        await asyncio.sleep(0.334)
+            items[item] = {'name' : items[item]['name'], 'best' : ducats/prices[0], 'median' : ducats/prices[int(len(prices)/2)], 'ducats' : items[item]['ducats']}
+        
+        await client.edit_message(progressMessage, "Progress: {:0.2f}%".format(100.0*index/len(interestingItems)))
+        if (time.time() - startTime) < 0.33:
+            await asyncio.sleep(0.34 - (time.time() - startTime))
+            print("Waiting an extra " + str(time.time() - startTime))
+    await client.edit_message(progressMessage, "Progress: Done!")
     
-    itemsToBuy.sort(key=lambda tup: tup[1])
-    results = "Top 5 items to buy for ducats:\n"
-    for item in itertools.islice(itemsToBuy, 0, 5):
-        results += ("{} : {} ducats, best: {:0.2f} dc/pl, median: {:0.2f} dc/pl\n".format(item[0],items[item[0]]['ducats'],item[1],item[2]))
+    itemsToBuy.sort(key=lambda tup: tup[2], reverse=True)
+    results = "Top 10 items to buy for ducats:\n"
+    for item in itertools.islice(itemsToBuy, 0, 10):
+        results += ("{} : {} ducats, best: {:0.2f} dc/pl, median: {:0.2f} dc/pl\n".format(item[0],item[1],item[2],item[3]))
     
     await client.send_message(triggerMessage.channel, results)
+    
+    try:
+        json.dumps(items, indent=4)
+    except:
+        raise
+    else:
+        if len(itemsToBuy) > 0:
+            with open('WarframePotentialDucks.json', 'w') as datafile:
+                datafile.write(json.dumps(items, indent=4))
