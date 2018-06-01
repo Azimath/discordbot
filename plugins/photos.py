@@ -1,17 +1,20 @@
 import commands
+import permissions
 import discord
 import requests
 from io import BytesIO
 from PIL import Image, ImageFilter
 import random
+import time
 
 client = None
 timeout = dict()
 COOLDOWN = 30
 
-@permissions.needs_admin
+@permissions.needs_moderator
 @commands.registerEventHander(name="jpegcd")
 async def jpegcd(triggerMessage):
+    global COOLDOWN
     try:
         COOLDOWN = int(triggerMessage.content.split()[1])
         await client.send_message(triggerMessage.channel, "JPEG Cooldown is now " + int(triggerMessage.content.split()[1]))
@@ -21,6 +24,7 @@ async def jpegcd(triggerMessage):
     
 @commands.registerEventHander(name="morejpeg")
 async def morejpeg(triggerMessage):
+    global COOLDOWN
     attachments = None
     if any("width" in a for a in triggerMessage.attachments):
         attachments = triggerMessage.attachments
@@ -53,10 +57,13 @@ async def morejpeg(triggerMessage):
     nowtime = int(time.time())
     user = triggerMessage.author.id
     if user in timeout and (timeout[user] + COOLDOWN > nowtime):
-        await client.send_message(triggerMessage.channel, triggerMessage.author.nick + "is on Cooldown")
+        if triggerMessage.author.nick is not None:
+        	await client.send_message(triggerMessage.channel, triggerMessage.author.nick + " is on Cooldown")
+        else:
+            await client.send_message(triggerMessage.channel, triggerMessage.author.name + " is on Cooldown")
         return
 
-    cooldown[user] = nowtime
+    timeout[user] = nowtime
     
     translationX = random.choice([-12,-4,0,4,12])
     translationY = random.choice([-12,-4,0,4,12])

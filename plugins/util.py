@@ -1,6 +1,8 @@
 import asyncio
 import discord
 import commands
+import os
+import permissions
 
 
 """This is a plugin for developer utilities to aid in programming and debugging.
@@ -35,3 +37,9 @@ async def embeds(triggerMessage):
     print(str(len(triggerMessage.embeds)) + " embeds in message")
     for embed in triggerMessage.embeds:
         await client.send_message(triggerMessage.author, str(dir(embed)))
+
+@permissions.needs_moderator        
+@commands.registerEventHander(name="gitpull")
+async def gitpull(triggerMessage):
+    os.system("git pull origin master")
+    
