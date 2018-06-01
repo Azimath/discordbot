@@ -71,11 +71,13 @@ async def morejpeg(triggerMessage):
     except:
         print ("Couldn't get jpeg iterations, defaulting to 1")
     
+    img = Image.open(BytesIO(r.content)).convert("RGB") #https://stackoverflow.com/a/13024547
+    img.save("more.jpeg", quality = 100)
     for i in range(iters):
         translationX = random.choice([-12,-4,0,4,12])
         translationY = random.choice([-12,-4,0,4,12])
 
-        img = Image.open(BytesIO(r.content)).convert("RGB") #https://stackoverflow.com/a/13024547
+        img = Image.open("more.jpeg").convert("RGB") 
         img = img.transform(img.size, Image.AFFINE, (1,0,translationX,0,1,translationY)).transpose(Image.ROTATE_90)
         img.save("more.jpeg", quality = 1)
 
