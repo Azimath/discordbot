@@ -53,28 +53,38 @@ async def morejpeg(triggerMessage):
     if r.status_code is not 200:
         await client.send_message(triggerMessage.channel, "Couldn't get image")
         return
-        
-    nowtime = int(time.time())
-    user = triggerMessage.author.id
-    if user in timeout and (timeout[user] + COOLDOWN > nowtime):
-        if triggerMessage.author.nick is not None:
-        	await client.send_message(triggerMessage.channel, triggerMessage.author.nick + " is on Cooldown")
-        else:
-            await client.send_message(triggerMessage.channel, triggerMessage.author.name + " is on Cooldown")
-        return
+    if not (triggerMessage.channel.type == discord.ChannelType.private or (triggerMessage.channel.name is not None and "deepfry" is in triggerMessage.channel.name)):
+        nowtime = int(time.time())
+        user = triggerMessage.author.id
+        if user in timeout and (timeout[user] + COOLDOWN > nowtime):
+            if triggerMessage.author.nick is not None:
+                await client.send_message(triggerMessage.channel, triggerMessage.author.nick + " is on Cooldown")
+            else:
+                await client.send_message(triggerMessage.channel, triggerMessage.author.name + " is on Cooldown")
+            return
 
-    timeout[user] = nowtime
+        timeout[user] = nowtime
     
-    translationX = random.choice([-12,-4,0,4,12])
-    translationY = random.choice([-12,-4,0,4,12])
+    iters = 1
+    try:
+        iters = int(triggerMessage.content.split()[1])
+    except:
+        print ("Couldn't get jpeg iterations, defaulting to 1")
     
     img = Image.open(BytesIO(r.content)).convert("RGB") #https://stackoverflow.com/a/13024547
-    img = img.transform(img.size, Image.AFFINE, (1,0,translationX,0,1,translationY)).transpose(Image.ROTATE_90)
-    img.save("more.jpeg", quality = 1)
-    
-    img = Image.open("more.jpeg").transpose(Image.ROTATE_270)
-    img = img.transform(img.size, Image.AFFINE, (1,0,-translationX,0,1,-translationY))
-    img.save("more.jpeg", quality = 1)
+    img.save("more.jpeg", quality = 100)
+    for i in range(iters):
+        translationX = random.choice([-12,-4,0,4,12])
+        translationY = random.choice([-12,-4,0,4,12])
+
+        img = Image.open("more.jpeg").convert("RGB") 
+        img = img.transform(img.size, Image.AFFINE, (1,0,translationX,0,1,translationY)).transpose(Image.ROTATE_90)
+        img.save("more.jpeg", quality = 1)
+
+        img = Image.open("more.jpeg").transpose(Image.ROTATE_270)
+        img = img.transform(img.size, Image.AFFINE, (1,0,-translationX,0,1,-translationY))
+        img.save("more.jpeg", quality = 1)
+
     with open("more.jpeg", "rb") as image:
         await client.send_file(triggerMessage.channel, image, filename="more.jpeg", content="Now with more JPEG")
     
