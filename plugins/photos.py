@@ -6,7 +6,19 @@ from PIL import Image, ImageFilter
 import random
 
 client = None
+timeout = dict()
+COOLDOWN = 30
 
+@permissions.needs_admin
+@commands.registerEventHander(name="jpegcd")
+async def jpegcd(triggerMessage):
+    try:
+        COOLDOWN = int(triggerMessage.content.split()[1])
+        await client.send_message(triggerMessage.channel, "JPEG Cooldown is now " + int(triggerMessage.content.split()[1]))
+    except:
+        print("Failed to parse jpegcd time")
+        
+    
 @commands.registerEventHander(name="morejpeg")
 async def morejpeg(triggerMessage):
     attachments = None
@@ -38,6 +50,14 @@ async def morejpeg(triggerMessage):
         await client.send_message(triggerMessage.channel, "Couldn't get image")
         return
         
+    nowtime = int(time.time())
+    user = triggerMessage.author.id
+    if user in timeout and (timeout[user] + COOLDOWN > nowtime):
+        await client.send_message(triggerMessage.channel, triggerMessage.author.nick + "is on Cooldown")
+        return
+
+    cooldown[user] = nowtime
+    
     translationX = random.choice([-12,-4,0,4,12])
     translationY = random.choice([-12,-4,0,4,12])
     
