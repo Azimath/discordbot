@@ -70,7 +70,7 @@ async def morejpeg(triggerMessage):
         iters = int(triggerMessage.content.split()[1])
     except:
         print ("Couldn't get jpeg iterations, defaulting to 1")
-    
+    iters = min(iters, 10)    
     img = Image.open(BytesIO(r.content)).convert("RGB") #https://stackoverflow.com/a/13024547
     img.save("more.jpeg", quality = 100)
     for i in range(iters):
