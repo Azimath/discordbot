@@ -53,7 +53,7 @@ async def morejpeg(triggerMessage):
     if r.status_code is not 200:
         await client.send_message(triggerMessage.channel, "Couldn't get image")
         return
-    if triggerMessage.channel.name is null or (triggerMessage.channel.name is not null and "deepfry" is in triggerMessage.channel.name):
+    if not (triggerMessage.channel.type == discord.ChannelType.private or (triggerMessage.channel.name is not None and "deepfry" is in triggerMessage.channel.name)):
         nowtime = int(time.time())
         user = triggerMessage.author.id
         if user in timeout and (timeout[user] + COOLDOWN > nowtime):
