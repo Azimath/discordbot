@@ -24,8 +24,8 @@ def warn_with_traceback(message, category, filename, lineno, file=None, line=Non
     traceback.print_stack(file=log)
     log.write(warnings.formatwarning(message, category, filename, lineno, line))
 
-warnings.showwarning = warn_with_traceback
-warnings.simplefilter("always")
+#warnings.showwarning = warn_with_traceback
+#warnings.simplefilter("never")
 ####Helper stuff
 async def loadPlugins():
     

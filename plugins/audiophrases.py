@@ -177,7 +177,7 @@ async def radio(triggerMessage):
         modulation = "wbfm"
     
     voice.encoder_options(sample_rate=48000, channels=1)
-    rtlfm = subprocess.Popen(["rtl_fm", "-f", freq, "-M", modulation, "-g" ,"0", "-r", "48k", "-l", "1"], stdout=subprocess.PIPE)
+    rtlfm = subprocess.Popen(["rtl_fm", "-f", freq, "-p","100", "-M", modulation, "-r", "48k", "-l", "0"], stdout=subprocess.PIPE)
     
     player = discord.voice_client.ProcessPlayer(rtlfm, voice, None)
     player.start()
@@ -247,6 +247,8 @@ async def stop(triggerMessage):
             player.stop()
             if hasattr(player, "yt"):
                 await client.change_presence()
+            if hasattr(player, "process"):
+                player.process.kill()
 
 @commands.registerEventHander(name="setcd") 
 @permissions.needs_moderator

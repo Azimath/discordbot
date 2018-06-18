@@ -1,4 +1,5 @@
 import asyncio
+import sys
 
 class Event: #Class to store event data
     def __init__(self, f, triggerType, name, **kwargs):
@@ -69,7 +70,11 @@ async def executeEvent(triggerType="\\command", name=None, **kwargs):
             else:       
                 await triggerHandlers[triggerType][name].handler(**kwargs)
         except:
-            pass
+            if sys.exc_info()[0].__name__ != "RestartException":
+                print("Unexpected error:", sys.exc_info())
+            else: 
+                raise
+            
     else:
         for k, v in triggerHandlers[triggerType].items():
             #print("Running " + k)
