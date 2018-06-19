@@ -22,7 +22,7 @@ def gelbooru(tags):
     
     j = response.json()
     
-    target = j[random.randint(0, len(j))]['file_url']
+    target = random.choice(j)['file_url']
     file_response = session.get(target)
     file_extension = target[target.rfind(".")+1:]
     print(file_extension)
@@ -49,7 +49,7 @@ def e621(tags):
     
     j = response.json()
     
-    target = j[random.randint(0, len(j))]['file_url']
+    target = random.choice(j)['file_url']
     file_response = session.get(target)
     file_extension = target[target.rfind(".")+1:]
     print(file_extension)
@@ -62,6 +62,11 @@ def e621(tags):
         f.close()
         
     return "out."+file_extension
+
+@commands.registerEventHander(name="boorutest")
+async def boorutest(triggerMessage):
+    tokens = triggerMessage.content.split()
+    await client.send_message(triggerMessage.channel, str(tokens))
 
 @commands.registerEventHander(name="booru")
 async def booru(triggerMessage):
@@ -78,7 +83,7 @@ async def booru(triggerMessage):
     try:
         out = functionMap[tokens[1]](tokens[2:])
     except Exception as e:
-        await client.send_message(triggerMessage.channel, "Oopsie woopsie Uwu. One of many possible disasters has occured. Try `!booru help`")
+        await client.send_message(triggerMessage.channel, "Oopsie woopsie Uwu. One of many possible disasters has occured. Try `!booru help`\n[" + str(type(exception).__name__) + "]")
         print(e) #hopefully this does something useful
         return
     
