@@ -22,7 +22,7 @@ def gelbooru(tags):
     
     j = response.json()
     
-    target = j[random.randint(0, len(j)-1)]['file_url']
+    target = random.choice(j)['file_url']
     file_response = session.get(target)
     file_extension = target[target.rfind(".")+1:]
     print(file_extension)
@@ -49,7 +49,7 @@ def e621(tags):
     
     j = response.json()
     
-    target = j[random.randint(0, len(j)-1)]['file_url']
+    target = random.choice(j)['file_url']
     file_response = session.get(target)
     file_extension = target[target.rfind(".")+1:]
     print(file_extension)
