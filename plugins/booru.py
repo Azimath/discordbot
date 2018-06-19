@@ -7,9 +7,11 @@ import time
 
 BOORUCD = 10 #this is to avoid spamming discord, and the APIs
 SUPPORTED = ["e621", "gelbooru"]
+headers = {"user-agent":"[^_^]/1.0"}
 client = None
 
 def gelbooru(tags):
+    global headers
     t = tags.pop(0)
     for x in tags:
         t+="+"+x
@@ -36,6 +38,7 @@ def gelbooru(tags):
 
 #tags should be a list of desired tags
 def e621(tags):
+    global headers
     t = tags.pop(0)
     for x in tags:
         t+="+"+x
