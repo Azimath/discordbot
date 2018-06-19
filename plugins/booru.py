@@ -70,7 +70,7 @@ async def booru(triggerMessage):
     #TODO: Actually implement cooldown
     global SUPPORTED
     tokens = triggerMessage.content.split()
-    if (len(tokens) == 1 or tokens[1].lower == "help"):
+    if (len(tokens) == 1 or tokens[1].lower() == "help"):
         await client.send_message(triggerMessage.channel, "Syntax is `!booru booru_name tag0...`\n Currently supported boorus: " + str(SUPPORTED))
         return
     functionMap = {"e621":e621, "gelbooru":gelbooru}
