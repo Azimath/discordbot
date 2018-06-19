@@ -7,6 +7,7 @@ import time
 
 BOORUCD = 10 #this is to avoid spamming discord, and the APIs
 SUPPORTED = ["e621", "gelbooru"]
+client = None
 
 def gelbooru(tags):
     t = tags.pop(0)
@@ -58,7 +59,8 @@ def e621(tags):
         f.close()
         
     return "out."+file_extension
-    
+
+@commands.registerEventHander(name="booru")
 async def booru(triggerMessage):
     await client.send_typing(triggerMessage.channel)
     global BOORUCD # currently nothing else uses this, but maybe something will
