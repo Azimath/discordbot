@@ -17,21 +17,26 @@ async def jpegcd(triggerMessage):
     global COOLDOWN
     try:
         COOLDOWN = int(triggerMessage.content.split()[1])
-        await client.send_message(triggerMessage.channel, "JPEG Cooldown is now " + int(triggerMessage.content.split()[1]))
+        await client.send_message(triggerMessage.channel, "JPEG Cooldown is now " + triggerMessage.content.split()[1])
     except:
         print("Failed to parse jpegcd time")
+        raise
         
     
 @commands.registerEventHander(name="morejpeg")
 async def morejpeg(triggerMessage):
     global COOLDOWN
     attachments = None
-    if any("width" in a for a in triggerMessage.attachments):
+    if any("width" in a for a in triggerMessage.attachments) and triggerMessage.author.id != "245814417609064448":
         attachments = triggerMessage.attachments
     else:
         logs = client.logs_from(triggerMessage.channel, limit=50)
         async for message in logs:
             if any("width" in a for a in message.attachments):
+                print(message.author.id)
+                if message.author.id == "245814417609064448":
+                    await client.send_message(triggerMessage.channel, "Chaining disallowed")
+                    break
                 attachments = message.attachments 
                 break
     
@@ -48,6 +53,7 @@ async def morejpeg(triggerMessage):
     if attachment is None:
         await client.send_message(triggerMessage.channel, "Something made a fucky wucky")
         return
+    await client.send_typing(triggerMessage.channel)
     
     r = requests.get(attachment["url"])
     if r.status_code is not 200:

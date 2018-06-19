@@ -98,6 +98,7 @@ async def disconnect(triggerMessage):
 @commands.registerEventHander(name="addsound") 
 @permissions.needs_admin
 async def addSound(triggerMessage):
+    await client.send_typing(triggerMessage.channel)
     name = triggerMessage.content.split()[1]
     link = triggerMessage.content.split()[2]
     try:
