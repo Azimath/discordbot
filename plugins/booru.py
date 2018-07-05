@@ -4,6 +4,7 @@ import discord
 import requests
 import random
 import time
+from requests import JSONDecodeError
 
 BOORUCD = 10 #this is to avoid spamming discord, and the APIs
 SUPPORTED = ["e621", "gelbooru"]
@@ -77,8 +78,14 @@ async def booru(triggerMessage):
     functionMap = {"e621":e621, "gelbooru":gelbooru}
     try:
         out = functionMap[tokens[1]](tokens[2:])
+    except IndexError:
+        await client.send_message(triggerMessage.channel, "Oopsie woopsie Uwu. " + tokens[1] + " returned no search results.")
+    except KeyError:
+           await client.send_message(triggerMessage.channel, "Oopsie woopsie. " + tokens[1] + " is not supported.\nSupported boorus: "+str(SUPPORTED))
+    except JSONDecodeError:
+        await client.send_message(triggerMessage.channel, "Oopsie Woopsie. Failed to decode json. " + tokens[1] + " returned an empty response, or something weird")
     except Exception as e:
-        await client.send_message(triggerMessage.channel, "Oopsie woopsie Uwu. One of many possible disasters has occured. Try `!booru help`")
+        await client.send_message(triggerMessage.channel, "Oopsie woopsie Uwu. One of many possible disasters has occured. Try `!booru help`\nException: " + type(e).__name__)
         print(e) #hopefully this does something useful
         return
     
