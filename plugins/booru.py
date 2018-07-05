@@ -4,7 +4,7 @@ import discord
 import requests
 import random
 import time
-from requests import JSONDecodeError
+from json import JSONDecodeError
 
 BOORUCD = 10 #this is to avoid spamming discord, and the APIs
 SUPPORTED = ["e621", "gelbooru"]
