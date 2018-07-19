@@ -65,14 +65,7 @@ def e621(tags):
         
     return "out."+file_extension
 
-@commands.registerEventHander(name="booru")
-async def booru(triggerMessage):
-    global busy
-    if (busy):
-        await client.send_message(triggerMessage.channel, "One at a time, please.")
-        return
-    print("Message " + str(triggerMessage.id) + " locked mutex")
-    busy = True
+def booru(triggerMessage):
     await client.send_typing(triggerMessage.channel)
     global BOORUCD # currently nothing else uses this, but maybe something will
     #TODO: Actually implement cooldown
@@ -98,13 +91,22 @@ async def booru(triggerMessage):
     except Exception as e:
         await client.send_message(triggerMessage.channel, "Oopsie woopsie Uwu. One of many possible disasters has occured. Try `!booru help`\nException: " + type(e).__name__)
         print(e) #hopefully this does something useful
-    finally:
-        print("Message " + str(triggerMessage.id) + " unlocked mutex")
-        busy = False
-
         
     return
 
+@commands.registerEventHandler(name="booru")
+async def booruWrapper(triggerMessage):
+    global busy
+    if (busy):
+        await client.send_message(triggerMessage.channel, "One at a time, please.")
+        return
+    print("Message " + str(triggerMessage.id) + " locked mutex")
+    busy = True
+    booru(triggerMessage)
+    print("Message " + str(triggerMessage.id) + " unlocked mutex")
+    busy = False
+    
+    
 @commands.registerEventHander(name="unbusy")
 async def unbusy(triggerMessage):
     global busy
