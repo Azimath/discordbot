@@ -71,6 +71,7 @@ async def booru(triggerMessage):
     if (busy):
         await client.send_message(triggerMessage.channel, "One at a time, please.")
         return
+    print("Message " + str(triggerMessage.id) + " locked mutex")
     busy = True
     await client.send_typing(triggerMessage.channel)
     global BOORUCD # currently nothing else uses this, but maybe something will
@@ -91,14 +92,20 @@ async def booru(triggerMessage):
     except IndexError:
         await client.send_message(triggerMessage.channel, "Oopsie woopsie Uwu. " + tokens[1] + " returned no search results.")
     except KeyError:
-           await client.send_message(triggerMessage.channel, "Oopsie woopsie. " + tokens[1] + " is not supported.\nSupported boorus: "+str(SUPPORTED))
+        await client.send_message(triggerMessage.channel, "Oopsie woopsie. " + tokens[1] + " is not supported.\nSupported boorus: "+str(SUPPORTED))
     except JSONDecodeError:
         await client.send_message(triggerMessage.channel, "Oopsie Woopsie. Failed to decode json. " + tokens[1] + " returned an empty response, or something weird")
     except Exception as e:
         await client.send_message(triggerMessage.channel, "Oopsie woopsie Uwu. One of many possible disasters has occured. Try `!booru help`\nException: " + type(e).__name__)
         print(e) #hopefully this does something useful
     finally:
+        print("Message " + str(triggerMessage.id) + " unlocked mutex")
         busy = False
 
         
     return
+
+@commands.registerEventHander(name="unbusy")
+async def unbusy(triggerMessage):
+    global busy
+    busy = False
