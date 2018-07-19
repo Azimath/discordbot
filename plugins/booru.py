@@ -10,6 +10,7 @@ BOORUCD = 10 #this is to avoid spamming discord, and the APIs
 SUPPORTED = ["e621", "gelbooru"]
 headers = {"user-agent":"[^_^]/1.0"}
 client = None
+busy = False
 
 def gelbooru(tags):
     global headers
@@ -66,6 +67,11 @@ def e621(tags):
 
 @commands.registerEventHander(name="booru")
 async def booru(triggerMessage):
+    
+    if (busy):
+        await client.send_message(triggerMessage.channel, "One at a time, please.")
+        return
+    busy = True
     await client.send_typing(triggerMessage.channel)
     global BOORUCD # currently nothing else uses this, but maybe something will
     #TODO: Actually implement cooldown
@@ -78,6 +84,10 @@ async def booru(triggerMessage):
     functionMap = {"e621":e621, "gelbooru":gelbooru}
     try:
         out = functionMap[tokens[1]](tokens[2:])
+        #out should be the file name of the file we want to send assuming nothing went terribly wrong
+    
+        with open(out, "rb") as image:
+            await client.send_file(triggerMessage.channel, image, filename=out)
     except IndexError:
         await client.send_message(triggerMessage.channel, "Oopsie woopsie Uwu. " + tokens[1] + " returned no search results.")
     except KeyError:
@@ -87,11 +97,8 @@ async def booru(triggerMessage):
     except Exception as e:
         await client.send_message(triggerMessage.channel, "Oopsie woopsie Uwu. One of many possible disasters has occured. Try `!booru help`\nException: " + type(e).__name__)
         print(e) #hopefully this does something useful
-        return
-    
-    #out should be the file name of the file we want to send assuming nothing went terribly wrong
-    
-    with open(out, "rb") as image:
-        await client.send_file(triggerMessage.channel, image, filename=out)
+    finally:
+        busy = False
+
         
     return
