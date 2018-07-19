@@ -67,7 +67,7 @@ def e621(tags):
 
 @commands.registerEventHander(name="booru")
 async def booru(triggerMessage):
-    
+    global busy
     if (busy):
         await client.send_message(triggerMessage.channel, "One at a time, please.")
         return
