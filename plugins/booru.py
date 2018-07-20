@@ -65,6 +65,7 @@ def e621(tags):
         
     return "out."+file_extension
 
+@commands.registerEventHandler(name="booru", exclusivity="global")
 async def booru(triggerMessage):
     await client.send_typing(triggerMessage.channel)
     global BOORUCD # currently nothing else uses this, but maybe something will
@@ -92,22 +93,81 @@ async def booru(triggerMessage):
         await client.send_message(triggerMessage.channel, "Oopsie woopsie Uwu. One of many possible disasters has occured. Try `!booru help`\nException: " + type(e).__name__)
         print(e) #hopefully this does something useful
         
-    return
-
-@commands.registerEventHandler(name="booru")
-async def booruWrapper(triggerMessage):
-    global busy
-    if (busy):
-        await client.send_message(triggerMessage.channel, "One at a time, please.")
-        return
-    print("Message " + str(triggerMessage.id) + " locked mutex")
-    busy = True
-    await booru(triggerMessage)
-    print("Message " + str(triggerMessage.id) + " unlocked mutex")
-    busy = False
-    
+    return    
     
 @commands.registerEventHandler(name="unbusy")
 async def unbusy(triggerMessage):
     global busy
     busy = False
+
+class BooruGame:
+    def __init__(self, tagValues):
+        self.userScores = {}
+        self.tagValues = tagValues
+        self.previousGuesses = []
+    
+    def wasguessed(self, guess):
+        return guess in self.previousGuesses
+        
+    def guess(self, guess, user):
+        if user not in self.userScores:
+            self.userScores[user] = 0
+            
+        if guess in self.tagValues:
+            value = self.tagValues[guess]
+            self.userScores[user] += value
+            del self.tagValues[guess]
+            return guess + ": Correct! " + str(value) + " points"
+        else:    
+            return guess + ": Nope!"
+            
+
+gameInstances = {}
+
+@commands.registerEventHandler(name="boorugamestart")
+async def startBooruGame(triggerMessage):
+    if triggerMessage.channel in gameInstances:
+        await client.send_message(triggerMessage.channel, "A game is already in progress in this channel")
+    else:
+        tagValues = {"fur":1, "dangerouslycheesy":10}
+        gameInstances[triggerMessage.channel] = BooruGame(tagValues)
+        await client.send_message(triggerMessage.channel, "Game started")
+
+@commands.registerEventHandler(name="boorugamestop")
+async def stopBooruGame(triggerMessage):
+    if triggerMessage.channel in gameInstances:
+        del gameInstances[triggerMessage.channel]
+        await client.send_message(triggerMessage.channel, "Game stopped")
+    else:
+        await client.send_message(triggerMessage.channel, "No game in progress here")
+
+@commands.registerEventHandler(name="boorugamequit")
+async def endBooruGame(triggerMessage):
+    await client.send_message(triggerMessage.channel, "Game Complete!")
+    scoreDict = gameInstances[triggerMessage.channel].userScores
+    scores = [(k, scoreDict[k]) for k in sorted(scoreDict, key=scoreDict.get, reverse=True)]
+    scoreString = ""
+    for id, score in scores:
+        member = discord.utils.find(lambda m: m.id == id, triggerMessage.server.members)
+        name = member.name
+        if member.nick is not None:
+            name = member.nick
+        scoreString += "User " + str(name) + " scored " + str(score) + "\n"
+    
+    member = discord.utils.find(lambda m: m.id == scores[0][0], triggerMessage.server.members)
+    name = member.name
+    if member.nick is not None:
+        name = member.nick
+    await client.send_message(triggerMessage.channel, scoreString)
+    await client.send_message(triggerMessage.channel, str(name) + " wins!")
+    
+    del gameInstances[triggerMessage.channel]
+
+@commands.registerEventHandler(name="booruguess")
+async def booruGameGuess(triggerMessage):
+    args = triggerMessage.content.split()
+    for arg in args[1:]:
+        await client.send_message(triggerMessage.channel, gameInstances[triggerMessage.channel].guess(str(arg), triggerMessage.author.id))
+        
+    if len(gameInstances[triggerMessage.channel].tagValues) == 0:
+        await endBooruGame(triggerMessage)
