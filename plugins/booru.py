@@ -65,7 +65,7 @@ def e621(tags):
         
     return "out."+file_extension
 
-def booru(triggerMessage):
+async def booru(triggerMessage):
     await client.send_typing(triggerMessage.channel)
     global BOORUCD # currently nothing else uses this, but maybe something will
     #TODO: Actually implement cooldown
@@ -94,7 +94,7 @@ def booru(triggerMessage):
         
     return
 
-@commands.registerEventHandler(name="booru")
+@commands.registerEventHander(name="booru")
 async def booruWrapper(triggerMessage):
     global busy
     if (busy):
@@ -102,7 +102,7 @@ async def booruWrapper(triggerMessage):
         return
     print("Message " + str(triggerMessage.id) + " locked mutex")
     busy = True
-    booru(triggerMessage)
+    await booru(triggerMessage)
     print("Message " + str(triggerMessage.id) + " unlocked mutex")
     busy = False
     
