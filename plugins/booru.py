@@ -124,18 +124,80 @@ class BooruGame:
 
 gameInstances = {}
 
+def lookup_tag(tag):
+    global headers
+    session = requests.Session()
+    session.headers.update(headers)
+    response = session.get("http://e621.net/tag/index.json?name=" + tag)
+    j = response.json()
+    if (len(j) == 0):
+        return 0
+    else:
+        return j[0]["count"]
+        
 @commands.registerEventHandler(name="boorugamestart")
 async def startBooruGame(triggerMessage):
     if triggerMessage.channel in gameInstances:
         await client.send_message(triggerMessage.channel, "A game is already in progress in this channel")
     else:
-        tagValues = {"fur":1, "dangerouslycheesy":10}
+        tagValues = {}
+        tags = []
+        try:    
+            global headers
+            session = requests.Session()
+            session.headers.update(headers)
+            response = session.get("http://e621.net/post/index.json?limit=10&tags=order:random")
+            j = response.json()
+            
+            target = -1
+            for i in range(0, len(j)): # look for a suitable post
+                file_ext = j[i]["file_ext"]
+                if (file_ext != 'png' and file_ext != 'jpg'):
+                    continue
+                if (len(j[i]["tags"]) <= 5):
+                    continue
+                target = i
+                break
+            if (target == -1):
+                #print("Error: Failed to find suitable post. Try again?")
+                await client.send_message(triggerMessage.channel, "Oopsie woopsie Uwu. Couldn't find a suitable post. Try again?")
+                return
+            tags = j[target]["tags"].split(" ")
+            target = j[target]["file_url"]
+            
+            file_response = session.get(target)
+            file_extension = target[target.rfind(".")+1:]
+            print(file_extension)
+            
+            #https://stackoverflow.com/a/39217788
+            data = file_response.content
+            print(len(data))
+            with open("out."+file_extension, 'wb') as f:
+                f.write(data)
+                f.close()
+            
+            with open("out."+file_extension, "rb") as image:
+                await client.send_file(triggerMessage.channel, image, filename="out."+file_extension)
+                
+        except JSONDecodeError:
+            await client.send_message(triggerMessage.channel, "Oopsie Woopsie. Failed to decode json.")
+            return
+        except Exception as e:
+            await client.send_message(triggerMessage.channel, "Oopsie woopsie Uwu. One of many possible disasters has occured. Try `!booru help`\nException: " + type(e).__name__)
+            print(e) #hopefully this does something useful
+            return
+        
+        print(tags)
+        for tag in tags:
+            tagValues[tag] = 1
+        
         gameInstances[triggerMessage.channel] = BooruGame(tagValues)
         await client.send_message(triggerMessage.channel, "Game started")
 
 @commands.registerEventHandler(name="boorugamestop")
 async def stopBooruGame(triggerMessage):
     if triggerMessage.channel in gameInstances:
+        await client.send_message(triggerMessage.channel, "Unguessed tags were: " + str(list([triggerMessage.channel].tagValues.keys())))
         del gameInstances[triggerMessage.channel]
         await client.send_message(triggerMessage.channel, "Game stopped")
     else:
@@ -144,6 +206,7 @@ async def stopBooruGame(triggerMessage):
 @commands.registerEventHandler(name="boorugamequit")
 async def endBooruGame(triggerMessage):
     await client.send_message(triggerMessage.channel, "Game Complete!")
+    await client.send_message(triggerMessage.channel, "Unguessed tags were: `" + str(list(gameInstances[triggerMessage.channel].tagValues.keys()))+"`")
     scoreDict = gameInstances[triggerMessage.channel].userScores
     scores = [(k, scoreDict[k]) for k in sorted(scoreDict, key=scoreDict.get, reverse=True)]
     scoreString = ""
