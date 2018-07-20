@@ -94,7 +94,7 @@ async def booru(triggerMessage):
         
     return
 
-@commands.registerEventHander(name="booru")
+@commands.registerEventHandler(name="booru")
 async def booruWrapper(triggerMessage):
     global busy
     if (busy):
@@ -107,7 +107,7 @@ async def booruWrapper(triggerMessage):
     busy = False
     
     
-@commands.registerEventHander(name="unbusy")
+@commands.registerEventHandler(name="unbusy")
 async def unbusy(triggerMessage):
     global busy
     busy = False

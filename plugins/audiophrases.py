@@ -66,7 +66,7 @@ with open('audiobank.json', 'r') as database:
     audiobank = json.loads(database.read())
     #asyncio.ensure_future(join())
 
-@commands.registerEventHander(name="join")    
+@commands.registerEventHandler(name="join")    
 async def join(triggerMessage):
     global voice
     channel = None
@@ -90,12 +90,12 @@ async def join(triggerMessage):
         else:
             await client.send_message(triggerMessage.channel, "That's not a valid voice channel on this server!")
 
-@commands.registerEventHander(name="disconnect") 
+@commands.registerEventHandler(name="disconnect") 
 async def disconnect(triggerMessage):
     if voice is not None:
         await voice.disconnect()
 
-@commands.registerEventHander(name="addsound") 
+@commands.registerEventHandler(name="addsound") 
 @permissions.needs_admin
 async def addSound(triggerMessage):
     await client.send_typing(triggerMessage.channel)
@@ -141,15 +141,15 @@ async def addSound(triggerMessage):
                 database.write(json.dumps(audiobank, indent=4))
                 await client.send_message(triggerMessage.channel, "Added sound " + name)
 
-@commands.registerEventHander(name="listsounds") 
+@commands.registerEventHandler(name="listsounds") 
 async def listSounds(triggerMessage):
     result = "Available audio clips: \n"
     for key in sorted(audiobank.keys()):
         result = result + key + "\n"
     await client.send_message(triggerMessage.channel, result)
 
-@commands.registerEventHander(name="sound")
-@commands.registerEventHander(name="play")  
+@commands.registerEventHandler(name="sound")
+@commands.registerEventHandler(name="play")  
 @voiceCommandExclusive
 async def sound(triggerMessage):
     global player
@@ -162,7 +162,7 @@ async def sound(triggerMessage):
     else:
         client.send_message(triggerMessage.channel, "Sound not found")
 
-@commands.registerEventHander(name="radio") 
+@commands.registerEventHandler(name="radio") 
 @voiceCommandExclusive
 async def radio(triggerMessage):
     global player
@@ -185,8 +185,8 @@ async def radio(triggerMessage):
     
     client.send_message(triggerMessage.channel, "Radio Started")
 
-@commands.registerEventHander(name="youtube")
-@commands.registerEventHander(name="websound")  
+@commands.registerEventHandler(name="youtube")
+@commands.registerEventHandler(name="websound")  
 @voiceCommandExclusive
 async def youtube(triggerMessage):
     global player
@@ -215,7 +215,7 @@ async def youtube(triggerMessage):
     except:
         pass
 
-@commands.registerEventHander(triggerType="\\reactionChanged", name="soundControl")
+@commands.registerEventHandler(triggerType="\\reactionChanged", name="soundControl")
 async def soundControl(triggerMessage, reaction, user):
     global message
     if message is None:
@@ -241,7 +241,7 @@ async def soundControl(triggerMessage, reaction, user):
                 await client.clear_reactions(triggerMessage)
     #print(user.name.encode('unicode_escape').decode('ascii'))
         
-@commands.registerEventHander(name="stop") 
+@commands.registerEventHandler(name="stop") 
 async def stop(triggerMessage):
     if voice is not None:
         if player.is_playing():
@@ -251,7 +251,7 @@ async def stop(triggerMessage):
             if hasattr(player, "process"):
                 player.process.kill()
 
-@commands.registerEventHander(name="setcd") 
+@commands.registerEventHandler(name="setcd") 
 @permissions.needs_moderator
 async def setcd(triggerMessage):
     global cd

@@ -27,7 +27,7 @@ phrasebank = {}
 with open('phrasebank.json', 'r') as lartfile:
     phrasebank = json.loads(lartfile.read())
 
-@commands.registerEventHander(name="getdragons")
+@commands.registerEventHandler(name="getdragons")
 async def refreshDragons(triggerMessage):
     global phrasebank
     
@@ -46,7 +46,7 @@ async def refreshDragons(triggerMessage):
     if len(phrasebank["dragons"]) - oldnum > 0:
         pass#await client.send_message(triggerMessage.channel, "@everyone")
 
-@commands.registerEventHander(name="lart")
+@commands.registerEventHandler(name="lart")
 async def lart(triggerMessage):
     lart = random.choice(phrasebank["larts"])
     target = triggerMessage.content[6:]
@@ -56,7 +56,7 @@ async def lart(triggerMessage):
     print("Lart: " + lart)
     await client.send_message(triggerMessage.channel, lart)
 
-@commands.registerEventHander(name="praise")
+@commands.registerEventHandler(name="praise")
 async def praise(triggerMessage):
     praise = random.choice(phrasebank["praises"])
     target = triggerMessage.content[8:]
@@ -66,24 +66,24 @@ async def praise(triggerMessage):
     print("praise: " + praise)
     await client.send_message(triggerMessage.channel, praise)
 
-@commands.registerEventHander(triggerType="\\messageNoBot", name="keikaku")
+@commands.registerEventHandler(triggerType="\\messageNoBot", name="keikaku")
 @commands.messageHandlerFilter("keikaku", filterType="cqc")
 async def keikaku(triggerMessage):
     await client.send_message(triggerMessage.channel, "tl note: keikaku means plan")
 
-@commands.registerEventHander(name="help")
+@commands.registerEventHandler(name="help")
 async def help(triggerMessage):
     await client.send_message(triggerMessage.author, phrasebank["help"][0])
     await client.send_message(triggerMessage.author, phrasebank["help"][1])
       
-@commands.registerEventHander(name="lmgtfy")
+@commands.registerEventHandler(name="lmgtfy")
 async def lmgtfy(triggerMessage):
     query = triggerMessage.content[8:]
     query = query.replace(" ", "+")
     query = ''.join(e for e in query if e.isalnum() or e == "+")
     await client.send_message(triggerMessage.channel, "http://lmgtfy.com/?q=" + query)
 
-@commands.registerEventHander(name="buydinner")
+@commands.registerEventHandler(name="buydinner")
 async def buydinner(triggerMessage):
     praise = random.choice(phrasebank["praises"])
     target = triggerMessage.author.name
@@ -91,37 +91,37 @@ async def buydinner(triggerMessage):
     print("praise: " + praise)
     await client.send_message(triggerMessage.channel, praise)
 
-@commands.registerEventHander(name="baddragon")
+@commands.registerEventHandler(name="baddragon")
 async def baddragon(triggerMessage):
     dragon = random.choice(phrasebank["dragons"])
     print("dragon: " + dragon)
     await client.send_message(triggerMessage.channel, "https://bad-dragon.com/products/"+dragon)
 
-@commands.registerEventHander(name="tingle")
+@commands.registerEventHandler(name="tingle")
 async def tingle(triggerMessage):
     tingle = "http://amazon.com/" + random.choice(phrasebank["tingles"])
     print("tingle: " + tingle)
     await client.send_message(triggerMessage.channel, tingle)
 
-@commands.registerEventHander(name="pal")
+@commands.registerEventHandler(name="pal")
 async def pal(triggerMessage):
     if random.randrange(100) < 2:
         await client.send_message(triggerMessage.channel, "Go fuck yourself " + triggerMessage.author.name)
     else:
         await client.send_message(triggerMessage.channel, "Yes this is pal, yes this is 60 FPS")
 
-@commands.registerEventHander(name="mango")
+@commands.registerEventHandler(name="mango")
 async def mango(triggerMessage):
     mango = random.choice(phrasebank["mango"])
     await client.send_message(triggerMessage.channel, mango)
 
-@commands.registerEventHander(name="8ball")
+@commands.registerEventHandler(name="8ball")
 async def eightball(triggerMessage):
     ball = random.choice(phrasebank["8balls"])
     #print("8ball: " + ball)
     await client.send_message(triggerMessage.channel, ":8ball: " + ball)
 
-@commands.registerEventHander(name="tests")
+@commands.registerEventHandler(name="tests")
 async def tests(triggerMessage):
     target = triggerMessage.author
     await client.send_message(target, "Take each of the following tests. Save a screenshot of each result.\nMBTI: http://www.humanmetrics.com/cgi-win/jtypes2.asp\nEnneagram: http://www.eclecticenergies.com/enneagram/test.php Take both tests for best results.\nBIG5: http://personality-testing.info/tests/BIG5.php\nTemperaments: http://personality-testing.info/tests/O4TS/")
@@ -131,57 +131,57 @@ async def tests(triggerMessage):
     # client.send_message(target, "BIG5: http://personality-testing.info/tests/BIG5.php")
     # client.send_message(target, "Temperaments: http://personality-testing.info/tests/O4TS/")    
 
-@commands.registerEventHander(name="popori")
+@commands.registerEventHandler(name="popori")
 async def popori(triggerMessage):
     await client.send_message(triggerMessage.channel, "https://www.youtube.com/watch?v=gbNN3grTdDk")
 
-@commands.registerEventHander(name="constitution")
+@commands.registerEventHandler(name="constitution")
 async def constitution(triggerMessage):
     await client.send_message(triggerMessage.channel, "https://docs.google.com/document/d/1XKFRQhzxwhjjtW1RnCc_ZhesRqavvM3F5z1LALfve48/")
 
-@commands.registerEventHander(name="wiki")
+@commands.registerEventHandler(name="wiki")
 async def wiki(triggerMessage):
     await client.send_message(triggerMessage.channel, "http://iaa.wikia.com")
 
-@commands.registerEventHander(name="application")
+@commands.registerEventHandler(name="application")
 async def application(triggerMessage):
     await client.send_message(triggerMessage.channel, "https://docs.google.com/forms/d/1bURXLKIo30XLX3RASg2B8XVLsYpp6GYXn84IT2F9hbM/viewform")
 
-@commands.registerEventHander(triggerType="\\messageNoBot", name="unflip")
+@commands.registerEventHandler(triggerType="\\messageNoBot", name="unflip")
 @commands.messageHandlerFilter("(╯°□°）╯︵ ┻━┻")
 async def unflip(triggerMessage):
     await client.send_message(triggerMessage.channel, "┬─┬﻿ ノ( ゜-゜ノ)")
 
-@commands.registerEventHander(triggerType="\\messageNoBot", name="kk")
+@commands.registerEventHandler(triggerType="\\messageNoBot", name="kk")
 @commands.messageHandlerFilter("kk")
 async def kkk(triggerMessage):
     if triggerMessage.content.__len__() == 2:
         await client.send_message(triggerMessage.channel, "k")
 
-@commands.registerEventHander(name="floor")
+@commands.registerEventHandler(name="floor")
 async def floor(triggerMessage):
     await client.send_message(triggerMessage.channel, "http://i.imgur.com/3OYeOxK.jpg")
 
-@commands.registerEventHander(name="sonic")
+@commands.registerEventHandler(name="sonic")
 async def sonic(triggerMessage):
     if random.randint(0,1) != 0:
         await client.send_message(triggerMessage.channel, "http://archiesonic.wikia.com/wiki/Special:Random")
     else:
         await client.send_message(triggerMessage.channel, "http://sonicfanon.wikia.com/wiki/Special:Random")
         
-@commands.registerEventHander(triggerType="\\messageNoBot", name="plot")
+@commands.registerEventHandler(triggerType="\\messageNoBot", name="plot")
 @commands.messageHandlerFilter("plot", filterType="contains")
 async def plot(triggerMessage):
     if client.user in triggerMessage.mentions:
         await client.send_message(triggerMessage.channel, random.choice(phrasebank["plots"]))
 
-@commands.registerEventHander(triggerType="\\messageNoBot", name="F")
+@commands.registerEventHandler(triggerType="\\messageNoBot", name="F")
 @commands.messageHandlerFilter("F")
 async def respects(triggerMessage):
     if triggerMessage.content.__len__() == 1:
         await client.send_message(triggerMessage.channel, triggerMessage.author.name + " has paid their respects.")
 
-@commands.registerEventHander(name="addphrase")
+@commands.registerEventHandler(name="addphrase")
 @permissions.needs_admin    
 async def addphrase(triggerMessage):
     banktargetstart = triggerMessage.content.find(' ') + 1

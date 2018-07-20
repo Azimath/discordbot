@@ -11,7 +11,7 @@ import permissions
 
 client = None
 
-@commands.registerEventHander(name="info")
+@commands.registerEventHandler(name="info")
 async def info(triggerMessage):
     target = triggerMessage.author
     if triggerMessage.mentions.__len__() == 1:
@@ -28,18 +28,18 @@ async def info(triggerMessage):
         # client.send_message(target, "Author name: " + triggerMessage.author.name)
         # client.send_message(target, "Author id: " + triggerMessage.author.id)
 
-@commands.registerEventHander(name="game")
+@commands.registerEventHandler(name="game")
 async def game(triggerMessage):
     await client.change_presence(game=discord.Game(name=triggerMessage.content[6:]))
 
-@commands.registerEventHander(name="embeds")
+@commands.registerEventHandler(name="embeds")
 async def embeds(triggerMessage):
     print(str(len(triggerMessage.embeds)) + " embeds in message")
     for embed in triggerMessage.embeds:
         await client.send_message(triggerMessage.author, str(dir(embed)))
 
 @permissions.needs_moderator        
-@commands.registerEventHander(name="gitpull")
+@commands.registerEventHandler(name="gitpull")
 async def gitpull(triggerMessage):
     os.system("git pull origin master")
     

@@ -28,7 +28,7 @@ class Game:
 client = None
 games = {}
 
-@commands.registerEventHander(name="startgame")
+@commands.registerEventHandler(name="startgame")
 async def startgame(triggerMessage):
     if triggerMessage.channel.id in games:
         await client.send_message(triggerMessage.channel, "Sorry, a game is already in progress")
@@ -46,7 +46,7 @@ async def startgame(triggerMessage):
     games[triggerMessage.channel.id] = newgame
     await client.send_message(triggerMessage.channel, "Game started")
     
-@commands.registerEventHander(name="guess")	
+@commands.registerEventHandler(name="guess")	
 async def guess(triggerMessage):
     if not triggerMessage.channel.id in games:
         await client.send_message(triggerMessage.channel, "No game in progress for this channel")
@@ -77,7 +77,7 @@ async def guess(triggerMessage):
     else:
         await client.send_message(triggerMessage.channel, "What the fuck")
 
-@commands.registerEventHander(name="stopgame")
+@commands.registerEventHandler(name="stopgame")
 async def stop(triggerMessage):
     if not triggerMessage.channel.id in games:
         await client.send_message(triggerMessage.channel, "Theres no game to stop")

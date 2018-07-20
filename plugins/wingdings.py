@@ -9,7 +9,7 @@ import commands
 
 client = None
 
-@commands.registerEventHander(name="translate")
+@commands.registerEventHandler(name="translate")
 async def translate(triggerMessage):
     toSend = triggerMessage.content[11:]
 

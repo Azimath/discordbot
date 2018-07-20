@@ -8,7 +8,7 @@ import commands
 
 client = None
 
-@commands.registerEventHander(name="sudo")
+@commands.registerEventHandler(name="sudo")
 @permissions.needs_moderator
 async def sudo(triggerMessage):
     args = triggerMessage.content.split()

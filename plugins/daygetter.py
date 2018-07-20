@@ -11,7 +11,7 @@ client = None
 nextDelay = random.randrange(10, 60)
 tz=tzlocal.get_localzone()
 
-@commands.registerEventHander(triggerType="\\timeTick", name="dayget")
+@commands.registerEventHandler(triggerType="\\timeTick", name="dayget")
 async def checkDay():
     if time(minute = 1, second = 10) < datetime.now().time():
         return

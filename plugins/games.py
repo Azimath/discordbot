@@ -6,12 +6,12 @@ import commands
    !trick: Does a super cool magic trick"""
 client = None
 
-@commands.registerEventHander(name="flip")
-@commands.registerEventHander(name="coin")
+@commands.registerEventHandler(name="flip")
+@commands.registerEventHandler(name="coin")
 async def flip(triggerMessage):
     await client.send_message(triggerMessage.channel, random.choice(["heads", "tails"]))
 
-@commands.registerEventHander(name="trick")
+@commands.registerEventHandler(name="trick")
 async def trick(triggerMessage):
     target = triggerMessage.channel
     suits = [":hearts:", ":clubs:", ":diamonds:", ":spades:"]
@@ -25,12 +25,12 @@ async def trick(triggerMessage):
     await client.send_message(target, "*cuts*")
     await client.send_message(target, "Is this your card? " + suit + " " + value)
 
-@commands.registerEventHander(triggerType="\\messageNoBot", name="fuck quest go")
+@commands.registerEventHandler(triggerType="\\messageNoBot", name="fuck quest go")
 @commands.messageHandlerFilter("fuck quest go", filterType="cqc")
 async def fuckRoll(triggerMessage):
     await client.send_message(triggerMessage.channel, "Fuck quest: " + str(random.randrange(1, 100)))
 
-@commands.registerEventHander(name="roll")
+@commands.registerEventHandler(name="roll")
 async def roll(triggerMessage):
     target = triggerMessage.channel
     toParse = triggerMessage.content[5:]

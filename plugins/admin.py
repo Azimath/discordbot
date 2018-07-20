@@ -16,23 +16,23 @@ import json
 
 client = None
 
-@commands.registerEventHander(name="leaveserver")
+@commands.registerEventHandler(name="leaveserver")
 @permissions.needs_owner    
 async def leave(triggerMessage):
     await client.leave_server(triggerMessage.channel.server)
 
-@commands.registerEventHander(name="invite")
+@commands.registerEventHandler(name="invite")
 @permissions.needs_owner
 async def invite(triggerMessage):
     print("Got an invite: " + triggerMessage.content[8:])
     await client.accept_invite(triggerMessage.content[8:])
 
-#@commands.registerEventHander(triggerType="\\message", name="newsPurge")
+#@commands.registerEventHandler(triggerType="\\message", name="newsPurge")
 async def newsPurge(triggerMessage):
     if triggerMessage.author.id == "102980090970779648" and triggerMessage.channel.id != "102984909320110080":
         await client.delete_message(triggerMessage)
 
-@commands.registerEventHander(name="register")
+@commands.registerEventHandler(name="register")
 async def registerNewUser(triggerMessage):  
     if triggerMessage.mentions.__len__() == 0:
         id = triggerMessage.author.id
@@ -49,7 +49,7 @@ async def registerNewUser(triggerMessage):
         else:
             await client.send_message(triggerMessage.channel, "User id " + id + " is already registered")
 
-@commands.registerEventHander(name="addnode")
+@commands.registerEventHandler(name="addnode")
 @permissions.needs_permissionsManager
 async def addNode(triggerMessage):
     if triggerMessage.mentions.__len__() == 0:
@@ -63,7 +63,7 @@ async def addNode(triggerMessage):
             permissions.addPermission(user, permNode)
         await client.send_message(triggerMessage.channel, "Permissions added")      
 
-@commands.registerEventHander(name="setavatar")
+@commands.registerEventHandler(name="setavatar")
 @permissions.needs_moderator
 async def setAvatar(triggerMessage):
     if triggerMessage.attachments is not None:
@@ -84,12 +84,13 @@ async def setAvatar(triggerMessage):
 class RestartException(Exception):
     pass
 
-@commands.registerEventHander(name="restart")
+@commands.registerEventHandler(name="restart")
+@commands.registerEventHandler(name="reeeeestart")
 @permissions.needs_moderator
 async def restart(triggerMessage):
     raise RestartException
 
-@commands.registerEventHander(name="nameall")
+@commands.registerEventHandler(name="nameall")
 @permissions.needs_moderator 
 async def changeAllNames(triggerMessage):
     names = {}
@@ -102,7 +103,7 @@ async def changeAllNames(triggerMessage):
     with open('names.json', 'w') as database:
             database.write(json.dumps(names, indent=4))
 
-@commands.registerEventHander(name="revertnames")
+@commands.registerEventHandler(name="revertnames")
 @permissions.needs_moderator 
 async def unchangeAllNames(triggerMessage):
     with open('names.json', 'r') as database:
@@ -113,7 +114,7 @@ async def unchangeAllNames(triggerMessage):
             except:
                 print("Couldn't unscoobert " + member.name.encode('ascii', 'ignore').decode('ascii'))
             
-@commands.registerEventHander(name="delete")
+@commands.registerEventHandler(name="delete")
 @permissions.needs_moderator
 async def delete(triggerMessage):
     #find out if the sender has delete permissions

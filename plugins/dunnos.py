@@ -8,12 +8,12 @@ client = None
 with open("plugins/dunnos.json","r") as dunnofile:
     config = json.load(dunnofile)
             
-@commands.registerEventHander(triggerType="\\commandNotFound", name="dunno") 
+@commands.registerEventHandler(triggerType="\\commandNotFound", name="dunno") 
 async def dunno(triggerMessage):
     if triggerMessage.channel.id in config["channels"]:
     	await client.send_message(triggerMessage.channel, random.sample(config["dunnos"], 1)[0])
     	
-@commands.registerEventHander(triggerType="\\command", name="dunnos.enable") 
+@commands.registerEventHandler(triggerType="\\command", name="dunnos.enable") 
 async def enable(triggerMessage):
 	if triggerMessage.channel.id in config["channels"]:
 		await client.send_message(triggerMessage.channel, "Dunnos already enabled here")
@@ -23,7 +23,7 @@ async def enable(triggerMessage):
 			json.dump(config, dunnofile, indent=4)
 		await client.send_message(triggerMessage.channel, "Dunnos enabled for this channel")
 		
-@commands.registerEventHander(triggerType="\\command", name="dunnos.disable") 
+@commands.registerEventHandler(triggerType="\\command", name="dunnos.disable") 
 async def disable(triggerMessage):
 	if triggerMessage.channel.id not in config["channels"]:
 		await client.send_message(triggerMessage.channel, "Dunnos already disabled here")

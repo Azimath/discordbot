@@ -12,7 +12,7 @@ timeout = dict()
 COOLDOWN = 30
 
 @permissions.needs_moderator
-@commands.registerEventHander(name="jpegcd")
+@commands.registerEventHandler(name="jpegcd")
 async def jpegcd(triggerMessage):
     global COOLDOWN
     try:
@@ -23,7 +23,7 @@ async def jpegcd(triggerMessage):
         raise
         
     
-@commands.registerEventHander(name="morejpeg")
+@commands.registerEventHandler(name="morejpeg")
 async def morejpeg(triggerMessage):
     global COOLDOWN
     attachments = None
