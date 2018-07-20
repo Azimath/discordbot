@@ -1,6 +1,8 @@
 import asyncio
 import sys
 
+client = None
+
 class Event: #Class to store event data
     def __init__(self, f, triggerType, name, **kwargs):
         self.handler = f
@@ -39,12 +41,33 @@ def messageHandlerFilter(triggerFilter, filterType="eq"):
             return handler
     return decorator
     
-def registerEventHandler(triggerType="\\command", name=None, **kwargs):
+commandMutexes = []
+
+def registerEventHandler(triggerType="\\command", name=None, exclusivity=None, **kwargs):
     """Decorator that registers event handlers
     Stay tuned for kwargs
     """
     def decorator(f):
-        event = Event(f, triggerType, name, **kwargs)
+        if exclusivity == "global" and name is not None:
+            print("Global exclusive command " + name)
+            async def excluder(triggerMessage):
+                global commandMutexes
+                print(commandMutexes)
+                if name not in commandMutexes:
+                    commandMutexes.append(name)
+                    print("Locked " + name)
+                    try:
+                        await f(triggerMessage)
+                    except:
+                        raise
+                    finally:
+                        commandMutexes.remove(name)
+                        print("Unlocked " + name)
+                else:
+                    await client.send_message(triggerMessage.channel, "One at a time please")
+            event = Event(excluder, triggerType, name, **kwargs)
+        else:
+            event = Event(f, triggerType, name, **kwargs)
         if triggerType in triggerHandlers:
             if name is not None:
                 if name in triggerHandlers[triggerType]:
@@ -54,6 +77,7 @@ def registerEventHandler(triggerType="\\command", name=None, **kwargs):
                 triggerHandlers[triggerType].update({f.__name__, event})
         else:
             print("Invalid trigger type registered")
+            
         return f
     return decorator
     

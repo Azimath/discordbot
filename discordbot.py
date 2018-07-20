@@ -62,6 +62,7 @@ if __name__ == "__main__":
     print("Config loaded")
     client = discord.Client()
     permissions.client = client
+    commands.client = client
     interactive = PyREPL.REPL(client)
     def listen():
         @client.event
