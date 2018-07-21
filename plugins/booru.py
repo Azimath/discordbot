@@ -113,9 +113,13 @@ class BooruGame:
         if user not in self.userScores:
             self.userScores[user] = 0
             
+        if guess in self.previousGuesses:
+            return guess + " was already guessed."
+        
         if guess in self.tagValues:
             value = self.tagValues[guess]
             self.userScores[user] += value
+            self.previousGuesses.append(guess)
             del self.tagValues[guess]
             return guess + ": Correct! " + str(value) + " points"
         else:    
@@ -134,7 +138,8 @@ def lookup_tag(tag):
         return 0
     else:
         return j[0]["count"]
-        
+
+@commands.registerEventHandler(name="bgs")
 @commands.registerEventHandler(name="boorugamestart")
 async def startBooruGame(triggerMessage):
     if triggerMessage.channel in gameInstances:
@@ -194,7 +199,7 @@ async def startBooruGame(triggerMessage):
         gameInstances[triggerMessage.channel] = BooruGame(tagValues)
         await client.send_message(triggerMessage.channel, "Game started")
 
-@commands.registerEventHandler(name="boorugamestop")
+
 async def stopBooruGame(triggerMessage):
     if triggerMessage.channel in gameInstances:
         await client.send_message(triggerMessage.channel, "Unguessed tags were: " + str(list([triggerMessage.channel].tagValues.keys())))
@@ -203,7 +208,10 @@ async def stopBooruGame(triggerMessage):
     else:
         await client.send_message(triggerMessage.channel, "No game in progress here")
 
+@commands.registerEventHandler(name="boorugamestop")
+@commands.registerEventHandler(name="bgs")
 @commands.registerEventHandler(name="boorugamequit")
+@commands.registerEventHandler(name="bgq")
 async def endBooruGame(triggerMessage):
     await client.send_message(triggerMessage.channel, "Game Complete!")
     await client.send_message(triggerMessage.channel, "Unguessed tags were: `" + str(list(gameInstances[triggerMessage.channel].tagValues.keys()))+"`")
@@ -226,6 +234,7 @@ async def endBooruGame(triggerMessage):
     
     del gameInstances[triggerMessage.channel]
 
+@commands.registerEventHandler(name="bg")
 @commands.registerEventHandler(name="booruguess")
 async def booruGameGuess(triggerMessage):
     args = triggerMessage.content.split()
