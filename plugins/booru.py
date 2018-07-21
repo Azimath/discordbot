@@ -197,7 +197,7 @@ async def startBooruGame(triggerMessage):
             tagValues[tag] = 1
         
         gameInstances[triggerMessage.channel] = BooruGame(tagValues)
-        await client.send_message(triggerMessage.channel, "Game started")
+        await client.send_message(triggerMessage.channel, "Game started. The post has " + str(len(tags)) + " tags to guess.")
 
 
 async def stopBooruGame(triggerMessage):
@@ -209,12 +209,12 @@ async def stopBooruGame(triggerMessage):
         await client.send_message(triggerMessage.channel, "No game in progress here")
 
 @commands.registerEventHandler(name="boorugamestop")
-@commands.registerEventHandler(name="bgs")
 @commands.registerEventHandler(name="boorugamequit")
 @commands.registerEventHandler(name="bgq")
 async def endBooruGame(triggerMessage):
     await client.send_message(triggerMessage.channel, "Game Complete!")
     await client.send_message(triggerMessage.channel, "Unguessed tags were: `" + str(list(gameInstances[triggerMessage.channel].tagValues.keys()))+"`")
+    await client.send_message(triggerMessage.channel, "Guessed tags were: `" + str(gameInstances[triggerMessage.channel].tags) + "`")
     scoreDict = gameInstances[triggerMessage.channel].userScores
     scores = [(k, scoreDict[k]) for k in sorted(scoreDict, key=scoreDict.get, reverse=True)]
     scoreString = ""
