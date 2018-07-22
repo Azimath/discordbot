@@ -237,5 +237,5 @@ async def booruGameGuess(triggerMessage):
     for arg in args[1:]:
         await client.send_message(triggerMessage.channel, gameInstances[triggerMessage.channel].guess(str(arg), triggerMessage.author.id))
         
-    if len(gameInstances[triggerMessage.channel].tagValues) == 0:
+    if len(gameInstances[triggerMessage.channel].tags) == 0:
         await endBooruGame(triggerMessage)
