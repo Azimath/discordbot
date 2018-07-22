@@ -105,28 +105,70 @@ class BooruGame:
         self.userScores = {}
         self.tags = tags
         self.previousGuesses = []
+        self.timeRemaining = 15 + 3 * len(tags)
         
     def wasguessed(self, guess):
         return guess in self.previousGuesses
         
     def guess(self, guess, user):
-        guess = guess.replace("`", "")
+        guess = guess.replace("`", "").casefold()
         if user not in self.userScores:
             self.userScores[user] = 0
             
         if guess in self.previousGuesses:
+            self.timeRemaining -= 1
             return "`" + guess + "` was already guessed."
         
         if guess in self.tags:
             self.userScores[user] += 1
             self.previousGuesses.append(guess)
             self.tags.remove(guess)
+            self.timeRemaining += 5
             return "`" + guess + "`: Correct! " + str(1) + " points. " + str(len(self.tags)) + " tags left."
         else:    
             return "`" + guess + "`: Nope!"
             
 gameInstances = {}
 
+async def endGame(channel):
+    global gameInstances
+    
+    game = gameInstances[channel]
+    del gameInstances[channel]
+    
+    endMsg = "Game Complete!\n" + "Unguessed tags were: `" + str(game.tags)+"`\n" + "Guessed tags were: `" + str(game.previousGuesses) + "`"
+    await client.send_message(channel, endMsg)
+    scoreDict = game.userScores
+    scores = [(k, scoreDict[k]) for k in sorted(scoreDict, key=scoreDict.get, reverse=True)]
+    if len(scores) > 0:
+        scoreString = ""
+        for id, score in scores:
+            member = discord.utils.find(lambda m: m.id == id, channel.server.members)
+            name = member.name
+            if member.nick is not None:
+                name = member.nick
+            scoreString += "User " + str(name) + " scored " + str(score) + "\n"
+        
+        member = discord.utils.find(lambda m: m.id == scores[0][0], channel.server.members)
+        name = member.name
+        if member.nick is not None:
+            name = member.nick
+        await client.send_message(channel, scoreString)
+        await client.send_message(channel, str(name) + " wins!")
+
+@commands.registerEventHandler(triggerType="\\timeTick", name="boorugametick")
+async def updateTime():
+    global gameInstances
+    gamesToStop = []
+    for c in gameInstances:
+        gameInstances[c].timeRemaining -= 1
+        if gameInstances[c].timeRemaining <= 0:
+            gamesToStop.append(c)
+            print("Stopping " + str(c))
+    for c in gamesToStop:
+        await client.send_message(c, "Timed out!")
+        await endGame(c)
+        
 def lookup_tag(tag):
     global headers
     session = requests.Session()
@@ -165,7 +207,7 @@ async def startBooruGame(triggerMessage):
                 #print("Error: Failed to find suitable post. Try again?")
                 await client.send_message(triggerMessage.channel, "Oopsie woopsie Uwu. Couldn't find a suitable post. Try again?")
                 return
-            tags = j[target]["tags"].split(" ")
+            tags = j[target]["tags"].casefold().split(" ")
             target = j[target]["file_url"]
             
             file_response = session.get(target)
@@ -208,27 +250,7 @@ async def startBooruGame(triggerMessage):
 @commands.registerEventHandler(name="boorugamequit")
 @commands.registerEventHandler(name="bgq")
 async def endBooruGame(triggerMessage):
-    await client.send_message(triggerMessage.channel, "Game Complete!")
-    await client.send_message(triggerMessage.channel, "Unguessed tags were: `" + str(gameInstances[triggerMessage.channel].tags)+"`")
-    await client.send_message(triggerMessage.channel, "Guessed tags were: `" + str(gameInstances[triggerMessage.channel].previousGuesses) + "`")
-    scoreDict = gameInstances[triggerMessage.channel].userScores
-    scores = [(k, scoreDict[k]) for k in sorted(scoreDict, key=scoreDict.get, reverse=True)]
-    scoreString = ""
-    for id, score in scores:
-        member = discord.utils.find(lambda m: m.id == id, triggerMessage.server.members)
-        name = member.name
-        if member.nick is not None:
-            name = member.nick
-        scoreString += "User " + str(name) + " scored " + str(score) + "\n"
-    
-    member = discord.utils.find(lambda m: m.id == scores[0][0], triggerMessage.server.members)
-    name = member.name
-    if member.nick is not None:
-        name = member.nick
-    await client.send_message(triggerMessage.channel, scoreString)
-    await client.send_message(triggerMessage.channel, str(name) + " wins!")
-    
-    del gameInstances[triggerMessage.channel]
+    await endGame(triggerMessage.channel)
 
 @commands.registerEventHandler(name="bg")
 @commands.registerEventHandler(name="booruguess")
