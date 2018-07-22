@@ -101,31 +101,30 @@ async def unbusy(triggerMessage):
     busy = False
 
 class BooruGame:
-    def __init__(self, tagValues):
+    def __init__(self, tags):
         self.userScores = {}
-        self.tagValues = tagValues
+        self.tags = tags
         self.previousGuesses = []
-    
+        
     def wasguessed(self, guess):
         return guess in self.previousGuesses
         
     def guess(self, guess, user):
+        guess = guess.replace("`", "")
         if user not in self.userScores:
             self.userScores[user] = 0
             
         if guess in self.previousGuesses:
-            return guess + " was already guessed."
+            return "`" guess + "` was already guessed."
         
-        if guess in self.tagValues:
-            value = self.tagValues[guess]
-            self.userScores[user] += value
+        if guess in self.tags:
+            self.userScores[user] += 1
             self.previousGuesses.append(guess)
-            del self.tagValues[guess]
-            return guess + ": Correct! " + str(value) + " points"
+            self.tags.remove(guess)
+            return "`" + guess + "`: Correct! " + str(value) + " points. " + str(tagCount) + " tags left."
         else:    
-            return guess + ": Nope!"
+            return "`" + guess + "`: Nope!"
             
-
 gameInstances = {}
 
 def lookup_tag(tag):
@@ -145,7 +144,6 @@ async def startBooruGame(triggerMessage):
     if triggerMessage.channel in gameInstances:
         await client.send_message(triggerMessage.channel, "A game is already in progress in this channel")
     else:
-        tagValues = {}
         tags = []
         try:    
             global headers
@@ -193,28 +191,26 @@ async def startBooruGame(triggerMessage):
             return
         
         print(tags)
-        for tag in tags:
-            tagValues[tag] = 1
         
-        gameInstances[triggerMessage.channel] = BooruGame(tagValues)
+        gameInstances[triggerMessage.channel] = BooruGame(tags)
         await client.send_message(triggerMessage.channel, "Game started. The post has " + str(len(tags)) + " tags to guess.")
 
 
-async def stopBooruGame(triggerMessage):
-    if triggerMessage.channel in gameInstances:
-        await client.send_message(triggerMessage.channel, "Unguessed tags were: " + str(list([triggerMessage.channel].tagValues.keys())))
-        del gameInstances[triggerMessage.channel]
-        await client.send_message(triggerMessage.channel, "Game stopped")
-    else:
-        await client.send_message(triggerMessage.channel, "No game in progress here")
+#async def stopBooruGame(triggerMessage):
+#    if triggerMessage.channel in gameInstances:
+#        await client.send_message(triggerMessage.channel, "Unguessed tags were: " + str(list([triggerMessage.channel].tagValues.keys())))
+#        del gameInstances[triggerMessage.channel]
+#        await client.send_message(triggerMessage.channel, "Game stopped")
+#    else:
+#        await client.send_message(triggerMessage.channel, "No game in progress here")
 
 @commands.registerEventHandler(name="boorugamestop")
 @commands.registerEventHandler(name="boorugamequit")
 @commands.registerEventHandler(name="bgq")
 async def endBooruGame(triggerMessage):
     await client.send_message(triggerMessage.channel, "Game Complete!")
-    await client.send_message(triggerMessage.channel, "Unguessed tags were: `" + str(list(gameInstances[triggerMessage.channel].tagValues.keys()))+"`")
-    await client.send_message(triggerMessage.channel, "Guessed tags were: `" + str(gameInstances[triggerMessage.channel].tags) + "`")
+    await client.send_message(triggerMessage.channel, "Unguessed tags were: `" + str(gameInstances[triggerMessage.channel].tags)+"`")
+    await client.send_message(triggerMessage.channel, "Guessed tags were: `" + str(gameInstances[triggerMessage.channel].previousGuesses) + "`")
     scoreDict = gameInstances[triggerMessage.channel].userScores
     scores = [(k, scoreDict[k]) for k in sorted(scoreDict, key=scoreDict.get, reverse=True)]
     scoreString = ""
