@@ -121,7 +121,7 @@ class BooruGame:
             self.userScores[user] += value
             self.previousGuesses.append(guess)
             del self.tagValues[guess]
-            return guess + ": Correct! " + str(value) + " points"
+            return guess + ": Correct! " + str(value) + " points. " + str(len(tags)) + " tags left."
         else:    
             return guess + ": Nope!"
             
