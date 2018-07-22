@@ -115,7 +115,7 @@ class BooruGame:
             self.userScores[user] = 0
             
         if guess in self.previousGuesses:
-            return "`" guess + "` was already guessed."
+            return "`" + guess + "` was already guessed."
         
         if guess in self.tags:
             self.userScores[user] += 1
