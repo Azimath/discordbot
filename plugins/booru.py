@@ -149,7 +149,7 @@ async def startBooruGame(triggerMessage):
             global headers
             session = requests.Session()
             session.headers.update(headers)
-            response = session.get("http://e621.net/post/index.json?limit=10&tags=order:random")
+            response = session.get("http://e621.net/post/index.json?limit=10&tags=-cub+order:random")
             j = response.json()
             
             target = -1
