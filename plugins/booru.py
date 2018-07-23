@@ -4,30 +4,32 @@ import discord
 import requests
 import random
 import time
+import json
 from json import JSONDecodeError
 
-BOORUCD = 10 #this is to avoid spamming discord, and the APIs
-SUPPORTED = ["e621", "gelbooru"]
-headers = {"user-agent":"[^_^]/1.0"}
 client = None
-busy = False
 
-def gelbooru(tags):
-    global headers
+def getData(endpoint, tags, limit=10):
+    headers = {"user-agent":"[^_^]/1.0"}
     t = tags.pop(0)
     for x in tags:
         t+="+"+x
     session = requests.Session()
     session.headers.update(headers)
-    
-    response = session.get("http://gelbooru.com/index.php?page=dapi&limit=10&s=post&&q=index&json=1&tags=" + t)
+
+    response = session.get(endpoint.format(limit, t))
     
     j = response.json()
     
-    target = j[random.randint(0, len(j))]['file_url']
-    file_response = session.get(target)
-    file_extension = target[target.rfind(".")+1:]
-    print(file_extension)
+    return j
+    
+def downloadImage(url):
+    headers = {"user-agent":"[^_^]/1.0"}
+    session = requests.Session()
+    session.headers.update(headers)
+    
+    file_response = session.get(url)
+    file_extension = url[url.rfind(".")+1:]
     
     #https://stackoverflow.com/a/39217788
     data = file_response.content
@@ -37,50 +39,26 @@ def gelbooru(tags):
         f.close()
         
     return "out."+file_extension
+    
+def gelbooru(tags):
+    j = getData("http://gelbooru.com/index.php?page=dapi&limit={0}&s=post&&q=index&json=1&tags={1}", tags)
+    
+    target = j[random.randint(0, len(j))]['file_url']
+    return downloadImage(target)
 
 #tags should be a list of desired tags
 def e621(tags):
-    global headers
-    t = tags.pop(0)
-    for x in tags:
-        t+="+"+x
-    session = requests.Session()
-    session.headers.update(headers)
-    
-    response = session.get("http://e621.net/post/index.json?limit=10&tags=" + t)
-    
-    j = response.json()
+    j = getData("http://e621.net/post/index.json?limit={0}&tags={1}", tags)
     
     target = j[random.randint(0, len(j))]['file_url']
-    file_response = session.get(target)
-    file_extension = target[target.rfind(".")+1:]
-    print(file_extension)
-    
-    #https://stackoverflow.com/a/39217788
-    data = file_response.content
-    print(len(data))
-    with open("out."+file_extension, 'wb') as f:
-        f.write(data)
-        f.close()
-        
-    return "out."+file_extension
+    return downloadImage(target)
 
-@commands.registerEventHandler(name="booru", exclusivity="global")
-async def booru(triggerMessage):
-    await client.send_typing(triggerMessage.channel)
-    global BOORUCD # currently nothing else uses this, but maybe something will
-    #TODO: Actually implement cooldown
-    global SUPPORTED
-    tokens = triggerMessage.content.split()
-    #if (len(tokens) == 1 or tokens[1].lower() == "help"):
-    if (len(tokens) <= 2):
-        await client.send_message(triggerMessage.channel, "Syntax is `!booru booru_name tag0 ...`\nCurrently supported boorus: " + str(SUPPORTED))
-        return
-    functionMap = {"e621":e621, "gelbooru":gelbooru}
+functionMap = {"e621":e621, "gelbooru":gelbooru}
+
+async def postRandom(booru, tags):
     try:
-        out = functionMap[tokens[1]](tokens[2:])
-        #out should be the file name of the file we want to send assuming nothing went terribly wrong
-    
+        out = functionMap[booru](tags)
+        
         with open(out, "rb") as image:
             await client.send_file(triggerMessage.channel, image, filename=out)
     except IndexError:
@@ -92,7 +70,19 @@ async def booru(triggerMessage):
     except Exception as e:
         await client.send_message(triggerMessage.channel, "Oopsie woopsie Uwu. One of many possible disasters has occured. Try `!booru help`\nException: " + type(e).__name__)
         print(e) #hopefully this does something useful
-        
+
+@commands.registerEventHandler(name="booru", exclusivity="global")
+async def booru(triggerMessage):
+    await client.send_typing(triggerMessage.channel)
+    global SUPPORTED
+    tokens = triggerMessage.content.split()
+    #if (len(tokens) == 1 or tokens[1].lower() == "help"):
+    if (len(tokens) <= 2):
+        await client.send_message(triggerMessage.channel, "Syntax is `!booru booru_name tag0 ...`\nCurrently supported boorus: " + str(list(functionMap.keys())))
+        return
+    
+    postRandom(tokens[1], tokens[2:])
+    
     return    
     
 @commands.registerEventHandler(name="unbusy")
@@ -130,6 +120,22 @@ class BooruGame:
             
 gameInstances = {}
 
+winnerTally = {}
+
+try:
+    with open("booruwins.json", "r") as winfile:
+        winnerTally = json.loads(winfile.read())
+except FileNotFoundError:
+    with open("booruwins.json", "w") as winfile:
+        winfile.write(json.dumps({}))
+    
+def nameFromId(channel, id):
+    member = discord.utils.find(lambda m: m.id == scores[0][0], channel.server.members)
+    name = member.name
+    if member.nick is not None:
+        name = member.nick
+    return name
+    
 async def endGame(channel):
     global gameInstances
     
@@ -143,18 +149,19 @@ async def endGame(channel):
     if len(scores) > 0:
         scoreString = ""
         for id, score in scores:
-            member = discord.utils.find(lambda m: m.id == id, channel.server.members)
-            name = member.name
-            if member.nick is not None:
-                name = member.nick
+            name = nameFromId(channel, id)
             scoreString += "User " + str(name) + " scored " + str(score) + "\n"
         
-        member = discord.utils.find(lambda m: m.id == scores[0][0], channel.server.members)
-        name = member.name
-        if member.nick is not None:
-            name = member.nick
-        await client.send_message(channel, scoreString)
-        await client.send_message(channel, str(name) + " wins!")
+        name = nameFromId(channel, scores[0][0])
+        await client.send_message(channel, scoreString + "\n" + str(name) + " wins!")
+        
+        if len(scores) > 2:
+            if member.id not in winnerTally:
+                winnerTally[member.id] = 0
+                
+            winnerTally[member.id] += 1
+            with open("booruwins.json", "w") as winfile:
+                winfile.write(json.dumps(winnerTally, indent=4))
 
 @commands.registerEventHandler(triggerType="\\timeTick", name="boorugametick")
 async def updateTime():
@@ -188,41 +195,29 @@ async def startBooruGame(triggerMessage):
     else:
         tags = []
         try:    
-            global headers
-            session = requests.Session()
-            session.headers.update(headers)
-            response = session.get("http://e621.net/post/index.json?limit=10&tags=-cub+order:random")
-            j = response.json()
+            j = getData("http://e621.net/post/index.json?limit={0}&tags={1}", ["order:random","-cub"])
             
-            target = -1
-            for i in range(0, len(j)): # look for a suitable post
-                file_ext = j[i]["file_ext"]
-                if (file_ext != 'png' and file_ext != 'jpg'):
+            target = None
+            for i in j: # look for a suitable post
+                file_ext = i["file_ext"]
+                if i["file_ext"] not in ['png', 'jpg']:
                     continue
-                if (len(j[i]["tags"]) <= 5):
+                if len(i["tags"]) <= 5:
                     continue
                 target = i
                 break
-            if (target == -1):
-                #print("Error: Failed to find suitable post. Try again?")
+                
+            if target is None:
                 await client.send_message(triggerMessage.channel, "Oopsie woopsie Uwu. Couldn't find a suitable post. Try again?")
                 return
-            tags = j[target]["tags"].casefold().split(" ")
-            target = j[target]["file_url"]
+                
+            tags = target["tags"].casefold().split(" ")
+            target = target["file_url"]
             
-            file_response = session.get(target)
-            file_extension = target[target.rfind(".")+1:]
-            print(file_extension)
+            filename = downloadImage(target)
             
-            #https://stackoverflow.com/a/39217788
-            data = file_response.content
-            print(len(data))
-            with open("out."+file_extension, 'wb') as f:
-                f.write(data)
-                f.close()
-            
-            with open("out."+file_extension, "rb") as image:
-                await client.send_file(triggerMessage.channel, image, filename="out."+file_extension)
+            with open(filename, "rb") as image:
+                await client.send_file(triggerMessage.channel, image, filename=filename)
                 
         except JSONDecodeError:
             await client.send_message(triggerMessage.channel, "Oopsie Woopsie. Failed to decode json.")
@@ -236,15 +231,6 @@ async def startBooruGame(triggerMessage):
         
         gameInstances[triggerMessage.channel] = BooruGame(tags)
         await client.send_message(triggerMessage.channel, "Game started. The post has " + str(len(tags)) + " tags to guess.")
-
-
-#async def stopBooruGame(triggerMessage):
-#    if triggerMessage.channel in gameInstances:
-#        await client.send_message(triggerMessage.channel, "Unguessed tags were: " + str(list([triggerMessage.channel].tagValues.keys())))
-#        del gameInstances[triggerMessage.channel]
-#        await client.send_message(triggerMessage.channel, "Game stopped")
-#    else:
-#        await client.send_message(triggerMessage.channel, "No game in progress here")
 
 @commands.registerEventHandler(name="boorugamestop")
 @commands.registerEventHandler(name="boorugamequit")
@@ -261,3 +247,14 @@ async def booruGameGuess(triggerMessage):
         
     if len(gameInstances[triggerMessage.channel].tags) == 0:
         await endBooruGame(triggerMessage)
+        
+@commands.registerEventHandler(name="booruleaders")
+async def booruLeaders(triggerMessage):
+    ids = [x.id for x in triggerMessage.server.members]
+    leaderboard = { k: winnerTally[k] for k in winnerTally if k in ids}
+    
+    leaderboardString = ""
+    for id in leaderboard:
+        name = nameFromId(triggerMessage.channel, id)
+        leaderboardString += name + " : " + str(leaderboard[id]) + "\n"
+    await client.send_message(triggerMessage.channel, leaderboardString)
