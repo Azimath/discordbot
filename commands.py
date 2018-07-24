@@ -1,5 +1,7 @@
 import asyncio
 import sys
+import traceback
+from admin import RestartException
 
 client = None
 
@@ -93,11 +95,15 @@ async def executeEvent(triggerType="\\command", name=None, **kwargs):
                 await executeEvent(triggerType="\\commandNotFound", name=None, **kwargs)
             else:       
                 await triggerHandlers[triggerType][name].handler(**kwargs)
+        except RestartException:
+            raise
         except:
-            if sys.exc_info()[0].__name__ != "RestartException":
-                print("Unexpected error:", sys.exc_info())
-            else: 
-                raise
+            await client.send_message(triggerMessage.channel, "```" + traceback.format_exc() + "```") # if THIS throws an exception, the bot just dies
+            #if sys.exc_info()[0].__name__ != "RestartException":
+            #    print("Unexpected error:", sys.exc_info())
+            #else: 
+            #    raise
+            
             
     else:
         for k, v in triggerHandlers[triggerType].items():
