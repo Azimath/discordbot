@@ -27,7 +27,7 @@ def getData(endpoint, tags, limit=10): # json
     j = response.json()
     return j
 
-def getDOM(endpoint, tags, limit=10)
+def getDOM(endpoint, tags, limit=10):
     response = getResponse(endpoint, tags, limit=10)
     return minidom.parseString(response.text)
 
