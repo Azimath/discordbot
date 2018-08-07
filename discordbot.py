@@ -94,7 +94,7 @@ if __name__ == "__main__":
         @client.event
         async def on_ready():
             global loaded
-
+            await client.change_presence(status=discord.Status.dnd)
             print("Logged in as")
             print(client.user.name)
             print(client.user.id)
@@ -109,7 +109,8 @@ if __name__ == "__main__":
                 timeTickThread.start()
                 
                 loaded = True
-        
+                
+            await client.change_presence(status=discord.Status.online)
         @client.event
         async def on_error(event, *args, **kwargs):
             await client.close()
