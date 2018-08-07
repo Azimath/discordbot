@@ -6,6 +6,7 @@ from io import BytesIO
 from PIL import Image, ImageFilter
 import random
 import time
+import bs4
 
 client = None
 timeout = dict()
@@ -94,3 +95,7 @@ async def morejpeg(triggerMessage):
     with open("more.jpeg", "rb") as image:
         await client.send_file(triggerMessage.channel, image, filename="more.jpeg", content="Now with more JPEG")
     
+async def hugeify(url):
+    session = requests.Session()
+    response = session.get("https://waifu2x.booru.pics/Home/fromlink?url=" + url + "&denoise=1&scale=2&submit=")
+    return "https://waifu2x.booru.pics" + bs4.BeautifulSoup(response.text, "lxml").find_all(class_="btn")[0]["href"]

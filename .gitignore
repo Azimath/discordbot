@@ -1,3 +1,10 @@
+*.jpeg
+*.json
+inactive/
+testshit/
+sounds/
+out.*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
