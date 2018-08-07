@@ -62,7 +62,7 @@ def e621(tags):
     return downloadImage(target)
 
 def rule34(tags):
-    dom = getDom("https://rule34.xxx/index.php?page=dapi&s=post&q=index&limit={0}&tags={1}", tags)
+    dom = getDOM("https://rule34.xxx/index.php?page=dapi&s=post&q=index&limit={0}&tags={1}", tags)
     posts = dom.getElementsByTagName("post")
     
     target = posts[random.randint(0, len(posts))].getAttribute('file_url')
