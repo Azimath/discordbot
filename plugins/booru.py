@@ -5,12 +5,13 @@ import requests
 import random
 import time
 import json
+from xml.dom import minidom
 import sqlite3, atexit
 from json import JSONDecodeError
 
 client = None
-
-def getData(endpoint, tags, limit=10):
+    
+def getResponse(endpoint, tags, limit=10):
     headers = {"user-agent":"[^_^]/1.0"}
     t = tags.pop(0)
     for x in tags:
@@ -19,11 +20,17 @@ def getData(endpoint, tags, limit=10):
     session.headers.update(headers)
 
     response = session.get(endpoint.format(limit, t))
-    
+    return response
+
+def getData(endpoint, tags, limit=10): # json
+    response = getResponse(endpoint, tags, limit=10)
     j = response.json()
-    
     return j
-    
+
+def getDOM(endpoint, tags, limit=10)
+    response = getResponse(endpoint, tags, limit=10)
+    return minidom.parseString(response.text)
+
 def downloadImage(url):
     headers = {"user-agent":"[^_^]/1.0"}
     session = requests.Session()
@@ -54,7 +61,14 @@ def e621(tags):
     target = j[random.randint(0, len(j))]['file_url']
     return downloadImage(target)
 
-functionMap = {"e621":e621, "gelbooru":gelbooru}
+def rule34(tags):
+    dom = getDom("https://rule34.xxx/index.php?page=dapi&s=post&q=index&limit={0}&tags={1}", tags)
+    posts = dom.getElementsByTagName("post")
+    
+    target = posts[random.randint(0, len(posts))].getAttribute('file_url')
+    return downloadImage(target)    
+    
+functionMap = {"e621":e621, "gelbooru":gelbooru, "rule34":rule34}
 
 async def postRandom(channel, booru, tags):
     try:
