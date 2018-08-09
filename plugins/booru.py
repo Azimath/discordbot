@@ -94,9 +94,9 @@ async def booru(triggerMessage):
     if (len(tokens) <= 2):
         await client.send_message(triggerMessage.channel, "Syntax is `!booru booru_name tag0 ...`\nCurrently supported boorus: " + str(list(functionMap.keys())))
         return
-    tokens.extend(["-scat","-loli","-shota","-cub","-fart"]) #Anti trash
-    await postRandom(triggerMessage.channel, tokens[1], tokens[2:])
-    
+    tokens.extend(["-young", "-scat","-fart"]) #Anti trash
+    await postRandom(triggerMessage.channel, tokens[1], tokens[2:8]) # chop off extra tags
+    # TODO: Filter remaining blacklist tags from results
     return    
     
 @commands.registerEventHandler(name="unbusy")
