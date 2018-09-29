@@ -180,6 +180,12 @@ async def plot(triggerMessage):
 async def respects(triggerMessage):
     if triggerMessage.content.__len__() == 1:
         await client.send_message(triggerMessage.channel, triggerMessage.author.name + " has paid their respects.")
+      
+@commands.registerEventHandler(triggerType="\\messageNoBot", name="X")
+@commands.messageHandlerFilter("X")
+async def respects(triggerMessage):
+    if triggerMessage.content.__len__() == 1:
+        await client.send_message(triggerMessage.channel, triggerMessage.author.name + " doubts that.")
 
 @commands.registerEventHandler(name="addphrase")
 @permissions.needs_admin    
