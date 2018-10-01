@@ -1,5 +1,6 @@
 import random
 import commands
+import discord
 
 """This is a plugin for fun things you can use to play with [^_^].
    !flip, !coin: Flips a coin
