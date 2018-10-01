@@ -36,7 +36,7 @@ async def ship(triggerMessage):
       onlineMembs = []
       for memb in membs:
          if memb.status is discord.Status.online:
-            onlineMembs.append(membs)
+            onlineMembs.append(memb)
       
       winners = random.sample(onlineMembs, 2)
       await client.send_message(triggerMessage.channel, "I ship {0} and {1}. Now kiss. :heart:".format(winners[0].mention, winners[1].mention))
