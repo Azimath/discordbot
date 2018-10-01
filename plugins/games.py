@@ -25,6 +25,24 @@ async def trick(triggerMessage):
     await client.send_message(target, "*cuts*")
     await client.send_message(target, "Is this your card? " + suit + " " + value)
 
+
+@commands.registerEventHandler(name="ship")
+async def ship(triggerMessage):
+   if triggerMessage.server is not None:
+      membs = triggerMessage.server.members
+      
+      #filter out offline members
+      onlineMembs = []
+      for memb in membs:
+         if memb.status is discord.Status.online:
+            onlineMembs.append(membs)
+      
+      winners = random.sample(onlineMembs, 2)
+      await client.send_message(triggerMessage.channel, "I ship {0} and {1}. Now kiss. :heart:".format(winners[0].mention, winners[1].mention))
+   else:
+      await client.send_message(triggerMessage.channel, "I ship us. :heart:")
+      
+
 @commands.registerEventHandler(triggerType="\\messageNoBot", name="fuck quest go")
 @commands.messageHandlerFilter("fuck quest go", filterType="cqc")
 async def fuckRoll(triggerMessage):
