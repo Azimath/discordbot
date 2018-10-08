@@ -3,7 +3,7 @@ import discord
 import commands
 import os
 import permissions
-
+from datetime import datetime
 
 """This is a plugin for developer utilities to aid in programming and debugging.
    !info: pms information about the channel, server, and author
@@ -16,12 +16,25 @@ async def info(triggerMessage):
     target = triggerMessage.author
     if triggerMessage.mentions.__len__() == 1:
         targetUser = triggerMessage.mentions[0]
-        await client.send_message(target, "User name: " + targetUser.name + "\nUser id: " + targetUser.id + "\nUser discriminator: " + targetUser.discriminator)
+        unixtime=(((int(targetUser.id)>>22)+ 1420070400000)
+        acctCreateDate = datetime.utcfromtimestamp(unixtime/1000).strftime('%Y-%m-%d %H:%M:%S')
+        await client.send_message(target, "User name: " + targetUser.name + 
+                                  "\nUser id: " + targetUser.id + 
+                                  "\nUser discriminator: " + targetUser.discriminator +
+                                  "\nAccount Create Date:" + acctCreateDate)
         # client.send_message(target, "User id: " + targetUser.id)
         # client.send_message(target, "User discriminator: " + targetUser.discriminator)
         await client.delete_message(message)
     else:
-        await client.send_message(target, "Channel name: " + triggerMessage.channel.name + "\nChannel id: " + triggerMessage.channel.id + "\nServer  name: " + triggerMessage.server.name + "\nServer id: " + triggerMessage.server.id + "\nAuthor name: " + triggerMessage.author.name + "\nAuthor id: " + triggerMessage.author.id)
+        unixtime=(((int(target.id)>>22)+ 1420070400000)
+        acctCreateDate = datetime.utcfromtimestamp(unixtime/1000).strftime('%Y-%m-%d %H:%M:%S')
+        await client.send_message(target, "Channel name: " + triggerMessage.channel.name + 
+                                  "\nChannel id: " + triggerMessage.channel.id + 
+                                  "\nServer  name: " + triggerMessage.server.name + 
+                                  "\nServer id: " + triggerMessage.server.id + 
+                                  "\nAuthor name: " + triggerMessage.author.name + 
+                                  "\nAuthor id: " + triggerMessage.author.id +
+                                  "\nAccount Create Date:" + acctCreateDate)
         # client.send_message(target, "Channel id: " + triggerMessage.channel.id)
         # client.send_message(target, "Server  name: " + triggerMessage.server.name)
         # client.send_message(target, "Server id: " + triggerMessage.server.id)
