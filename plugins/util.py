@@ -48,4 +48,9 @@ async def embeds(triggerMessage):
 @commands.registerEventHandler(name="gitpull")
 async def gitpull(triggerMessage):
     os.system("git pull origin master")
+
+@permissions.needs_admin        
+@commands.registerEventHandler(name="oauth")
+async def oauthlink(triggerMessage):  
+   await client.send_message(triggerMessage.author, "https://discordapp.com/oauth2/authorize?client_id=245814417609064448&scope=bot")
     
