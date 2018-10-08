@@ -16,7 +16,7 @@ async def info(triggerMessage):
     target = triggerMessage.author
     if triggerMessage.mentions.__len__() == 1:
         targetUser = triggerMessage.mentions[0]
-        unixtime=(((int(targetUser.id)>>22)+ 1420070400000)
+        unixtime=((int(targetUser.id)>>22)+ 1420070400000)
         acctCreateDate = datetime.utcfromtimestamp(unixtime/1000).strftime('%Y-%m-%d %H:%M:%S')
         await client.send_message(target, "User name: " + targetUser.name + 
                                   "\nUser id: " + targetUser.id + 
@@ -26,7 +26,7 @@ async def info(triggerMessage):
         # client.send_message(target, "User discriminator: " + targetUser.discriminator)
         await client.delete_message(message)
     else:
-        unixtime=(((int(target.id)>>22)+ 1420070400000)
+        unixtime=((int(target.id)>>22)+ 1420070400000)
         acctCreateDate = datetime.utcfromtimestamp(unixtime/1000).strftime('%Y-%m-%d %H:%M:%S')
         await client.send_message(target, "Channel name: " + triggerMessage.channel.name + 
                                   "\nChannel id: " + triggerMessage.channel.id + 
