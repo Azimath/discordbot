@@ -22,9 +22,7 @@ async def info(triggerMessage):
                                   "\nUser id: " + targetUser.id + 
                                   "\nUser discriminator: " + targetUser.discriminator +
                                   "\nAccount Create Date:" + acctCreateDate)
-        # client.send_message(target, "User id: " + targetUser.id)
-        # client.send_message(target, "User discriminator: " + targetUser.discriminator)
-        await client.delete_message(message)
+        await client.delete_message(triggerMessage)
     else:
         unixtime=((int(target.id)>>22)+ 1420070400000)
         acctCreateDate = datetime.utcfromtimestamp(unixtime/1000).strftime('%Y-%m-%d %H:%M:%S')
@@ -35,11 +33,6 @@ async def info(triggerMessage):
                                   "\nAuthor name: " + triggerMessage.author.name + 
                                   "\nAuthor id: " + triggerMessage.author.id +
                                   "\nAccount Create Date:" + acctCreateDate)
-        # client.send_message(target, "Channel id: " + triggerMessage.channel.id)
-        # client.send_message(target, "Server  name: " + triggerMessage.server.name)
-        # client.send_message(target, "Server id: " + triggerMessage.server.id)
-        # client.send_message(target, "Author name: " + triggerMessage.author.name)
-        # client.send_message(target, "Author id: " + triggerMessage.author.id)
 
 @commands.registerEventHandler(name="game")
 async def game(triggerMessage):
