@@ -49,34 +49,54 @@ async def ship(triggerMessage):
 async def fuckRoll(triggerMessage):
     await client.send_message(triggerMessage.channel, "Fuck quest: " + str(random.randrange(1, 100)))
 
-@commands.registerEventHandler(name="roll")
-async def roll(triggerMessage):
-    target = triggerMessage.channel
-    toParse = triggerMessage.content[5:]
-    if "∞" in toParse:
-        result = "∞"
-        await client.send_message(target, "Rolled " + toParse + ": " + "∞")
 
-    else:    
-        rolls = int(toParse[1:toParse.index('d')])
-        toParse = toParse[toParse.index('d'):]
-        index = toParse.find('+')
-        if index == -1:
-            index = toParse.find('-')
-        if index == -1:
-            size = int(toParse[toParse.index('d')+1:])
-            mod = 0
-        else:
-            size = int(toParse[1:index])
-            mod = int(int(toParse[index:]))
-        
-        result = 0
-        
-        if rolls > 100000:
-            await client.send_message(target, "Fuck off")
-        else:
-            for i in range(0, rolls):
-                result = result + random.randrange(1, size+1)
-            
-            result = result + mod
-            await client.send_message(target, "Rolled " + str(rolls) + "d" + str(size) + "+" + str(mod) + ": " + "**" + str(result) + "**")
+
+def modString(mod):
+   if mod == 0:
+      return ""
+   if mod < 0:
+      return str(mod)
+   else:
+      return "+" + str(mod)
+
+lastRoll = None
+   
+@commands.registerEventHandler(name="roll")
+@commands.registerEventHandler(name="r")
+async def roll(triggerMessage):
+   global lastRoll
+   target = triggerMessage.channel
+   pivot = triggerMessage.content.find(" ")
+   if pivot = -1 and lastRoll is not None:
+      toParse = lastRoll
+   else:
+      toParse = triggerMessage.content[triggerMessage.content.find(" "):]
+      lastRoll = toParse
+      
+   if "∞" in toParse:
+       result = "∞"
+       await client.send_message(target, "Rolled " + toParse + ": " + "∞")
+
+   else:    
+       rolls = int(toParse[1:toParse.index('d')])
+       toParse = toParse[toParse.index('d'):]
+       index = toParse.find('+')
+       if index == -1:
+           index = toParse.find('-')
+       if index == -1:
+           size = int(toParse[toParse.index('d')+1:])
+           mod = 0
+       else:
+           size = int(toParse[1:index])
+           mod = int(toParse[index:])
+       
+       result = 0
+       
+       if rolls > 100000:
+           await client.send_message(target, "Fuck off")
+       else:
+           for i in range(0, rolls):
+               result += random.randrange(1, size+1)
+           
+           result += mod
+           await client.send_message(target, "Rolled {0}d{1}{2}: **{3}**".format(str(rolls), str(size), modString(mod), str(result))
