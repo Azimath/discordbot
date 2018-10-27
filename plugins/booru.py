@@ -109,7 +109,7 @@ class BooruGame:
         self.userScores = {}
         self.tags = tags
         self.previousGuesses = []
-        self.timeRemaining = 15 + 3 * len(tags)
+        self.timeRemaining = 30 + 2 * len(tags)
         self.url = url
         
     def wasguessed(self, guess):
