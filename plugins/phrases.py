@@ -175,6 +175,12 @@ async def plot(triggerMessage):
     if client.user in triggerMessage.mentions:
         await client.send_message(triggerMessage.channel, random.choice(phrasebank["plots"]))
 
+@commands.registerEventHandler(triggerType="\\messageNoBot", name="ㅋ")
+@commands.messageHandlerFilter("ㅋ")
+async def disrespects(triggerMessage):
+    if triggerMessage.content.__len__() == 1:
+        await client.send_message(triggerMessage.channel, triggerMessage.author.name + " has revoked their respects.")
+      
 @commands.registerEventHandler(triggerType="\\messageNoBot", name="F")
 @commands.messageHandlerFilter("F")
 async def respects(triggerMessage):
