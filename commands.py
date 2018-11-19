@@ -22,6 +22,8 @@ triggerHandlers = {
     "\\reactionChanged" : {}
 }
 
+helpString = ""
+
 def messageHandlerFilter(triggerFilter, filterType="eq"):
     def decorator(func):
         if filterType=="eq":
@@ -43,7 +45,7 @@ def messageHandlerFilter(triggerFilter, filterType="eq"):
     
 commandMutexes = []
 
-def registerEventHandler(triggerType="\\command", name=None, exclusivity=None, **kwargs):
+def registerEventHandler(triggerType="\\command", name=None, helpText=None, exclusivity=None, **kwargs):
     """Decorator that registers event handlers
     Stay tuned for kwargs
     """
@@ -69,6 +71,8 @@ def registerEventHandler(triggerType="\\command", name=None, exclusivity=None, *
         else:
             event = Event(f, triggerType, name, **kwargs)
         if triggerType in triggerHandlers:
+            if helpText is not None:
+                helpString += helpText + "\n"
             if name is not None:
                 if name in triggerHandlers[triggerType]:
                     print("Duplicate command")
