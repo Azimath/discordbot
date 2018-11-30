@@ -145,7 +145,7 @@ async def wiki(triggerMessage):
 
 @commands.registerEventHandler(name="application")
 async def application(triggerMessage):
-    await client.send_message(triggerMessage.channel, "https://docs.google.com/forms/d/1bURXLKIo30XLX3RASg2B8XVLsYpp6GYXn84IT2F9hbM/viewform")
+    await client.send_message(triggerMessage.channel, "https://docs.google.com/forms/d/1a6fXy0b9uimE789VLFUyUUvkbjVDEx3cYfutXBT8WOQ/viewform")
 
 @commands.registerEventHandler(triggerType="\\messageNoBot", name="unflip")
 @commands.messageHandlerFilter("(╯°□°）╯︵ ┻━┻")
