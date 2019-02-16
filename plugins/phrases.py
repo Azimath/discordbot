@@ -14,7 +14,7 @@ import commands
    !addphrase phrasebank phrase : adds phrase to the given phrasebank. The phrasebank for a given command is generally the plural of the command
    !baddragon : give me some sugah, baby
    !wiki : links to the iaa wiki
-   !apply : links to the membership application
+   !application : links to the membership application
    !tests : PMs the user links to all required membership tests
    !constitution : links to the constitution
    !sonic : links to a random page on either the archie sonic wiki or the sonic fanon wiki
