@@ -14,7 +14,7 @@ import commands
    !addphrase phrasebank phrase : adds phrase to the given phrasebank. The phrasebank for a given command is generally the plural of the command
    !baddragon : give me some sugah, baby
    !wiki : links to the iaa wiki
-   !apply : links to the membership application
+   !application : links to the membership application
    !tests : PMs the user links to all required membership tests
    !constitution : links to the constitution
    !sonic : links to a random page on either the archie sonic wiki or the sonic fanon wiki
@@ -145,7 +145,7 @@ async def wiki(triggerMessage):
 
 @commands.registerEventHandler(name="application")
 async def application(triggerMessage):
-    await client.send_message(triggerMessage.channel, "https://docs.google.com/forms/d/1bURXLKIo30XLX3RASg2B8XVLsYpp6GYXn84IT2F9hbM/viewform")
+    await client.send_message(triggerMessage.channel, "https://docs.google.com/forms/d/1a6fXy0b9uimE789VLFUyUUvkbjVDEx3cYfutXBT8WOQ/viewform")
 
 @commands.registerEventHandler(triggerType="\\messageNoBot", name="unflip")
 @commands.messageHandlerFilter("(╯°□°）╯︵ ┻━┻")
@@ -175,6 +175,12 @@ async def plot(triggerMessage):
     if client.user in triggerMessage.mentions:
         await client.send_message(triggerMessage.channel, random.choice(phrasebank["plots"]))
 
+@commands.registerEventHandler(triggerType="\\messageNoBot", name="ㅋ")
+@commands.messageHandlerFilter("ㅋ")
+async def disrespects(triggerMessage):
+    if triggerMessage.content.__len__() == 1:
+        await client.send_message(triggerMessage.channel, triggerMessage.author.name + " has revoked their respects.")
+      
 @commands.registerEventHandler(triggerType="\\messageNoBot", name="F")
 @commands.messageHandlerFilter("F")
 async def respects(triggerMessage):
