@@ -162,7 +162,7 @@ async def endGame(channel):
     endMsg = "Game Complete!\n" + "Unguessed tags were: `" + str(game.tags)+"`\n" + "Guessed tags were: `" + str(game.previousGuesses) + "`"
     await client.send_message(channel, endMsg)
     scoreDict = game.userScores
-    scores = [(k, len(scoreDict[k])) for k in sorted(scoreDict, key=scoreDict.get, reverse=True)]
+    scores = sorted([(k, len(scoreDict[k])) for k in scoreDict], key=lambda tup: tup[1], reverse=True)
     if len(scores) > 0:
         scoreString = ""
         for id, score in scores:
@@ -268,13 +268,14 @@ async def booruGameGuess(triggerMessage):
         
     if len(gameInstances[triggerMessage.channel].tags) == 0:
         await endBooruGame(triggerMessage)
-        
+
+@commands.registerEventHandler(name="boorucoin")        
 @commands.registerEventHandler(name="booruleaders")
 async def booruLeaders(triggerMessage):
     ids = [x.id for x in triggerMessage.server.members]
     leaderboard = { k: winnerTally[k] for k in winnerTally if k in ids}
     
-    leaderboardString = "Total game wins:\n"
+    leaderboardString = "YiffCoins earned:\n"
     for id in leaderboard:
         name = nameFromId(triggerMessage.channel, id)
         leaderboardString += name + " : " + str(leaderboard[id]) + "\n"
