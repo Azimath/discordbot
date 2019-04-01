@@ -1,5 +1,4 @@
 import commands
-import discord
 
 client = None
 
@@ -11,7 +10,7 @@ async def dewetethis(triggerMessage):
             await client.delete_message(triggerMessage)
 
 @commands.registerEventHandler(triggerType="\\messageEdit", name="dewetethis2")
-async def dewetethis2(after):
+async def dewetethis2(befor, after):
     if ("r" in after.content.lower() or "l" in after.content.lower()) and not ("uwu" in after.content.lower() or "owo" in after.content.lower()):
         if (after.server.id == "102981131074297856"):
             await client.send_message(after.author, "UwU Pwease wewwite youw message without iwwegaw chawactews and/ow add owo ow uwu.")
