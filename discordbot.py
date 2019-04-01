@@ -115,6 +115,10 @@ if __name__ == "__main__":
         async def on_error(event, *args, **kwargs):
             await client.close()
             sys.exit(event)
+
+        @client.event
+        async def on_message_edit(before, after):
+            await commands.executeEvent(triggerType="\\messageEdit", before=before, after=after)
             
         loaded = False
         client.run(config["DiscordToken"])

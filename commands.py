@@ -19,7 +19,8 @@ triggerHandlers = {
     "\\botException" : {},
     "\\set_root_context_on_load" : {},
     "\\timeTick" : {},
-    "\\reactionChanged" : {}
+    "\\reactionChanged" : {},
+    "\\messageEdit": {}
 }
 
 helpString = ""
@@ -72,6 +73,7 @@ def registerEventHandler(triggerType="\\command", name=None, helpText=None, excl
             event = Event(f, triggerType, name, **kwargs)
         if triggerType in triggerHandlers:
             if helpText is not None:
+                global helpString
                 helpString += helpText + "\n"
             if name is not None:
                 if name in triggerHandlers[triggerType]:
