@@ -18,7 +18,7 @@ async def info(triggerMessage):
         targetUser = triggerMessage.mentions[0]
         unixtime=((int(targetUser.id)>>22)+ 1420070400000)
         acctCreateDate = datetime.utcfromtimestamp(unixtime/1000).strftime('%Y-%m-%d %H:%M:%S')
-        await client.send_message(target, "User name: " + targetUser.name + 
+        await target.send("User name: " + targetUser.name + 
                                   "\nUser id: " + targetUser.id + 
                                   "\nUser discriminator: " + targetUser.discriminator +
                                   "\nAccount Create Date:" + acctCreateDate)
@@ -26,7 +26,7 @@ async def info(triggerMessage):
     else:
         unixtime=((int(target.id)>>22)+ 1420070400000)
         acctCreateDate = datetime.utcfromtimestamp(unixtime/1000).strftime('%Y-%m-%d %H:%M:%S')
-        await client.send_message(target, "Channel name: " + triggerMessage.channel.name + 
+        await target.send("Channel name: " + triggerMessage.channel.name + 
                                   "\nChannel id: " + triggerMessage.channel.id + 
                                   "\nServer  name: " + triggerMessage.server.name + 
                                   "\nServer id: " + triggerMessage.server.id + 
@@ -42,7 +42,7 @@ async def game(triggerMessage):
 async def embeds(triggerMessage):
     print(str(len(triggerMessage.embeds)) + " embeds in message")
     for embed in triggerMessage.embeds:
-        await client.send_message(triggerMessage.author, str(dir(embed)))
+        await triggerMessage.author.send(str(dir(embed)))
 
 @permissions.needs_moderator        
 @commands.registerEventHandler(name="gitpull")
@@ -52,5 +52,5 @@ async def gitpull(triggerMessage):
 @permissions.needs_admin        
 @commands.registerEventHandler(name="oauth")
 async def oauthlink(triggerMessage):  
-   await client.send_message(triggerMessage.author, "https://discordapp.com/oauth2/authorize?client_id=245814417609064448&scope=bot")
+   await triggerMessage.author.send("https://discordapp.com/oauth2/authorize?client_id=245814417609064448&scope=bot")
     

@@ -27,6 +27,6 @@ async def checkDay():
         if tz.localize(m.timestamp) > midnight:
             return
     
-    await client.send_message(channel, "New Day Get")
+    await channel.send( "New Day Get")
     #if discord.utils.find(lambda m: m.timestamp > midnight, list(client.logs_from(channel, limit=2))) is None:
-        #await client.send_message(channel, "New Day Get")
+        #await channel.send( "New Day Get")

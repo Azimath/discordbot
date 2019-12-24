@@ -31,7 +31,7 @@ games = {}
 @commands.registerEventHandler(name="startgame")
 async def startgame(triggerMessage):
     if triggerMessage.channel.id in games:
-        await client.send_message(triggerMessage.channel, "Sorry, a game is already in progress")
+        await triggerMessage.channel.send( "Sorry, a game is already in progress")
         return
     
     args = triggerMessage.content.split()
@@ -44,12 +44,12 @@ async def startgame(triggerMessage):
             range = 100
     newgame = Game(range)
     games[triggerMessage.channel.id] = newgame
-    await client.send_message(triggerMessage.channel, "Game started")
+    await triggerMessage.channel.send( "Game started")
     
 @commands.registerEventHandler(name="guess")	
 async def guess(triggerMessage):
     if not triggerMessage.channel.id in games:
-        await client.send_message(triggerMessage.channel, "No game in progress for this channel")
+        await triggerMessage.channel.send( "No game in progress for this channel")
         return
     
     args = triggerMessage.content.split()
@@ -62,27 +62,27 @@ async def guess(triggerMessage):
             guess = 0
     
     if games[triggerMessage.channel.id].wasguessed(guess):
-        await client.send_message(triggerMessage.channel, "Sorry but " + str(guess) + " was already guessed")
+        await triggerMessage.channel.send( "Sorry but " + str(guess) + " was already guessed")
         return
     
     result = games[triggerMessage.channel.id].guess(guess)
     if result == 0:
-        await client.send_message(triggerMessage.channel, "User " + triggerMessage.author.name + " won! With " + str(games[triggerMessage.channel.id].guesses) + " guesses. !startgame to play again")
-        await client.send_message(triggerMessage.channel, "Guesses: " + str(games[triggerMessage.channel.id].previousGuesses))
+        await triggerMessage.channel.send( "User " + triggerMessage.author.name + " won! With " + str(games[triggerMessage.channel.id].guesses) + " guesses. !startgame to play again")
+        await triggerMessage.channel.send( "Guesses: " + str(games[triggerMessage.channel.id].previousGuesses))
         games.pop(triggerMessage.channel.id, None)
     elif result == -1:
-        await client.send_message(triggerMessage.channel, "Guess " + str(guess) + " was too low. Number of guesses so far: " + str(games[triggerMessage.channel.id].guesses) + ".")
+        await triggerMessage.channel.send( "Guess " + str(guess) + " was too low. Number of guesses so far: " + str(games[triggerMessage.channel.id].guesses) + ".")
     elif result == 1:
-        await client.send_message(triggerMessage.channel, "Guess " + str(guess) + " was too high. Number of guesses so far: " + str(games[triggerMessage.channel.id].guesses) + ".")
+        await triggerMessage.channel.send( "Guess " + str(guess) + " was too high. Number of guesses so far: " + str(games[triggerMessage.channel.id].guesses) + ".")
     else:
-        await client.send_message(triggerMessage.channel, "What the fuck")
+        await triggerMessage.channel.send( "What the fuck")
 
 @commands.registerEventHandler(name="stopgame")
 async def stop(triggerMessage):
     if not triggerMessage.channel.id in games:
-        await client.send_message(triggerMessage.channel, "Theres no game to stop")
+        await triggerMessage.channel.send( "Theres no game to stop")
         return
     
     games.pop(triggerMessage.channel.id, None)
-    await client.send_message(triggerMessage.channel, "Game stopped")
+    await triggerMessage.channel.send( "Game stopped")
     

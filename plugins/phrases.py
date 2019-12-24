@@ -41,10 +41,10 @@ async def refreshDragons(triggerMessage):
     with open('phrasebank.json', "w") as lartfile:
             json.dump(phrasebank, lartfile, indent=4)
     
-    await client.send_message(triggerMessage.channel, "Downloaded new dragons. There are now " + str(len(phrasebank["dragons"])) 
+    await triggerMessage.channel.send( "Downloaded new dragons. There are now " + str(len(phrasebank["dragons"])) 
                                                       + " dragons. Got " + str(len(phrasebank["dragons"])-oldnum) + " new dragons")
     if len(phrasebank["dragons"]) - oldnum > 0:
-        pass#await client.send_message(triggerMessage.channel, "@everyone")
+        pass#await triggerMessage.channel.send( "@everyone")
 
 @commands.registerEventHandler(name="lart")
 async def lart(triggerMessage):
@@ -54,7 +54,7 @@ async def lart(triggerMessage):
         target = triggerMessage.author.name
     lart = lart.replace("$who", target)
     print("Lart: " + lart)
-    await client.send_message(triggerMessage.channel, lart)
+    await triggerMessage.channel.send( lart)
 
 @commands.registerEventHandler(name="praise")
 async def praise(triggerMessage):
@@ -64,24 +64,24 @@ async def praise(triggerMessage):
         target = triggerMessage.author.name
     praise = praise.replace("$who", target)
     print("praise: " + praise)
-    await client.send_message(triggerMessage.channel, praise)
+    await triggerMessage.channel.send( praise)
 
 @commands.registerEventHandler(triggerType="\\messageNoBot", name="keikaku")
 @commands.messageHandlerFilter("keikaku", filterType="cqc")
 async def keikaku(triggerMessage):
-    await client.send_message(triggerMessage.channel, "tl note: keikaku means plan")
+    await triggerMessage.channel.send( "tl note: keikaku means plan")
 
 @commands.registerEventHandler(name="help")
 async def help(triggerMessage):
-    await client.send_message(triggerMessage.author, phrasebank["help"][0])
-    await client.send_message(triggerMessage.author, phrasebank["help"][1])
+    await triggerMessage.author.send(phrasebank["help"][0])
+    await triggerMessage.author.send(phrasebank["help"][1])
       
 @commands.registerEventHandler(name="lmgtfy")
 async def lmgtfy(triggerMessage):
     query = triggerMessage.content[8:]
     query = query.replace(" ", "+")
     query = ''.join(e for e in query if e.isalnum() or e == "+")
-    await client.send_message(triggerMessage.channel, "http://lmgtfy.com/?q=" + query)
+    await triggerMessage.channel.send( "http://lmgtfy.com/?q=" + query)
 
 @commands.registerEventHandler(name="buydinner")
 async def buydinner(triggerMessage):
@@ -89,109 +89,109 @@ async def buydinner(triggerMessage):
     target = triggerMessage.author.name
     praise = praise.replace("$who", target)
     print("praise: " + praise)
-    await client.send_message(triggerMessage.channel, praise)
+    await triggerMessage.channel.send( praise)
 
 @commands.registerEventHandler(name="baddragon")
 async def baddragon(triggerMessage):
     dragon = random.choice(phrasebank["dragons"])
     print("dragon: " + dragon)
-    await client.send_message(triggerMessage.channel, "https://bad-dragon.com/products/"+dragon)
+    await triggerMessage.channel.send( "https://bad-dragon.com/products/"+dragon)
 
 @commands.registerEventHandler(name="tingle")
 async def tingle(triggerMessage):
     tingle = "http://amazon.com/" + random.choice(phrasebank["tingles"])
     print("tingle: " + tingle)
-    await client.send_message(triggerMessage.channel, tingle)
+    await triggerMessage.channel.send( tingle)
 
 @commands.registerEventHandler(name="pal")
 async def pal(triggerMessage):
     if random.randrange(100) < 2:
-        await client.send_message(triggerMessage.channel, "Go fuck yourself " + triggerMessage.author.name)
+        await triggerMessage.channel.send( "Go fuck yourself " + triggerMessage.author.name)
     else:
-        await client.send_message(triggerMessage.channel, "Yes this is pal, yes this is 60 FPS")
+        await triggerMessage.channel.send( "Yes this is pal, yes this is 60 FPS")
 
 @commands.registerEventHandler(name="mango")
 async def mango(triggerMessage):
     mango = random.choice(phrasebank["mango"])
-    await client.send_message(triggerMessage.channel, mango)
+    await triggerMessage.channel.send( mango)
 
 @commands.registerEventHandler(name="8ball")
 async def eightball(triggerMessage):
     ball = random.choice(phrasebank["8balls"])
     #print("8ball: " + ball)
-    await client.send_message(triggerMessage.channel, ":8ball: " + ball)
+    await triggerMessage.channel.send( ":8ball: " + ball)
 
 @commands.registerEventHandler(name="tests")
 async def tests(triggerMessage):
     target = triggerMessage.author
-    await client.send_message(target, "Take each of the following tests. Save a screenshot of each result.\nMBTI: http://www.humanmetrics.com/cgi-win/jtypes2.asp\nEnneagram: http://www.eclecticenergies.com/enneagram/test.php Take both tests for best results.\nBIG5: http://personality-testing.info/tests/BIG5.php\nTemperaments: http://personality-testing.info/tests/O4TS/")
-    # client.send_message(target, "MBTI: http://www.humanmetrics.com/cgi-win/jtypes2.asp")
-    # client.send_message(target, "Enneagram: http://www.eclecticenergies.com/enneagram/test.php")
-    # client.send_message(target, "Take both tests for best results.")
-    # client.send_message(target, "BIG5: http://personality-testing.info/tests/BIG5.php")
-    # client.send_message(target, "Temperaments: http://personality-testing.info/tests/O4TS/")    
+    await target.send("Take each of the following tests. Save a screenshot of each result.\nMBTI: http://www.humanmetrics.com/cgi-win/jtypes2.asp\nEnneagram: http://www.eclecticenergies.com/enneagram/test.php Take both tests for best results.\nBIG5: http://personality-testing.info/tests/BIG5.php\nTemperaments: http://personality-testing.info/tests/O4TS/")
+    # target.send("MBTI: http://www.humanmetrics.com/cgi-win/jtypes2.asp")
+    # target.send("Enneagram: http://www.eclecticenergies.com/enneagram/test.php")
+    # target.send("Take both tests for best results.")
+    # target.send("BIG5: http://personality-testing.info/tests/BIG5.php")
+    # target.send("Temperaments: http://personality-testing.info/tests/O4TS/")    
 
 @commands.registerEventHandler(name="popori")
 async def popori(triggerMessage):
-    await client.send_message(triggerMessage.channel, "https://www.youtube.com/watch?v=gbNN3grTdDk")
+    await triggerMessage.channel.send( "https://www.youtube.com/watch?v=gbNN3grTdDk")
 
 @commands.registerEventHandler(name="constitution")
 async def constitution(triggerMessage):
-    await client.send_message(triggerMessage.channel, "https://docs.google.com/document/d/1XKFRQhzxwhjjtW1RnCc_ZhesRqavvM3F5z1LALfve48/")
+    await triggerMessage.channel.send( "https://docs.google.com/document/d/1XKFRQhzxwhjjtW1RnCc_ZhesRqavvM3F5z1LALfve48/")
 
 @commands.registerEventHandler(name="wiki")
 async def wiki(triggerMessage):
-    await client.send_message(triggerMessage.channel, "http://iaa.wikia.com")
+    await triggerMessage.channel.send( "http://iaa.wikia.com")
 
 @commands.registerEventHandler(name="application")
 async def application(triggerMessage):
-    await client.send_message(triggerMessage.channel, "https://docs.google.com/forms/d/1a6fXy0b9uimE789VLFUyUUvkbjVDEx3cYfutXBT8WOQ/viewform")
+    await triggerMessage.channel.send( "https://docs.google.com/forms/d/1a6fXy0b9uimE789VLFUyUUvkbjVDEx3cYfutXBT8WOQ/viewform")
 
 @commands.registerEventHandler(triggerType="\\messageNoBot", name="unflip")
 @commands.messageHandlerFilter("(╯°□°）╯︵ ┻━┻")
 async def unflip(triggerMessage):
-    await client.send_message(triggerMessage.channel, "┬─┬﻿ ノ( ゜-゜ノ)")
+    await triggerMessage.channel.send( "┬─┬﻿ ノ( ゜-゜ノ)")
 
 @commands.registerEventHandler(triggerType="\\messageNoBot", name="kk")
 @commands.messageHandlerFilter("kk")
 async def kkk(triggerMessage):
     if triggerMessage.content.__len__() == 2:
-        await client.send_message(triggerMessage.channel, "k")
+        await triggerMessage.channel.send( "k")
 
 @commands.registerEventHandler(name="floor")
 async def floor(triggerMessage):
-    await client.send_message(triggerMessage.channel, "http://i.imgur.com/3OYeOxK.jpg")
+    await triggerMessage.channel.send( "http://i.imgur.com/3OYeOxK.jpg")
 
 @commands.registerEventHandler(name="sonic")
 async def sonic(triggerMessage):
     if random.randint(0,1) != 0:
-        await client.send_message(triggerMessage.channel, "http://archiesonic.wikia.com/wiki/Special:Random")
+        await triggerMessage.channel.send( "http://archiesonic.wikia.com/wiki/Special:Random")
     else:
-        await client.send_message(triggerMessage.channel, "http://sonicfanon.wikia.com/wiki/Special:Random")
+        await triggerMessage.channel.send( "http://sonicfanon.wikia.com/wiki/Special:Random")
         
 @commands.registerEventHandler(triggerType="\\messageNoBot", name="plot")
 @commands.messageHandlerFilter("plot", filterType="contains")
 async def plot(triggerMessage):
     if client.user in triggerMessage.mentions:
-        await client.send_message(triggerMessage.channel, random.choice(phrasebank["plots"]))
+        await triggerMessage.channel.send( random.choice(phrasebank["plots"]))
 
 @commands.registerEventHandler(triggerType="\\messageNoBot", name="ㅋ")
 @commands.messageHandlerFilter("ㅋ")
 async def disrespects(triggerMessage):
     if triggerMessage.content.__len__() == 1:
-        await client.send_message(triggerMessage.channel, triggerMessage.author.name + " has revoked their respects.")
+        await triggerMessage.channel.send( triggerMessage.author.name + " has revoked their respects.")
       
 @commands.registerEventHandler(triggerType="\\messageNoBot", name="F")
 @commands.messageHandlerFilter("F")
 async def respects(triggerMessage):
     if triggerMessage.content.__len__() == 1:
-        await client.send_message(triggerMessage.channel, triggerMessage.author.name + " has paid their respects.")
+        await triggerMessage.channel.send( triggerMessage.author.name + " has paid their respects.")
       
 @commands.registerEventHandler(triggerType="\\messageNoBot", name="X")
 @commands.messageHandlerFilter("X")
 async def respects(triggerMessage):
     if triggerMessage.content.__len__() == 1:
-        await client.send_message(triggerMessage.channel, triggerMessage.author.name + " doubts that.")
+        await triggerMessage.channel.send( triggerMessage.author.name + " doubts that.")
 
 @commands.registerEventHandler(name="addphrase")
 @permissions.needs_admin    
@@ -209,5 +209,5 @@ async def addphrase(triggerMessage):
         
         with open('phrasebank.json', 'w') as phrasefile:
             phrasefile.write(json.dumps(phrasebank, indent=4))
-            await client.send_message(triggerMessage.channel, "Added phrase " + phrase)
+            await triggerMessage.channel.send( "Added phrase " + phrase)
             

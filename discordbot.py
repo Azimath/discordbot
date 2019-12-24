@@ -10,12 +10,12 @@ import threading
 import commands
 import permissions
 
-import PyREPL
-interactive = None
+#import pyrepl
+#interactive = None
 loaded = False
 
-import traceback
-import warnings
+#import traceback
+#import warnings
 import sys
 
 def warn_with_traceback(message, category, filename, lineno, file=None, line=None):
@@ -34,9 +34,13 @@ async def loadPlugins():
         for importer, package_name, _ in pkgutil.iter_modules([dirname]):
             full_package_name = '%s.%s' % (dirname, package_name)
             if full_package_name not in sys.modules:
-                mod = importer.find_module(package_name).load_module(package_name)
-                modules.append(mod)
-                print(mod)
+                try:
+                    mod = importer.find_module(package_name).load_module(package_name)
+                    modules.append(mod)
+                    print(mod)
+                except Exception as e:
+                    print("Failed to load " + str(package_name))
+                    print(e)
         return modules
         
     plugins = load_all_modules_from_dir("plugins")
@@ -46,7 +50,7 @@ async def loadPlugins():
     context = globals()
     context.update(locals())
     #await commands.executeEvent(triggerType="\\set_root_context_on_load", rootContext=context)#TODO: probably dont need to pass locals()
-    interactive.setRootContext(context)
+#    interactive.setRootContext(context)
     print("%s plugins loaded" % len(plugins))
 
 def timeLoop(asyncLoop):
@@ -63,7 +67,7 @@ if __name__ == "__main__":
     client = discord.Client()
     permissions.client = client
     commands.client = client
-    interactive = PyREPL.REPL(client)
+#    interactive = PyREPL.REPL(client)
     def listen():
         @client.event
         async def on_reaction_add(reaction, user):

@@ -59,7 +59,7 @@ def needs_admin(func):
         if hasPermission(triggerMessage.author, "admin"):
             await func(triggerMessage)
         else:
-            await client.send_message(triggerMessage.channel, "Get admin permission dummy")
+            await triggerMessage.channel.send( "Get admin permission dummy")
     return command
 
 def needs_owner(func):
@@ -67,7 +67,7 @@ def needs_owner(func):
         if hasPermission(triggerMessage.author, "owner"):
             await func(triggerMessage)
         else:
-            await client.send_message(triggerMessage.channel, "Get owner permission dummy")
+            await triggerMessage.channel.send( "Get owner permission dummy")
     return command
 
 def needs_moderator(func):
@@ -75,7 +75,7 @@ def needs_moderator(func):
         if hasPermission(triggerMessage.author, "moderator"):
             await func(triggerMessage)
         else:
-            await client.send_message(triggerMessage.channel, "Get moderator permission dummy")
+            await triggerMessage.channel.send( "Get moderator permission dummy")
     return command
     
 def needs_base(func):
@@ -83,7 +83,7 @@ def needs_base(func):
         if hasPermission(triggerMessage.author, "base"):
             await func(triggerMessage)
         else:
-            await client.send_message(triggerMessage.channel, "You're not in the permission system dummy")
+            await triggerMessage.channel.send( "You're not in the permission system dummy")
     return command    
     
 def needs_permissionsManager(func):
@@ -91,7 +91,7 @@ def needs_permissionsManager(func):
         if hasPermission(triggerMessage.author, "manager"):
             await func(triggerMessage)
         else:
-            await client.send_message(triggerMessage.channel, "Get manager permission dummy")
+            await triggerMessage.channel.send( "Get manager permission dummy")
     return command
     
 def register(user, triggerMessage):

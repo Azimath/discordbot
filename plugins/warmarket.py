@@ -23,18 +23,18 @@ async def fetchItemInfo(triggerMessage):
     itemRequest = requests.get('https://api.warframe.market/v1/items')
 
     if itemRequest.status_code != 200:
-        await client.send_message(triggerMessage.channel, "Item list request error, aborting item search")
+        await triggerMessage.channel.send( "Item list request error, aborting item search")
         return
         
     items = [x for x in itemRequest.json()['payload']['items']['en'] if 'prime' in x['url_name'] and 'primed' not in x['url_name']]
     
-    await client.send_message(triggerMessage.channel, "Beginning item data download with " + str(len(items)) + " items")
-    progressMessage = await client.send_message(triggerMessage.channel, "Progress: 0%")
+    await triggerMessage.channel.send( "Beginning item data download with " + str(len(items)) + " items")
+    progressMessage = await triggerMessage.channel.send( "Progress: 0%")
     nextEdit = 5
     for index,item in enumerate(items):
         itemInfoRequest = requests.get('https://api.warframe.market/v1/items/'+item['url_name'])
         if itemInfoRequest.status_code != 200:
-            await client.send_message(triggerMessage.channel, "Item info request error, aborting further item search")
+            await triggerMessage.channel.send( "Item info request error, aborting further item search")
             break
         
         itemInfo = itemInfoRequest.json()['payload']['item']
@@ -65,7 +65,7 @@ async def fetchItemInfo(triggerMessage):
         if len(itemData) > 0:
             with open('WarframeItems.json', 'w') as datafile:
                 datafile.write(json.dumps(itemData, indent=4, sort_keys=True))
-                await client.send_message(triggerMessage.channel, "Got {} warframe items".format(len(itemData)))
+                await triggerMessage.channel.send( "Got {} warframe items".format(len(itemData)))
 onlineGPrimeOffers = []
 
 @commands.registerEventHandler(triggerType="\\timeTick", name="cheapGalatine")
@@ -85,7 +85,7 @@ async def checkGalatine():
                 elif offer['user']['id'] in onlineGPrimeOffers and offer['user']['status'] == 'offline':
                     onlineGPrimeOffers.remove(offer['user']['id'])
         if len(outString) > 0:            
-            await client.send_message(discord.Object('431299254418669570'), outString)
+            await discord.Object('431299254418669570').send(outString)
         
         #print(onlineGPrimeOffers)
         
@@ -99,8 +99,8 @@ async def getDuckListings(triggerMessage):
     
     interestingItems = {k: v for k, v in items.items() if v['best'] > 8}
     
-    await client.send_message(triggerMessage.channel, "Searching through " + str(len(interestingItems)) + " interesting items")
-    progressMessage = await client.send_message(triggerMessage.channel, "Progress: 0%")
+    await triggerMessage.channel.send( "Searching through " + str(len(interestingItems)) + " interesting items")
+    progressMessage = await triggerMessage.channel.send( "Progress: 0%")
     
     for index, item in enumerate(interestingItems):
         startTime = time.time()
@@ -109,7 +109,7 @@ async def getDuckListings(triggerMessage):
         itemOrdersRequest = requests.get('https://api.warframe.market/v1/items/'+item+'/orders')
         
         if itemOrdersRequest.status_code != 200:
-            await client.send_message(triggerMessage.channel, "Item orders request error, aborting further ducat search")
+            await triggerMessage.channel.send( "Item orders request error, aborting further ducat search")
             break
             
         itemOrders = itemOrdersRequest.json()['payload']['orders']
@@ -137,7 +137,7 @@ async def getDuckListings(triggerMessage):
     for item in itertools.islice(itemsToBuy, 0, 10):
         results += ("{} : {} ducats, best: {:0.2f} dc/pl, median: {:0.2f} dc/pl\n".format(item[0],item[1],item[2],item[3]))
     
-    await client.send_message(triggerMessage.channel, results)
+    await triggerMessage.channel.send( results)
     
     try:
         json.dumps(items, indent=4)

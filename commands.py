@@ -67,7 +67,7 @@ def registerEventHandler(triggerType="\\command", name=None, helpText=None, excl
                         commandMutexes.remove(name)
                         print("Unlocked " + name)
                 else:
-                    await client.send_message(triggerMessage.channel, "One at a time please")
+                    await triggerMessage.channel.send( "One at a time please")
             event = Event(excluder, triggerType, name, **kwargs)
         else:
             event = Event(f, triggerType, name, **kwargs)

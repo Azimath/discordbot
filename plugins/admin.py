@@ -38,22 +38,22 @@ async def registerNewUser(triggerMessage):
         id = triggerMessage.author.id
         name = triggerMessage.author.name
         if permissions.register(permissions.User(id, name, ["base"]), triggerMessage):
-            await client.send_message(triggerMessage.channel, "User id " + triggerMessage.author.id + " has been registered")
+            await triggerMessage.channel.send( "User id " + triggerMessage.author.id + " has been registered")
         else:
-            await client.send_message(triggerMessage.channel, "User id " + triggerMessage.author.id + " is already registered")
+            await triggerMessage.channel.send( "User id " + triggerMessage.author.id + " is already registered")
     else:
         id = triggerMessage.mentions[0].id
         name = triggerMessage.mentions[0].name
         if permissions.register(permissions.User(id, name, ["base"]), triggerMessage):
-            await client.send_message(triggerMessage.channel, "User id " + id + " has been registered")
+            await triggerMessage.channel.send( "User id " + id + " has been registered")
         else:
-            await client.send_message(triggerMessage.channel, "User id " + id + " is already registered")
+            await triggerMessage.channel.send( "User id " + id + " is already registered")
 
 @commands.registerEventHandler(name="addnode")
 @permissions.needs_permissionsManager
 async def addNode(triggerMessage):
     if triggerMessage.mentions.__len__() == 0:
-        await client.send_message(triggerMessage.channel, "Specify one or more users")
+        await triggerMessage.channel.send( "Specify one or more users")
     else:
         permNode = triggerMessage.content.split()[-1]
         if permNode == "manager":
@@ -61,7 +61,7 @@ async def addNode(triggerMessage):
             
         for user in triggerMessage.mentions:
             permissions.addPermission(user, permNode)
-        await client.send_message(triggerMessage.channel, "Permissions added")      
+        await triggerMessage.channel.send( "Permissions added")      
 
 @commands.registerEventHandler(name="setavatar")
 @permissions.needs_moderator
@@ -77,9 +77,9 @@ async def setAvatar(triggerMessage):
                   })
                 image = request.urlopen(req).read()
                 await client.edit_profile(avatar=image)
-                await client.send_message(triggerMessage.channel, "Avatar set!")
+                await triggerMessage.channel.send( "Avatar set!")
                 return
-        await client.send_message(triggerMessage.channel, "Couldnt get an image")          
+        await triggerMessage.channel.send( "Couldnt get an image")          
 
 class RestartException(Exception):
     pass
@@ -155,7 +155,7 @@ async def delete(triggerMessage):
                     deleted = deleted + 1
                     #print("deleted " + str(deleted))
                 if deleted >= number and victim is not None:
-                    await client.send_message(channel, triggerMessage.author.name + " removed " + str(deleted) + " messages belonging to " + victim.name)
+                    await channel.send( triggerMessage.author.name + " removed " + str(deleted) + " messages belonging to " + victim.name)
                     break
             #print("messages remaining: " + str(number-deleted))
         else:

@@ -10,7 +10,7 @@ client = None
 @commands.registerEventHandler(name="flip")
 @commands.registerEventHandler(name="coin")
 async def flip(triggerMessage):
-    await client.send_message(triggerMessage.channel, random.choice(["heads", "tails"]))
+    await triggerMessage.channel.send( random.choice(["heads", "tails"]))
 
 @commands.registerEventHandler(name="trick")
 async def trick(triggerMessage):
@@ -19,12 +19,12 @@ async def trick(triggerMessage):
     values = ["Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Jack", "Queen", "King"]
     suit = random.choice(suits)
     value = random.choice(values)
-    await client.send_message(target, "This is your card. Remember it, but don't tell me what it is. " + suit + " " + value)
-    await client.send_message(target, "*shuffles*")
-    await client.send_message(target, "*shuffles*")
-    await client.send_message(target, "*shuffles*")
-    await client.send_message(target, "*cuts*")
-    await client.send_message(target, "Is this your card? " + suit + " " + value)
+    await target.send("This is your card. Remember it, but don't tell me what it is. " + suit + " " + value)
+    await target.send("*shuffles*")
+    await target.send("*shuffles*")
+    await target.send("*shuffles*")
+    await target.send("*cuts*")
+    await target.send("Is this your card? " + suit + " " + value)
 
 
 @commands.registerEventHandler(name="ship")
@@ -39,15 +39,15 @@ async def ship(triggerMessage):
             onlineMembs.append(memb)
       
       winners = random.sample(onlineMembs, 2)
-      await client.send_message(triggerMessage.channel, "I ship {0} and {1}. Now kiss. :heart:".format(winners[0].mention, winners[1].mention))
+      await triggerMessage.channel.send( "I ship {0} and {1}. Now kiss. :heart:".format(winners[0].mention, winners[1].mention))
    else:
-      await client.send_message(triggerMessage.channel, "I ship us. :heart:")
+      await triggerMessage.channel.send( "I ship us. :heart:")
       
 
 @commands.registerEventHandler(triggerType="\\messageNoBot", name="fuck quest go")
 @commands.messageHandlerFilter("fuck quest go", filterType="cqc")
 async def fuckRoll(triggerMessage):
-    await client.send_message(triggerMessage.channel, "Fuck quest: " + str(random.randrange(1, 100)))
+    await triggerMessage.channel.send( "Fuck quest: " + str(random.randrange(1, 100)))
 
 
 
@@ -67,7 +67,7 @@ async def roll(triggerMessage):
    global lastRoll
    target = triggerMessage.channel
    pivot = triggerMessage.content.find(" ")
-   if pivot = -1 and lastRoll is not None:
+   if pivot == -1 and lastRoll is not None:
       toParse = lastRoll
    else:
       toParse = triggerMessage.content[triggerMessage.content.find(" "):]
@@ -75,7 +75,7 @@ async def roll(triggerMessage):
       
    if "∞" in toParse:
        result = "∞"
-       await client.send_message(target, "Rolled " + toParse + ": " + "∞")
+       await target.send("Rolled " + toParse + ": " + "∞")
 
    else:    
        rolls = int(toParse[1:toParse.index('d')])
@@ -93,10 +93,10 @@ async def roll(triggerMessage):
        result = 0
        
        if rolls > 100000:
-           await client.send_message(target, "Fuck off")
+           await target.send("Fuck off")
        else:
            for i in range(0, rolls):
                result += random.randrange(1, size+1)
            
            result += mod
-           await client.send_message(target, "Rolled {0}d{1}{2}: **{3}**".format(str(rolls), str(size), modString(mod), str(result))
+           await target.send("Rolled {0}d{1}{2}: **{3}**".format(str(rolls), str(size), modString(mod), str(result)))

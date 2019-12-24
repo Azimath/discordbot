@@ -18,11 +18,11 @@ async def translate(triggerMessage):
     output = p.stdout.read().decode('utf-8')
     signal = p.stderr.read().decode('utf-8')
     if signal == "1":
-        await client.send_message(triggerMessage.channel, output)
+        await triggerMessage.channel.send( output)
 
     else:
         splitPoint = output.find("-")
         translated = output[:splitPoint]
         plainText = output[splitPoint+1:]
-        await client.send_message(triggerMessage.author, plainText[:-1])
-        await client.send_message(triggerMessage.channel, translated)
+        await triggerMessage.author.send(plainText[:-1])
+        await triggerMessage.channel.send( translated)

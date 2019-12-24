@@ -16,7 +16,6 @@ cd = 2
 lastTime = time.time() - cd # for cooldowns
 
 def voiceCommandExclusive(func):
-    global player
     global voice
     async def command(triggerMessage):
         global voice
@@ -24,23 +23,23 @@ def voiceCommandExclusive(func):
         if voice is None:
             channel = None
             for c in client.get_all_channels():
-                if c.type==discord.ChannelType.voice and triggerMessage.author in c.voice_members:
+                if c.type==discord.ChannelType.voice and triggerMessage.author in c.members:
                     channel = c
                     break
             
             if channel is not None:            
-                voice = await client.join_voice_channel(channel) # there is no better way to do this
+                voice = await channel.connect() # there is no better way to do this
             else:
                 return
         #print(str(time.time()) + ">" + str(lastTime) + "+" + str(cd))
         if time.time() > lastTime + cd:
             if not voice.is_connected():
-                await client.send_message(triggerMessage.channel, "Error: not connected to voice")
+                await triggerMessage.channel.send( "Error: not connected to voice")
             else:
-                if player is not None:
-                    if hasattr(player, "is_playing"):
-                        if player.is_playing():
-                            await client.send_message(triggerMessage.channel, "Fuck you")
+                if voice is not None:
+                    if hasattr(voice, "is_playing"):
+                        if voice.is_playing():
+                            await triggerMessage.channel.send( "Fuck you")
                             return
                 lastTime = time.time()
                 await func(triggerMessage)
@@ -55,7 +54,6 @@ def voiceCommandExclusive(func):
     """
 client = None
 voice = None
-player = None
 message = None
 
 if not discord.opus.is_loaded():
@@ -72,7 +70,7 @@ async def join(triggerMessage):
     channel = None
     if len(triggerMessage.content.split()) < 2:
         for c in client.get_all_channels():
-            if c.type==discord.ChannelType.voice and triggerMessage.author in c.voice_members:
+            if c.type==discord.ChannelType.voice and triggerMessage.author in c.members:
                 channel = c
                 print("Got channel " + c.name)
                 break
@@ -80,15 +78,15 @@ async def join(triggerMessage):
         if channel is not None:            
             if voice is not None:
                 await voice.disconnect()
-            voice = await client.join_voice_channel(channel) # there is no better way to do this
+            voice = await channel.connect() # there is no better way to do this
     else:
         channel = discord.utils.get(triggerMessage.server.channels, name=triggerMessage.content[6:], type=discord.ChannelType.voice)
         if channel is not None:
             if voice is not None:
                 await voice.disconnect()
-            voice = await client.join_voice_channel(channel) # there is no better way to do this
+            voice = await channel.connect() # there is no better way to do this
         else:
-            await client.send_message(triggerMessage.channel, "That's not a valid voice channel on this server!")
+            await triggerMessage.channel.send( "That's not a valid voice channel on this server!")
 
 @commands.registerEventHandler(name="disconnect") 
 async def disconnect(triggerMessage):
@@ -119,7 +117,7 @@ async def addSound(triggerMessage):
         audiobank.update({name : filepath})
         with open('audiobank.json', 'w') as database:
                 database.write(json.dumps(audiobank, indent=4))
-                await client.send_message(triggerMessage.channel, "Added sound " + name)
+                await triggerMessage.channel.send( "Added sound " + name)
     except:
         name, link = link, name
         filename = re.sub('[-.() ]', '', name)
@@ -139,35 +137,32 @@ async def addSound(triggerMessage):
         audiobank.update({name : filepath})
         with open('audiobank.json', 'w') as database:
                 database.write(json.dumps(audiobank, indent=4))
-                await client.send_message(triggerMessage.channel, "Added sound " + name)
+                await triggerMessage.channel.send( "Added sound " + name)
 
 @commands.registerEventHandler(name="listsounds") 
 async def listSounds(triggerMessage):
     result = "Available audio clips: \n"
     for key in sorted(audiobank.keys()):
         result = result + key + "\n"
-    await client.send_message(triggerMessage.channel, result)
+    await triggerMessage.channel.send( result)
 
 @commands.registerEventHandler(name="sound")
 @commands.registerEventHandler(name="play")  
 @voiceCommandExclusive
 async def sound(triggerMessage):
-    global player
     sound = triggerMessage.content.split()[-1]
     
     if sound in audiobank:
-        print("Sound " + sound + " started by user " + triggerMessage.author.id)
-        player = voice.create_ffmpeg_player(audiobank[sound], use_avconv=True)
-        player.start()
+        print("Sound " + sound + " started by user " + str(triggerMessage.author.id))
+        voice.play(discord.FFmpegPCMAudio(audiobank[sound]))
     else:
-        client.send_message(triggerMessage.channel, "Sound not found")
+        triggerMessage.channel.send( "Sound not found")
 
 @commands.registerEventHandler(name="radio") 
 @voiceCommandExclusive
 async def radio(triggerMessage):
-    global player
     if len(triggerMessage.content.split()) < 2:
-        client.send_message(triggerMessage.channel, "Not enough args for !radio")
+        triggerMessage.channel.send( "Not enough args for !radio")
         return
     
     freq = triggerMessage.content.split()[1]
@@ -180,30 +175,28 @@ async def radio(triggerMessage):
     voice.encoder_options(sample_rate=48000, channels=1)
     rtlfm = subprocess.Popen(["rtl_fm", "-f", freq, "-p","100", "-M", modulation, "-r", "48k", "-l", "0"], stdout=subprocess.PIPE)
     
-    player = discord.voice_client.ProcessPlayer(rtlfm, voice, None)
-    player.start()
+    discord.voice_client.ProcessPlayer(rtlfm, voice, None)
     
-    client.send_message(triggerMessage.channel, "Radio Started")
+    triggerMessage.channel.send( "Radio Started")
 
 @commands.registerEventHandler(name="youtube")
 @commands.registerEventHandler(name="websound")  
 @voiceCommandExclusive
 async def youtube(triggerMessage):
-    global player
     global message
     if triggerMessage.channel.is_private:
-        await client.send_message(triggerMessage.channel, "Go fuck yourself")
-        await client.send_message(discord.utils.get(client.get_all_channels(), server__name="IAA-Official", name='genearl', type=discord.ChannelType.text), triggerMessage.author.name + " should go fuck themselves")
+        await triggerMessage.channel.send( "Go fuck yourself")
+        await discord.utils.get(client.get_all_channels(), server__name="IAA-Official", name='genearl', type=discord.ChannelType.text).send(triggerMessage.author.name + " should go fuck themselves")
         return
         
-    await client.send_message(triggerMessage.channel, "Loading song at the request of " + triggerMessage.author.name)
+    await triggerMessage.channel.send( "Loading song at the request of " + triggerMessage.author.name)
     
-    player = await voice.create_ytdl_player(triggerMessage.content.split()[1], use_avconv=True)
+    player = await voice.create_ytdl_player(triggerMessage.content.split()[1], use_avconv=False)
     
     player.start()
     
     await client.change_presence(game=discord.Game(name=player.title, url=triggerMessage.content.split()[1], type=2))
-    message = await client.send_message(triggerMessage.channel, "Now playing " + player.title)
+    message = await triggerMessage.channel.send( "Now playing " + player.title)
     
     await client.add_reaction(message, '\u23ef')
     await client.add_reaction(message, '\u23f9')
@@ -257,6 +250,6 @@ async def setcd(triggerMessage):
     global cd
     try:
         cd = int(triggerMessage.content[7:])
-        await client.send_message(triggerMessage.channel, "Cooldown is now " + triggerMessage.content[7:] + " seconds")
+        await triggerMessage.channel.send( "Cooldown is now " + triggerMessage.content[7:] + " seconds")
     except ValueError:
-        await client.send_message(triggerMessage.channel, "Invalid input")
+        await triggerMessage.channel.send( "Invalid input")

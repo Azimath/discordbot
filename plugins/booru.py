@@ -77,13 +77,13 @@ async def postRandom(channel, booru, tags):
         with open(out, "rb") as image:
             await client.send_file(channel, image, filename=out)
     except IndexError:
-        await client.send_message(channel, "Oopsie woopsie Uwu. " + booru + " returned no search results.")
+        await channel.send("Oopsie woopsie Uwu. " + booru + " returned no search results.")
     except KeyError:
-        await client.send_message(channel, "Oopsie woopsie. " + booru + " is not supported.\nSupported boorus: "+str(SUPPORTED))
+        await channel.send("Oopsie woopsie. " + booru + " is not supported.\nSupported boorus: "+str(SUPPORTED))
     except JSONDecodeError:
-        await client.send_message(channel, "Oopsie Woopsie. Failed to decode json. " + booru + " returned an empty response, or something weird")
+        await channel.send("Oopsie Woopsie. Failed to decode json. " + booru + " returned an empty response, or something weird")
     except Exception as e:
-        await client.send_message(channel, "Oopsie woopsie Uwu. One of many possible disasters has occured. Try `!booru help`\nException: " + type(e).__name__)
+        await channel.send("Oopsie woopsie Uwu. One of many possible disasters has occured. Try `!booru help`\nException: " + type(e).__name__)
         print(e) #hopefully this does something useful
 
 @commands.registerEventHandler(name="booru", exclusivity="global")
@@ -92,7 +92,7 @@ async def booru(triggerMessage):
     tokens = triggerMessage.content.split()
     #if (len(tokens) == 1 or tokens[1].lower() == "help"):
     if (len(tokens) <= 2):
-        await client.send_message(triggerMessage.channel, "Syntax is `!booru booru_name tag0 ...`\nCurrently supported boorus: " + str(list(functionMap.keys())))
+        await triggerMessage.channel.send( "Syntax is `!booru booru_name tag0 ...`\nCurrently supported boorus: " + str(list(functionMap.keys())))
         return
     tokens.extend(["-young", "-scat","-fart"]) #Anti trash
     await postRandom(triggerMessage.channel, tokens[1], tokens[2:8]) # chop off extra tags
@@ -160,7 +160,7 @@ async def endGame(channel):
     del gameInstances[channel]
     
     endMsg = "Game Complete!\n" + "Unguessed tags were: `" + str(game.tags)+"`\n" + "Guessed tags were: `" + str(game.previousGuesses) + "`"
-    await client.send_message(channel, endMsg)
+    await channel.send(endMsg)
     scoreDict = game.userScores
     scores = sorted([(k, len(scoreDict[k])) for k in scoreDict], key=lambda tup: tup[1], reverse=True)
     if len(scores) > 0:
@@ -170,7 +170,7 @@ async def endGame(channel):
             scoreString += "User " + str(name) + " scored " + str(score) + "\n"
         
         name = nameFromId(channel, scores[0][0])
-        await client.send_message(channel, scoreString + "\n" + str(name) + " wins!")
+        await channel.send(scoreString + "\n" + str(name) + " wins!")
         
         remainingJson = json.dumps(game.tags)
         guessedJson = json.dumps(game.previousGuesses)
@@ -189,7 +189,7 @@ async def updateTime():
             gamesToStop.append(c)
             print("Stopping " + str(c))
     for c in gamesToStop:
-        await client.send_message(c, "Timed out!")
+        await c.send("Timed out!")
         await endGame(c)
         
 def lookup_tag(tag):
@@ -207,7 +207,7 @@ def lookup_tag(tag):
 @commands.registerEventHandler(name="boorugamestart")
 async def startBooruGame(triggerMessage):
     if triggerMessage.channel in gameInstances:
-        await client.send_message(triggerMessage.channel, "A game is already in progress in this channel")
+        await triggerMessage.channel.send( "A game is already in progress in this channel")
     else:
         tags = []
         target = ""
@@ -224,7 +224,7 @@ async def startBooruGame(triggerMessage):
                 break
                 
             if target is None:
-                await client.send_message(triggerMessage.channel, "Oopsie woopsie Uwu. Couldn't find a suitable post. Try again?")
+                await triggerMessage.channel.send( "Oopsie woopsie Uwu. Couldn't find a suitable post. Try again?")
                 return   
             tags = target["tags"].casefold().split(" ")
             target = target["file_url"]
@@ -235,17 +235,17 @@ async def startBooruGame(triggerMessage):
                 await client.send_file(triggerMessage.channel, image, filename=filename)
                 
         except JSONDecodeError:
-            await client.send_message(triggerMessage.channel, "Oopsie Woopsie. Failed to decode json.")
+            await triggerMessage.channel.send( "Oopsie Woopsie. Failed to decode json.")
             return
         except Exception as e:
-            await client.send_message(triggerMessage.channel, "Oopsie woopsie Uwu. One of many possible disasters has occured. Try `!booru help`\nException: " + type(e).__name__)
+            await triggerMessage.channel.send( "Oopsie woopsie Uwu. One of many possible disasters has occured. Try `!booru help`\nException: " + type(e).__name__)
             print(e) #hopefully this does something useful
             return
         
         print(tags)
         
         gameInstances[triggerMessage.channel] = BooruGame(tags, target)
-        await client.send_message(triggerMessage.channel, "Game started. The post has " + str(len(tags)) + " tags to guess.")
+        await triggerMessage.channel.send( "Game started. The post has " + str(len(tags)) + " tags to guess.")
 
 @commands.registerEventHandler(name="boorugamestop")
 @commands.registerEventHandler(name="boorugamequit")
@@ -257,14 +257,14 @@ async def endBooruGame(triggerMessage):
 @commands.registerEventHandler(name="booruguess")
 async def booruGameGuess(triggerMessage):
     if triggerMessage.channel not in gameInstances:
-        await client.send_message(triggerMessage.channel, "No game in progress")
+        await triggerMessage.channel.send( "No game in progress")
         return
     
     args = triggerMessage.content.split()
     resultText = ""
     for arg in args[1:]:
         resultText += gameInstances[triggerMessage.channel].guess(str(arg), triggerMessage.author.id) + "\n"
-    await client.send_message(triggerMessage.channel, resultText)
+    await triggerMessage.channel.send( resultText)
         
     if len(gameInstances[triggerMessage.channel].tags) == 0:
         await endBooruGame(triggerMessage)
@@ -279,4 +279,4 @@ async def booruLeaders(triggerMessage):
     for id in leaderboard:
         name = nameFromId(triggerMessage.channel, id)
         leaderboardString += name + " : " + str(leaderboard[id]) + "\n"
-    await client.send_message(triggerMessage.channel, leaderboardString)
+    await triggerMessage.channel.send( leaderboardString)
