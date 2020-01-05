@@ -25,8 +25,8 @@ async def fetchItemInfo(triggerMessage):
     if itemRequest.status_code != 200:
         await triggerMessage.channel.send( "Item list request error, aborting item search")
         return
-        
-    items = [x for x in itemRequest.json()['payload']['items']['en'] if 'prime' in x['url_name'] and 'primed' not in x['url_name']]
+
+    items = [x for x in itemRequest.json()['payload']['items'] if 'prime' in x['url_name'] and 'primed' not in x['url_name']]
     
     await triggerMessage.channel.send( "Beginning item data download with " + str(len(items)) + " items")
     progressMessage = await triggerMessage.channel.send( "Progress: 0%")
@@ -38,11 +38,10 @@ async def fetchItemInfo(triggerMessage):
             break
         
         itemInfo = itemInfoRequest.json()['payload']['item']
-        
         ducats = 0
         if 'set' not in item['url_name']:
             for setItem in itemInfo['items_in_set']:
-                if 'ducats' in setItem and setItem['_id'] == itemInfo['_id']:
+                if 'ducats' in setItem and setItem['id'] == itemInfo['id']:
                     ducats = setItem['ducats']
         else:
             ducats = 0
@@ -52,7 +51,7 @@ async def fetchItemInfo(triggerMessage):
         
         itemData[item['url_name']] = {'name' : item['item_name'], 'ducats' : ducats}
         if nextEdit > index:
-            await client.edit_message(progressMessage, "Progress: {:0.2f}%".format(100.0*index/len(items)))
+            await progressMessage.edit(content="Progress: {:0.2f}%".format(100.0*index/len(items)))
             nextEdit = index + 5
             
         await asyncio.sleep(0.334)
@@ -70,7 +69,7 @@ onlineGPrimeOffers = []
 
 @commands.registerEventHandler(triggerType="\\timeTick", name="cheapGalatine")
 async def checkGalatine():
-    if datetime.now(tz).second == 0:
+    if datetime.now(tz).second == 0 and datetime.now(tz).minute % 10 == 0:
         itemRequest = requests.get('https://api.warframe.market/v1/items/galatine_prime_set/orders')
 
         if itemRequest.status_code != 200:
@@ -85,7 +84,7 @@ async def checkGalatine():
                 elif offer['user']['id'] in onlineGPrimeOffers and offer['user']['status'] == 'offline':
                     onlineGPrimeOffers.remove(offer['user']['id'])
         if len(outString) > 0:            
-            await discord.Object('431299254418669570').send(outString)
+            await client.get_channel(431299254418669570).send(outString)
         
         #print(onlineGPrimeOffers)
         
@@ -97,8 +96,8 @@ async def getDuckListings(triggerMessage):
     with open('WarframePotentialDucks.json', 'r') as itemfile:
         items = json.loads(itemfile.read())
     
-    interestingItems = {k: v for k, v in items.items() if v['best'] > 8}
-    
+    #interestingItems = {k: v for k, v in items.items() if v['best'] > 8}
+    interestingItems = items
     await triggerMessage.channel.send( "Searching through " + str(len(interestingItems)) + " interesting items")
     progressMessage = await triggerMessage.channel.send( "Progress: 0%")
     
@@ -126,11 +125,11 @@ async def getDuckListings(triggerMessage):
         
             items[item] = {'name' : items[item]['name'], 'best' : ducats/prices[0], 'median' : ducats/prices[int(len(prices)/2)], 'ducats' : items[item]['ducats']}
         
-        await client.edit_message(progressMessage, "Progress: {:0.2f}%".format(100.0*index/len(interestingItems)))
+        await progressMessage.edit(content="Progress: {:0.2f}%".format(100.0*index/len(interestingItems)))
         if (time.time() - startTime) < 0.33:
             await asyncio.sleep(0.34 - (time.time() - startTime))
             print("Waiting an extra " + str(time.time() - startTime))
-    await client.edit_message(progressMessage, "Progress: Done!")
+    await progressMessage.edit(content="Progress: Done!")
     
     itemsToBuy.sort(key=lambda tup: tup[2], reverse=True)
     results = "Top 10 items to buy for ducats:\n"
