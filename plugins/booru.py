@@ -103,7 +103,59 @@ async def booru(triggerMessage):
 async def unbusy(triggerMessage):
     global busy
     busy = False
+    
+@commands.registerEventHandler(name="secret", exclusivity="global")
+async def postsecret(triggerMessage):
+    await channel.send(file=discord.File(addsecret(e621(["furry"]), filename = "secret.png")))
 
+def addsecret(file_name):
+    chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
+    pw = ""
+    for i in range(6):
+        pw += random.choice(chars)
+        
+    #get an image from e621
+    #we can mess with tags later
+    bg = Image.open(file_name)
+    
+    #make sure the image has an alpha channel so alpha_composite will work later
+    bg = bg.convert(mode="RGBA")
+    bg.putalpha(255)
+    
+    # magic formula: size = x/y/z
+    # where x is the x dimension of the image
+    # y is the ratio of image width to text width
+    # and z is the ratio of pixels to points
+    # this finds the font size to produce text of the correct pixel width
+    fontsize = int(bg.size[0]/8/5.3)
+    fontsize = (fontsize, 12)[fontsize < 12]
+    # font can be changed later
+    font = ImageFont.truetype("arial.ttf", fontsize)
+    
+    #get the dimensions of rendered text
+    x,y = font.getsize(chars)
+    img = Image.new("RGBA", (x+4, y+4), (0,0,0,0))
+    draw = ImageDraw.Draw(img)
+    
+    #draw the text on a canvas, rotate, then get new dimensions
+    draw.text((0,0), pw, fill=(255, 255, 255, 127), font=font, stroke_width=2, stroke_fill=(0, 0, 0, 127))
+    img = img.rotate(random.randrange(0,360), resample=Image.NEAREST, expand=1)
+    
+    #randomly pad the text image to align the text with a random location on the background image
+    x,y = img.size
+    xb,yb = bg.size
+    x1 = random.randrange(0, xb-x)
+    x2 = xb-x1
+    y1 = random.randrange(0, yb-y)
+    y2 = yb-y1
+    img = img.crop((-x1, -y1, x2+x, y2+y))
+    
+    #composite images and save
+    bg.alpha_composite(img)
+    out = io.BytesIO()
+    bg.save(out, format="PNG")
+    return out
+    
 class BooruGame:
     def __init__(self, tags, url):
         self.userScores = {}
@@ -212,7 +264,7 @@ async def startBooruGame(triggerMessage):
         tags = []
         target = ""
         try:    
-            j = getData("http://e621.net/post/index.json?limit={0}&tags={1}", ["order:random","-scat","-loli","-shota","-cub","-fart"])
+            j = getData("http://e621.net/post/index.json?limit={0}&tags={1}", ["order:random","-scat","-young","-fart"])
             target = None
             for i in j: # look for a suitable post
                 file_ext = i["file_ext"]
