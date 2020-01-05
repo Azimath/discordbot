@@ -1,5 +1,6 @@
 import asyncio
 import sys
+import traceback
 
 client = None
 
@@ -101,7 +102,8 @@ async def executeEvent(triggerType="\\command", name=None, **kwargs):
                 await triggerHandlers[triggerType][name].handler(**kwargs)
         except:
             if sys.exc_info()[0].__name__ != "RestartException":
-                print("Unexpected error:", sys.exc_info())
+                print("Unexpected error:", sys.exc_info()[1])
+                traceback.print_tb(sys.exc_info()[2])
             else: 
                 raise
             
