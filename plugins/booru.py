@@ -109,8 +109,11 @@ async def unbusy(triggerMessage):
 @commands.registerEventHandler(name="secret", exclusivity="global")
 async def postsecret(triggerMessage):
     filename = addsecret(e621(["furry"]))
-    with open(filename, "rb") as image:
-        await triggerMessage.channel.send(file=discord.File(image, filename="secret.png"))
+    if filename is not None:
+        with open(filename, "rb") as image:
+            await triggerMessage.channel.send(file=discord.File(image, filename="secret.png"))
+    else:
+        await triggerMessage.channel.send("Input image too small")
 
 def addsecret(file_name):
     chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghkmnopqrstuvwxyz1234567890"
@@ -152,6 +155,11 @@ def addsecret(file_name):
     #randomly pad the text image to align the text with a random location on the background image
     x,y = img.size
     xb,yb = bg.size
+
+    if xb-x <= 0 or yb-y <= 0:
+        print("Too small image {} by {}, text size {} by {}, {} points".format(xb, yb, x, y, fontsize))
+        return None
+
     x1 = random.randrange(0, xb-x)
     x2 = xb-x1
     y1 = random.randrange(0, yb-y)
