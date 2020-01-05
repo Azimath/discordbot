@@ -8,9 +8,10 @@ import commands
 
 import time
 import re
-from youtube_dl import YoutubeDL
+from youtube_dl import YoutubeDL, DownloadError
 import json
 import subprocess
+import functools
 
 cd = 2
 lastTime = time.time() - cd # for cooldowns
@@ -96,48 +97,48 @@ async def disconnect(triggerMessage):
 @commands.registerEventHandler(name="addsound") 
 @permissions.needs_admin
 async def addSound(triggerMessage):
-    await client.send_typing(triggerMessage.channel)
-    name = triggerMessage.content.split()[1]
-    link = triggerMessage.content.split()[2]
-    try:
-        filename = re.sub('[-.() ]', '', name)
-        filepath = "/home/azimath/discordbot/sounds/" + filename + ".mp3"
-        
-        ydlopts = { "outtmpl" : filepath[:-4]
-                    #, 'format': 'bestaudio/best'
-                     ,'postprocessors': [{
-                         'key': 'FFmpegExtractAudio',
-                         'preferredcodec': 'mp3',
-                         'preferredquality': '192',
-                     }]
-                    }
-        with YoutubeDL(ydlopts) as ydl:
-            ydl.download([link])
-        
-        audiobank.update({name : filepath})
-        with open('audiobank.json', 'w') as database:
-                database.write(json.dumps(audiobank, indent=4))
-                await triggerMessage.channel.send( "Added sound " + name)
-    except:
-        name, link = link, name
-        filename = re.sub('[-.() ]', '', name)
-        filepath = "/home/azimath/discordbot/sounds/" + filename + ".mp3"
-        
-        ydlopts = { "outtmpl" : filepath[:-4]
-                    #, 'format': 'bestaudio/best'
-                     ,'postprocessors': [{
-                         'key': 'FFmpegExtractAudio',
-                         'preferredcodec': 'mp3',
-                         'preferredquality': '192',
-                     }]
-                    }
-        with YoutubeDL(ydlopts) as ydl:
-            ydl.download([link])
-        
-        audiobank.update({name : filepath})
-        with open('audiobank.json', 'w') as database:
-                database.write(json.dumps(audiobank, indent=4))
-                await triggerMessage.channel.send( "Added sound " + name)
+    async with triggerMessage.channel.typing():
+        name = triggerMessage.content.split()[1]
+        link = triggerMessage.content.split()[2]
+        try:
+            filename = re.sub('[-.() ]', '', name)
+            filepath = "/home/azimath/discordbot/sounds/" + filename + ".mp3"
+            
+            ydlopts = { "outtmpl" : filepath[:-4]
+                        #, 'format': 'bestaudio/best'
+                        ,'postprocessors': [{
+                            'key': 'FFmpegExtractAudio',
+                            'preferredcodec': 'mp3',
+                            'preferredquality': '192',
+                        }]
+                        }
+            with YoutubeDL(ydlopts) as ydl:
+                ydl.download([link])
+            
+            audiobank.update({name : filepath})
+            with open('audiobank.json', 'w') as database:
+                    database.write(json.dumps(audiobank, indent=4))
+                    await triggerMessage.channel.send( "Added sound " + name)
+        except:
+            name, link = link, name
+            filename = re.sub('[-.() ]', '', name)
+            filepath = "/home/azimath/discordbot/sounds/" + filename + ".mp3"
+            
+            ydlopts = { "outtmpl" : filepath[:-4]
+                        #, 'format': 'bestaudio/best'
+                        ,'postprocessors': [{
+                            'key': 'FFmpegExtractAudio',
+                            'preferredcodec': 'mp3',
+                            'preferredquality': '192',
+                        }]
+                        }
+            with YoutubeDL(ydlopts) as ydl:
+                ydl.download([link])
+            
+            audiobank.update({name : filepath})
+            with open('audiobank.json', 'w') as database:
+                    database.write(json.dumps(audiobank, indent=4))
+                    await triggerMessage.channel.send( "Added sound " + name)
 
 @commands.registerEventHandler(name="listsounds") 
 async def listSounds(triggerMessage):
@@ -184,28 +185,43 @@ async def radio(triggerMessage):
 @voiceCommandExclusive
 async def youtube(triggerMessage):
     global message
-    if triggerMessage.channel.is_private:
+    if triggerMessage.channel.type != discord.ChannelType.text:
         await triggerMessage.channel.send( "Go fuck yourself")
         await discord.utils.get(client.get_all_channels(), server__name="IAA-Official", name='genearl', type=discord.ChannelType.text).send(triggerMessage.author.name + " should go fuck themselves")
         return
         
     await triggerMessage.channel.send( "Loading song at the request of " + triggerMessage.author.name)
     
-    player = await voice.create_ytdl_player(triggerMessage.content.split()[1], use_avconv=False)
+    url=triggerMessage.content.split()[1]
+
+    ydlopts = { 'format': 'webm[abr>0]/bestaudio/best',
+                'verbose': True,
+                'no_color': True
+                }
+    ydl = YoutubeDL(ydlopts)
+    try:
+        info = ydl.extract_info(url, download=False)
+        if "entries" in info:
+            info = info['entries'][0]
+
+        source = discord.FFmpegPCMAudio(info['url'])
+        voice.play(source)
+    except DownloadError as err:
+        await triggerMessage.channel.send(err)
+        return
+
     
-    player.start()
+    await client.change_presence(activity=discord.Game(name=info['title'], url=url, type=2))
+    message = await triggerMessage.channel.send( "Now playing " + info['title'])
     
-    await client.change_presence(game=discord.Game(name=player.title, url=triggerMessage.content.split()[1], type=2))
-    message = await triggerMessage.channel.send( "Now playing " + player.title)
+    await message.add_reaction('\u23ef')
+    await message.add_reaction('\u23f9')
     
-    await client.add_reaction(message, '\u23ef')
-    await client.add_reaction(message, '\u23f9')
-    
-    print("User " + triggerMessage.author.id + " started video: " + triggerMessage.content.split()[1])
+    print("User " + str(triggerMessage.author.id) + " started video: " + url)
     
     try:
-        await client.delete_message(triggerMessage)
-    except:
+        await triggerMessage.delete()
+    except discord.Forbidden:
         pass
 
 @commands.registerEventHandler(triggerType="\\reactionChanged", name="soundControl")
@@ -215,34 +231,32 @@ async def soundControl(triggerMessage, reaction, user):
         return
         
     if message.id is not None:
+        print(voice.is_connected())
         if(type(reaction.emoji) is str) and voice.is_connected() and client.user != user and message.id == triggerMessage.id:
-            if(reaction.emoji == '\u25b6') and not player.is_playing() and not player.is_done():
+            if(reaction.emoji == '\u25b6') and voice.is_paused():
                 print("Play Music")
-                player.resume()
-            elif(reaction.emoji == '\u23ef') and not player.is_done():
+                voice.resume()
+            elif(reaction.emoji == '\u23ef') and (voice.is_playing() or voice.is_paused()):
                 print("Play/pause")
-                if player.is_playing():
-                    player.pause()
+                if not voice.is_paused():
+                    voice.pause()
                 else:
-                    player.resume()
-            elif(reaction.emoji == '\u23f8') and player.is_playing():
+                    voice.resume()
+            elif(reaction.emoji == '\u23f8') and voice.is_playing():
                 print("Pause")
-                player.pause()
-            elif(reaction.emoji == '\u23f9') and not player.is_done():
+                voice.pause()
+            elif(reaction.emoji == '\u23f9') and (voice.is_playing() or voice.is_paused()):
                 print("Stop")
-                player.stop()
-                await client.clear_reactions(triggerMessage)
+                voice.stop()
+                await triggerMessage.clear_reactions()
     #print(user.name.encode('unicode_escape').decode('ascii'))
         
 @commands.registerEventHandler(name="stop") 
 async def stop(triggerMessage):
     if voice is not None:
-        if player.is_playing():
-            player.stop()
-            if hasattr(player, "yt"):
-                await client.change_presence()
-            if hasattr(player, "process"):
-                player.process.kill()
+        if voice.is_playing():
+            voice.stop()
+            await client.change_presence()
 
 @commands.registerEventHandler(name="setcd") 
 @permissions.needs_moderator
