@@ -8,6 +8,8 @@ import json
 from xml.dom import minidom
 import sqlite3, atexit
 from json import JSONDecodeError
+from PIL import Image, ImageDraw, ImageFont
+import io
 
 client = None
     
@@ -106,10 +108,12 @@ async def unbusy(triggerMessage):
     
 @commands.registerEventHandler(name="secret", exclusivity="global")
 async def postsecret(triggerMessage):
-    await channel.send(file=discord.File(addsecret(e621(["furry"]), filename = "secret.png")))
+    filename = addsecret(e621(["furry"]))
+    with open(filename, "rb") as image:
+        await triggerMessage.channel.send(file=discord.File(image, filename="secret.png"))
 
 def addsecret(file_name):
-    chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
+    chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghkmnopqrstuvwxyz1234567890"
     pw = ""
     for i in range(6):
         pw += random.choice(chars)
@@ -134,11 +138,15 @@ def addsecret(file_name):
     
     #get the dimensions of rendered text
     x,y = font.getsize(chars)
-    img = Image.new("RGBA", (x+4, y+4), (0,0,0,0))
+    img = Image.new("RGBA", (x+6, y+6), (0,0,0,0))
     draw = ImageDraw.Draw(img)
     
     #draw the text on a canvas, rotate, then get new dimensions
-    draw.text((0,0), pw, fill=(255, 255, 255, 127), font=font, stroke_width=2, stroke_fill=(0, 0, 0, 127))
+    draw.text((0, 1), pw, font=font, fill=(0, 0, 0, 127))
+    draw.text((2, 1), pw, font=font, fill=(0, 0, 0, 127))
+    draw.text((1, 0), pw, font=font, fill=(0, 0, 0, 127))
+    draw.text((1, 2), pw, font=font, fill=(0, 0, 0, 127))
+    draw.text((1,1), pw, fill=(255, 255, 255, 127), font=font)
     img = img.rotate(random.randrange(0,360), resample=Image.NEAREST, expand=1)
     
     #randomly pad the text image to align the text with a random location on the background image
@@ -153,8 +161,8 @@ def addsecret(file_name):
     #composite images and save
     bg.alpha_composite(img)
     out = io.BytesIO()
-    bg.save(out, format="PNG")
-    return out
+    bg.save("out.png", format="PNG")
+    return "out.png"
     
 class BooruGame:
     def __init__(self, tags, url):
