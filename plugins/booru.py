@@ -13,7 +13,7 @@ import io
 
 client = None
     
-def getResponse(endpoint, tags, limit=10):
+def getResponse(endpoint, tags, limit=20):
     headers = {"user-agent":"[^_^]/1.0"}
     t = tags.pop(0)
     for x in tags:
@@ -24,13 +24,13 @@ def getResponse(endpoint, tags, limit=10):
     response = session.get(endpoint.format(limit, t))
     return response
 
-def getData(endpoint, tags, limit=10): # json
-    response = getResponse(endpoint, tags, limit=10)
+def getData(endpoint, tags, limit=20): # json
+    response = getResponse(endpoint, tags, limit=limit)
     j = response.json()
     return j
 
-def getDOM(endpoint, tags, limit=10):
-    response = getResponse(endpoint, tags, limit=10)
+def getDOM(endpoint, tags, limit=20):
+    response = getResponse(endpoint, tags, limit=limit)
     return minidom.parseString(response.text)
 
 def downloadImage(url):
