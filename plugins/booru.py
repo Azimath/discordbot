@@ -73,9 +73,9 @@ functionMap = {"e621":e621, "gelbooru":gelbooru, "rule34":rule34}
 async def postRandom(channel, booru, tags):
     try:
         out = functionMap[booru](tags)
-        await client.send_typing(channel)
-        with open(out, "rb") as image:
-            await client.send_file(channel, image, filename=out)
+        async with channel.typing():
+            with open(out, "rb") as image:
+                await channel.send(file=discord.File(image, filename=out))
     except IndexError:
         await channel.send("Oopsie woopsie Uwu. " + booru + " returned no search results.")
     except KeyError:
@@ -228,11 +228,11 @@ async def startBooruGame(triggerMessage):
                 return   
             tags = target["tags"].casefold().split(" ")
             target = target["file_url"]
-            await client.send_typing(triggerMessage.channel)
-            filename = downloadImage(target)
-            
-            with open(filename, "rb") as image:
-                await client.send_file(triggerMessage.channel, image, filename=filename)
+            async with triggerMessage.channel.typing():
+                filename = downloadImage(target)
+                
+                with open(filename, "rb") as image:
+                    await channel.send(file=discord.File(image, filename=filename))
                 
         except JSONDecodeError:
             await triggerMessage.channel.send( "Oopsie Woopsie. Failed to decode json.")
