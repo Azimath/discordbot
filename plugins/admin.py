@@ -149,7 +149,7 @@ async def delete(triggerMessage):
             #print("authorized, channel is " + channel.name + " target is " + victim.name)
             print("deleting " + str(number) + " messages")
             deleted = 0
-            async for msg in client.logs_from(channel, limit=100*number):
+            async for msg in triggerMessage.channel.history(limit=100*number):
                 if (msg.author == victim or victim is None) and deleted < number:
                     await client.delete_message(msg)
                     deleted = deleted + 1

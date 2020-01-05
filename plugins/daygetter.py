@@ -21,12 +21,12 @@ async def checkDay():
         
     midnight = datetime.combine(date.today(), time.min.replace(tzinfo=tz)) #Get an offset aware datetime representing the previous midnight
     
-    channel = discord.Object("102981131074297856") #IAA genearl
+    channel = client.get_channel(102981131074297856) #IAA genearl
     
-    async for m in client.logs_from(channel, limit=2):
-        if tz.localize(m.timestamp) > midnight:
+    async for m in channel.history(limit=2):
+        if tz.localize(m.created_at) > midnight:
             return
     
     await channel.send( "New Day Get")
-    #if discord.utils.find(lambda m: m.timestamp > midnight, list(client.logs_from(channel, limit=2))) is None:
+    #if discord.utils.find(lambda m: m.timestamp > midnight, list(channel.history(limit=2)) is None:
         #await channel.send( "New Day Get")
