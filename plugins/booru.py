@@ -13,7 +13,7 @@ import io
 
 client = None
     
-def getResponse(endpoint, tags, limit=20):
+def getResponse(endpoint, tags, limit=10):
     headers = {"user-agent":"[^_^]/1.0"}
     t = tags.pop(0)
     for x in tags:
@@ -24,13 +24,13 @@ def getResponse(endpoint, tags, limit=20):
     response = session.get(endpoint.format(limit, t))
     return response
 
-def getData(endpoint, tags, limit=20): # json
-    response = getResponse(endpoint, tags, limit=limit)
+def getData(endpoint, tags, limit=10): # json
+    response = getResponse(endpoint, tags, limit=10)
     j = response.json()
     return j
 
-def getDOM(endpoint, tags, limit=20):
-    response = getResponse(endpoint, tags, limit=limit)
+def getDOM(endpoint, tags, limit=10):
+    response = getResponse(endpoint, tags, limit=10)
     return minidom.parseString(response.text)
 
 def downloadImage(url):
@@ -140,7 +140,7 @@ def addsecret(file_name):
     font = ImageFont.truetype("arial.ttf", fontsize)
     
     #get the dimensions of rendered text
-    x,y = font.getsize(chars)
+    x,y = font.getsize(pw)
     img = Image.new("RGBA", (x+6, y+6), (0,0,0,0))
     draw = ImageDraw.Draw(img)
     
