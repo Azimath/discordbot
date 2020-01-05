@@ -140,7 +140,7 @@ def addsecret(file_name):
     font = ImageFont.truetype("arial.ttf", fontsize)
     
     #get the dimensions of rendered text
-    x,y = font.getsize(chars)
+    x,y = font.getsize(pw)
     img = Image.new("RGBA", (x+6, y+6), (0,0,0,0))
     draw = ImageDraw.Draw(img)
     
