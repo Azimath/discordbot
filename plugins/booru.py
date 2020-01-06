@@ -108,12 +108,12 @@ async def unbusy(triggerMessage):
     
 @commands.registerEventHandler(name="secret", exclusivity="global")
 async def postsecret(triggerMessage):
-    filename = addsecret(e621(["furry"]))
+    filename = addsecret(e621(["furry"]))[0]
     if filename is not None:
         with open(filename, "rb") as image:
             await triggerMessage.channel.send(file=discord.File(image, filename="secret.png"))
     else:
-        await triggerMessage.channel.send("Input image too small")
+        await triggerMessage.channel.send("Failed to generate image")
 
 def addsecret(file_name):
     chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghkmnopqrstuvwxyz1234567890"
@@ -170,7 +170,7 @@ def addsecret(file_name):
     bg.alpha_composite(img)
     out = io.BytesIO()
     bg.save("out.png", format="PNG")
-    return "out.png"
+    return ("out.png", pw)
     
 class BooruGame:
     def __init__(self, tags, url):
