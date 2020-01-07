@@ -102,11 +102,11 @@ async def addSound(triggerMessage):
         link = triggerMessage.content.split()[2]
         try:
             filename = re.sub('[-.() ]', '', name)
-            filepath = "/home/azimath/discordbot/sounds/" + filename + ".mp3"
+            filepath = "/home/seve/discordbot/sounds/" + filename + ".mp3"
             
-            ydlopts = { "outtmpl" : filepath[:-4]
-                        #, 'format': 'bestaudio/best'
-                        ,'postprocessors': [{
+            ydlopts = { "outtmpl" : filepath[:-4] + ".%(ext)s",
+                        'format': 'webm[abr>0]/bestaudio/best',
+                        'postprocessors': [{
                             'key': 'FFmpegExtractAudio',
                             'preferredcodec': 'mp3',
                             'preferredquality': '192',
@@ -122,11 +122,11 @@ async def addSound(triggerMessage):
         except:
             name, link = link, name
             filename = re.sub('[-.() ]', '', name)
-            filepath = "/home/azimath/discordbot/sounds/" + filename + ".mp3"
+            filepath = "/home/seve/discordbot/sounds/" + filename + ".mp3"
             
-            ydlopts = { "outtmpl" : filepath[:-4]
-                        #, 'format': 'bestaudio/best'
-                        ,'postprocessors': [{
+            ydlopts = { "outtmpl" : filepath[:-4],
+                        'format': 'webm[abr>0]/bestaudio/best',
+                        'postprocessors': [{
                             'key': 'FFmpegExtractAudio',
                             'preferredcodec': 'mp3',
                             'preferredquality': '192',
@@ -157,7 +157,7 @@ async def sound(triggerMessage):
         print("Sound " + sound + " started by user " + str(triggerMessage.author.id))
         voice.play(discord.FFmpegPCMAudio(audiobank[sound]))
     else:
-        triggerMessage.channel.send( "Sound not found")
+        await triggerMessage.channel.send( "Sound not found")
 
 @commands.registerEventHandler(name="radio") 
 @voiceCommandExclusive
