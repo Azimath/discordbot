@@ -192,11 +192,11 @@ async def doge(triggerMessage):
 
     tags.extend(["-young", "-scat","-fart"]) #Anti trash
     
-    x,y = functionmap[site](tags, return_tags=True)
+    x,y = functionMap[site](tags, return_tags=True)
     filename = makedoge(x, y)
     if filename is not None:
-    with open(filename, "rb") as image:
-        await triggerMessage.channel.send(file=discord.File(image, filename="doge.png"))
+        with open(filename, "rb") as image:
+            await triggerMessage.channel.send(file=discord.File(image, filename="doge.png"))
     else:
         await triggerMessage.channel.send("Failed to generate image")
 
