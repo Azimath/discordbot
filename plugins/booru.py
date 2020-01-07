@@ -57,11 +57,15 @@ def gelbooru(tags):
     return downloadImage(target)
 
 #tags should be a list of desired tags
-def e621(tags):
+def e621(tags, return_tags=False):
     j = getData("http://e621.net/post/index.json?limit={0}&tags={1}", tags)
-    
-    target = j[random.randint(0, len(j))]['file_url']
-    return downloadImage(target)
+    if not return_tags:
+        target = j[random.randint(0, len(j))]['file_url']
+        return downloadImage(target)
+    else:
+        i = random.randint(0, len(j))
+        target = j[i]['file_url']
+        return (downloadImage(target), j[i]['tags'])
 
 def rule34(tags):
     dom = getDOM("https://rule34.xxx/index.php?page=dapi&s=post&q=index&limit={0}&tags={1}", tags)
@@ -171,7 +175,66 @@ def addsecret(file_name):
     out = io.BytesIO()
     bg.save("out.png", format="PNG")
     return ("out.png", pw)
+  
+@commands.registerEventHandler(name="doge", exclusivity="global")      
+async def doge(triggerMessage):
+    global SUPPORTED
+    tokens = triggerMessage.content.split()
+    if (len(tokens) == 1):
+        site = "e621"
+    else:
+        site = tokens[1]
+        
+    if len(tokens) <= 2:
+        tags = ["dog", "rating:explicit"]
+    else:
+        tags = tokens[2:8]
+
+    tags.extend(["-young", "-scat","-fart"]) #Anti trash
     
+    x,y = functionmap[site](tags, return_tags=True)
+    filename = makedoge(x, y)
+    if filename is not None:
+    with open(filename, "rb") as image:
+        await triggerMessage.channel.send(file=discord.File(image, filename="doge.png"))
+    else:
+        await triggerMessage.channel.send("Failed to generate image")
+
+    
+def makedoge(file_name, tags):
+    colors = ["Red", "Green", "GreenYellow", "Magenta", "Cyan", "Blue", "White", "Black", "Orange", "Yellow", "Grey"]
+    colors = random.sample(colors, 8)
+    # this lets us take either the string straight from the json or an already split up list
+    if type(tags) == str:
+        tags = tags.split(" ")
+
+    img = Image.open(file_name)
+    draw = ImageDraw.Draw(img)
+    
+    phrases = ["wow."]
+    tags = random.sample(tags, 5) # pick 5 tags at random
+    
+    phrases.append("such {}".format(tags[0]))
+    phrases.append("much {}".format(tags[1]))
+    phrases.append("very {}".format(tags[2]))
+    phrases.append("so {}".format(tags[3]))
+    phrases.append("how {}".format(tags[4]))
+    phrases.append("Cool")
+    phrases.append("neat")
+    
+    random.shuffle(phrases)
+    
+    xs = [int(img.size[0]*(i/10))+(i==0)*10 for i in range(0,9)] # fun list iteration
+    ys = [int(img.size[1]*(i/10)) for i in range(0,9)]
+    random.shuffle(xs)
+    
+    font = ImageFont.truetype(font="comic.ttf", size=int((img.size[0], img.size[1])[img.size[0] < img.size[1]]/6/5.3))
+    for i in range(len(phrases)):
+        draw.text((xs[i],ys[i]), phrases[i], fill=colors[i], font=font)
+        
+    img.save("out.png")
+    return "out.png"
+
 class BooruGame:
     def __init__(self, tags, url):
         self.userScores = {}
