@@ -38,7 +38,7 @@ with open('permissions.json', 'r') as userfile:
     userbank = json.loads(userfile.read(), cls=CustomDecoder)
     
 def addPermission(userObject, permission):
-    user = next(x for x in userbank if x.data['id'] == userObject.id) 
+    user = next((x for x in userbank if x.data['id'] == userObject.id), None) 
     if user is not None:
         user.data['permissions'].append(permission)
         with open('permissions.json', 'w') as userfile:
@@ -48,7 +48,7 @@ def addPermission(userObject, permission):
         return False
          
 def hasPermission(userObject, permission):
-    user = next(x for x in userbank if x.data['id'] == userObject.id)
+    user = next((x for x in userbank if x.data['id'] == userObject.id), None)
     if user is not None:
         return permission in user.data['permissions']
     else:
