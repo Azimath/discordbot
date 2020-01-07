@@ -50,11 +50,15 @@ def downloadImage(url):
         
     return "out."+file_extension
     
-def gelbooru(tags):
+def gelbooru(tags, return_tags=False):
     j = getData("http://gelbooru.com/index.php?page=dapi&limit={0}&s=post&&q=index&json=1&tags={1}", tags)
-    
-    target = j[random.randint(0, len(j))]['file_url']
-    return downloadImage(target)
+    if not return_tags:
+        target = j[random.randint(0, len(j))]['file_url']
+        return downloadImage(target)
+    else:
+        i = random.randint(0, len(j))
+        target = j[i]['file_url']
+        return (downloadImage(target), j[i]['tags'])
 
 #tags should be a list of desired tags
 def e621(tags, return_tags=False):
@@ -67,12 +71,15 @@ def e621(tags, return_tags=False):
         target = j[i]['file_url']
         return (downloadImage(target), j[i]['tags'])
 
-def rule34(tags):
+def rule34(tags, return_tags=False):
     dom = getDOM("https://rule34.xxx/index.php?page=dapi&s=post&q=index&limit={0}&tags={1}", tags)
-    posts = dom.getElementsByTagName("post")
-    
-    target = posts[random.randint(0, len(posts))].getAttribute('file_url')
-    return downloadImage(target)    
+    if not return_tags:
+        target = j[random.randint(0, len(j))]['file_url']
+        return downloadImage(target)
+    else:
+        i = random.randint(0, len(j))
+        target = j[i]['file_url']
+        return (downloadImage(target), j[i]['tags'])
     
 functionMap = {"e621":e621, "gelbooru":gelbooru, "rule34":rule34}
 
