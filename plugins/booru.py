@@ -51,6 +51,8 @@ def downloadImage(url):
     return "out."+file_extension
     
 def gelbooru(tags, return_tags=False):
+    tags.append("-loli")
+    tags.append("-shota")
     j = getData("http://gelbooru.com/index.php?page=dapi&limit={0}&s=post&&q=index&json=1&tags={1}", tags)
     if not return_tags:
         target = j[random.randint(0, len(j))]['file_url']
@@ -232,7 +234,7 @@ def makedoge(file_name, tags):
     random.shuffle(phrases)
     
     xs = [int(img.size[0]*(i/10))+(i==0)*10 for i in range(0,9)] # fun list iteration
-    ys = [int(img.size[1]*(i/10)) for i in range(0,9)]
+    ys = [int(img.size[1]*(i/9)) for i in range(0,9)]
     random.shuffle(xs)
     
     font = ImageFont.truetype(font="comic.ttf", size=int((img.size[0], img.size[1])[img.size[0] < img.size[1]]/6/5.3))
