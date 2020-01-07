@@ -363,7 +363,7 @@ async def startBooruGame(triggerMessage):
                 filename = downloadImage(target)
                 
                 with open(filename, "rb") as image:
-                    await channel.send(file=discord.File(image, filename=filename))
+                    await triggerMessage.channel.send(file=discord.File(image, filename=filename))
                 
         except JSONDecodeError:
             await triggerMessage.channel.send( "Oopsie Woopsie. Failed to decode json.")
