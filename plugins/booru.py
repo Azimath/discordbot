@@ -64,7 +64,7 @@ def gelbooru(tags, return_tags=False):
 
 #tags should be a list of desired tags
 def e621(tags, return_tags=False):
-    j = getData("http://e621.net/post/index.json?limit={0}&tags={1}", tags)
+    j = getData("http://e621.net/posts.json?limit={0}&tags={1}", tags)
     if not return_tags:
         target = j[random.randint(0, len(j))]['file_url']
         return downloadImage(target)
