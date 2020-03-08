@@ -64,14 +64,18 @@ def gelbooru(tags, return_tags=False):
 
 #tags should be a list of desired tags
 def e621(tags, return_tags=False):
-    j = getData("http://e621.net/posts.json?limit={0}&tags={1}", tags)
+    j = getData("http://e621.net/posts.json?limit={0}&tags={1}", tags)['posts']
     if not return_tags:
-        target = j[random.randint(0, len(j))]['file_url']
+        target = j[random.randint(0, len(j))]['file']['url']
         return downloadImage(target)
     else:
         i = random.randint(0, len(j))
-        target = j[i]['file_url']
-        return (downloadImage(target), j[i]['tags'])
+        target = j[i]['file']['url']
+        tags = []
+        for t in ['general', 'species', 'artist', 'character', 'copyright', 'lore', 'meta']:
+            for tag in j[i]['tags'][t]:
+                tags.append(tag)
+        return (downloadImage(target), tags)
 
 def rule34(tags, return_tags=False):
     dom = getDOM("https://rule34.xxx/index.php?page=dapi&s=post&q=index&limit={0}&tags={1}", tags)
