@@ -15,8 +15,8 @@ client = None
     
 def getResponse(endpoint, tags, limit=20):
     headers = {"user-agent":"[^_^]/1.0"}
-    t = tags.pop(0)
-    for x in tags:
+    t = tags[0]
+    for x in tags[1:]:
         t+="+"+x
     session = requests.Session()
     session.headers.update(headers)
@@ -78,14 +78,14 @@ def e621(tags, return_tags=False):
         return (downloadImage(target), tags)
 
 def rule34(tags, return_tags=False):
-    dom = getDOM("https://rule34.xxx/index.php?page=dapi&s=post&q=index&limit={0}&tags={1}", tags)
+    j = getDOM("https://rule34.xxx/index.php?page=dapi&s=post&q=index&limit={0}&tags={1}", tags).getElementsByTagName("post")
     if not return_tags:
-        target = j[random.randint(0, len(j))]['file_url']
+        target = j[random.randint(0, len(j))].attributes['file_url'].value
         return downloadImage(target)
     else:
         i = random.randint(0, len(j))
-        target = j[i]['file_url']
-        return (downloadImage(target), j[i]['tags'])
+        target = j[i].attributes['file_url'].value
+        return (downloadImage(target), j[i].attributes['tags'].value.split(" ")[1:-1])
     
 functionMap = {"e621":e621, "gelbooru":gelbooru, "rule34":rule34}
 
