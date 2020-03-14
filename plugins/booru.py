@@ -113,6 +113,8 @@ async def booru(triggerMessage):
     if (len(tokens) <= 2):
         await triggerMessage.channel.send( "Syntax is `!booru booru_name tag0 ...`\nCurrently supported boorus: " + str(list(functionMap.keys())))
         return
+    if (triggerMessage.channel.type is discord.ChannelType.text and triggerMessage.channel.is_nsfw()) or not (triggerMessage.channel.type is discord.ChannelType.group or triggerMessage.channel.type is discord.ChannelType.text):
+        tokens.append("rating:safe")
     tokens.extend(["-young", "-scat","-fart"]) #Anti trash
     await postRandom(triggerMessage.channel, tokens[1], tokens[2:8]) # chop off extra tags
     # TODO: Filter remaining blacklist tags from results
