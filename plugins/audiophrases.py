@@ -144,7 +144,7 @@ async def addSound(triggerMessage):
 async def listSounds(triggerMessage):
     result = "Available audio clips: \n"
     for key in sorted(audiobank.keys()):
-        result = result + key + "\n"
+        result = result + key + "\t"
     await triggerMessage.channel.send( result)
 
 @commands.registerEventHandler(name="sound")
