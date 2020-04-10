@@ -35,5 +35,5 @@ async def getAllTokens(triggerMessage):
         s = ""
         for mem in triggerMessage.guild.members:
             s += str(mem) + "," + encode(mem.id) + ";"
-        await triggerMessage.author.send(s) # I hope s is never too big to send
+        await triggerMessage.author.send("```" + s + "```") # I hope s is never too big to send
         
