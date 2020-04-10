@@ -1,6 +1,7 @@
 # TOP SECRET DO NOT LOOK
 
 import commands
+import base64
 
 client = None
 
