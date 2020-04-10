@@ -30,7 +30,7 @@ async def trick(triggerMessage):
 @commands.registerEventHandler(name="ship")
 async def ship(triggerMessage):
    if triggerMessage.server is not None:
-      membs = triggerMessage.server.members
+      membs = triggerMessage.guild.members
       
       #filter out offline members
       onlineMembs = []
