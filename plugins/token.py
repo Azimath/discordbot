@@ -25,7 +25,7 @@ def decode(mbs):
 @commands.registerEventHandler(name="token")
 async def getToken(triggerMessage):
     token = encode(triggerMessage.author.id, "01")
-    await triggerMessage.channel.send( "Your Cryptographically Secure LocusToken is: " + token)
+    await triggerMessage.author.send( "Your Cryptographically Secure LocusToken is: " + token)
     
 @commands.registerEventHandler(name="alltokens")
 async def getAllTokens(triggerMessage):
