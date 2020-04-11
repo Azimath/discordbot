@@ -2,6 +2,7 @@
 
 import commands
 import base64
+import utilities
 
 client = None
 
@@ -35,5 +36,5 @@ async def getAllTokens(triggerMessage):
         s = ""
         for mem in triggerMessage.guild.members:
             s += str(mem) + "," + encode(mem.id) + ";"
-        await triggerMessage.author.send("```" + s + "```") # I hope s is never too big to send
+        await utilities.big_send(triggerMessage.author, s, "```")
         
