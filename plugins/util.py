@@ -35,6 +35,7 @@ async def info(triggerMessage):
                                   "\nAccount Create Date:" + str(acctCreateDate) +
                                   "\nChannel Type:" + str(triggerMessage.channel.ChannelType) +
                                   "\nChannel NSFW:" + str(triggerMessage.channel.is_nsfw())
+                         )
 
 @commands.registerEventHandler(name="game")
 async def game(triggerMessage):
