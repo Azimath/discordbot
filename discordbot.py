@@ -29,8 +29,9 @@ def warn_with_traceback(message, category, filename, lineno, file=None, line=Non
 ####Helper stuff
 async def loadPlugins():
     
-    async def load_all_modules_from_dir(dirname): #modded from: http://stackoverflow.com/questions/1057431/loading-all-modules-in-a-folder-in-python/8556471#8556471
+    def load_all_modules_from_dir(dirname): #modded from: http://stackoverflow.com/questions/1057431/loading-all-modules-in-a-folder-in-python/8556471#8556471
         modules = []
+        errors = []
         for importer, package_name, _ in pkgutil.iter_modules([dirname]):
             full_package_name = '%s.%s' % (dirname, package_name)
             if full_package_name not in sys.modules:
@@ -41,15 +42,18 @@ async def loadPlugins():
                 except Exception as e:
                     print("Failed to load " + str(package_name))
                     print(e)
-                    channel = client.get_channel(124051195949088768)
-                    daddy = client.get_user(102978533663440896).get_mention()
-                    await channel.send(daddy + " I am broken!")
-                    await channel.send("In " + str(package_name) + "\n" + str(e))
-        return modules
+                    errors.append("Failed to load " + str(package_name) + "\n" + str(e))
+        return modules, errors
         
-    plugins = await load_all_modules_from_dir("plugins")
+    (plugins, errors) = load_all_modules_from_dir("plugins")
     for plugin in plugins:
         plugin.client = client
+        
+    if len(errors) > 0:
+        channel = client.get_channel(124051195949088768)
+        daddy = client.get_user(102978533663440896).get_mention()
+        await channel.send(daddy + " I am broken!")
+        await channel.send(errors)
     
     context = globals()
     context.update(locals())
