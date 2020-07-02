@@ -51,7 +51,7 @@ async def loadPlugins():
         
     if len(errors) > 0:
         channel = client.get_channel(124051195949088768)
-        daddy = client.get_user(102978533663440896).get_mention()
+        daddy = client.get_user(102978533663440896).mention
         await channel.send(daddy + " I am broken!")
         await channel.send(errors)
     
