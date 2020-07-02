@@ -41,6 +41,10 @@ async def loadPlugins():
                 except Exception as e:
                     print("Failed to load " + str(package_name))
                     print(e)
+                    channel = client.get_channel(124051195949088768)
+                    daddy = client.get_user(102978533663440896).get_mention()
+                    await channel.send(daddy + " I am broken!")
+                    await channel.send("In " + str(package_name) + "\n" + str(e))
         return modules
         
     plugins = load_all_modules_from_dir("plugins")
