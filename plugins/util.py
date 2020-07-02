@@ -28,8 +28,8 @@ async def info(triggerMessage):
         acctCreateDate = datetime.utcfromtimestamp(unixtime/1000).strftime('%Y-%m-%d %H:%M:%S')
         await target.send("Channel name: " + triggerMessage.channel.name + 
                                   "\nChannel id: " + str(triggerMessage.channel.id) + 
-                                  "\nServer  name: " + triggerMessage.server.name + 
-                                  "\nServer id: " + str(triggerMessage.server.id) + 
+                                  "\nServer  name: " + triggerMessage.guild.name + 
+                                  "\nServer id: " + str(triggerMessage.guild.id) + 
                                   "\nAuthor name: " + triggerMessage.author.name + 
                                   "\nAuthor id: " + str(triggerMessage.author.id) +
                                   "\nAccount Create Date:" + str(acctCreateDate) +
