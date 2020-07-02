@@ -27,11 +27,11 @@ async def info(triggerMessage):
         unixtime=((int(target.id)>>22)+ 1420070400000)
         acctCreateDate = datetime.utcfromtimestamp(unixtime/1000).strftime('%Y-%m-%d %H:%M:%S')
         await target.send("Channel name: " + triggerMessage.channel.name + 
-                                  "\nChannel id: " + triggerMessage.channel.id + 
+                                  "\nChannel id: " + str(triggerMessage.channel.id) + 
                                   "\nServer  name: " + triggerMessage.server.name + 
-                                  "\nServer id: " + triggerMessage.server.id + 
+                                  "\nServer id: " + str(triggerMessage.server.id) + 
                                   "\nAuthor name: " + triggerMessage.author.name + 
-                                  "\nAuthor id: " + triggerMessage.author.id +
+                                  "\nAuthor id: " + str(triggerMessage.author.id) +
                                   "\nAccount Create Date:" + str(acctCreateDate) +
                                   "\nChannel Type:" + str(triggerMessage.channel.ChannelType) +
                                   "\nChannel NSFW:" + str(triggerMessage.channel.is_nsfw())
