@@ -29,7 +29,7 @@ def warn_with_traceback(message, category, filename, lineno, file=None, line=Non
 ####Helper stuff
 async def loadPlugins():
     
-    def load_all_modules_from_dir(dirname): #modded from: http://stackoverflow.com/questions/1057431/loading-all-modules-in-a-folder-in-python/8556471#8556471
+    async def load_all_modules_from_dir(dirname): #modded from: http://stackoverflow.com/questions/1057431/loading-all-modules-in-a-folder-in-python/8556471#8556471
         modules = []
         for importer, package_name, _ in pkgutil.iter_modules([dirname]):
             full_package_name = '%s.%s' % (dirname, package_name)
@@ -47,7 +47,7 @@ async def loadPlugins():
                     await channel.send("In " + str(package_name) + "\n" + str(e))
         return modules
         
-    plugins = load_all_modules_from_dir("plugins")
+    plugins = await load_all_modules_from_dir("plugins")
     for plugin in plugins:
         plugin.client = client
     
