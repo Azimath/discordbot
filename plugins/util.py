@@ -33,7 +33,7 @@ async def info(triggerMessage):
                                   "\nAuthor name: " + triggerMessage.author.name + 
                                   "\nAuthor id: " + str(triggerMessage.author.id) +
                                   "\nAccount Create Date:" + str(acctCreateDate) +
-                                  "\nChannel Type:" + str(triggerMessage.channel.ChannelType) +
+                                  "\nChannel Type:" + str(triggerMessage.channel.type) +
                                   "\nChannel NSFW:" + str(triggerMessage.channel.is_nsfw())
                          )
 
