@@ -102,8 +102,12 @@ async def executeEvent(triggerType="\\command", name=None, **kwargs):
                 await triggerHandlers[triggerType][name].handler(**kwargs)
         except:
             if sys.exc_info()[0].__name__ != "RestartException":
-                print("Unexpected error:", sys.exc_info()[1])
-                traceback.print_tb(sys.exc_info()[2])
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                print("Unexpected error:", exc_value)
+                traceback.print_tb(exc_traceback)
+                tb = str.join("", traceback.format_exception(exc_type, exc_value, exc_traceback))
+                channel = client.get_channel(124051195949088768)
+                await channel.send("```" + tb + "```")
             else: 
                 raise
             
