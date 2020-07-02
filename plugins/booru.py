@@ -113,8 +113,7 @@ async def booru(triggerMessage):
     if (len(tokens) <= 2):
         await triggerMessage.channel.send( "Syntax is `!booru booru_name tag0 ...`\nCurrently supported boorus: " + str(list(functionMap.keys())))
         return
-    if (triggerMessage.channel.type is discord.ChannelType.text and not triggerMessage.channel.is_nsfw()) or not (triggerMessage.channel.type is discord.ChannelType.group or triggerMessage.channel.type is discord.ChannelType.private):
-        print(triggerMessage.channel.type is discord.ChannelType.text and not triggerMessage.channel.is_nsfw(), not (triggerMessage.channel.type is discord.ChannelType.group or triggerMessage.channel.type is discord.ChannelType.private),triggerMessage.channel.type is discord.ChannelType.group,  triggerMessage.channel.type is discord.ChannelType.private) 
+    if (triggerMessage.channel.type is discord.ChannelType.text and not triggerMessage.channel.is_nsfw()):
         tokens.append("rating:safe")
     else:
         tokens.extend(["-young", "-scat","-fart"]) #Anti trash
