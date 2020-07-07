@@ -4,6 +4,7 @@ import asyncio
 import aiohttp
 import permissions
 import commands
+from random_words import RandomWords
 
 """A plugin for giving various kinds of random phrases.
    !lart user : uses the LART on the given user.
@@ -19,7 +20,9 @@ import commands
    !constitution : links to the constitution
    !sonic : links to a random page on either the archie sonic wiki or the sonic fanon wiki
    !tingle : links to a random tingler
-   !lmgtfy, !google: generates an lmgtfy link from the given query"""
+   !lmgtfy, !google: generates an lmgtfy link from the given query
+   !IAA : explains what IAA stands for
+   """
 
 client = None
 
@@ -189,9 +192,16 @@ async def respects(triggerMessage):
       
 @commands.registerEventHandler(triggerType="\\messageNoBot", name="X")
 @commands.messageHandlerFilter("X")
-async def respects(triggerMessage):
+async def doubt(triggerMessage):
     if triggerMessage.content.__len__() == 1:
         await triggerMessage.channel.send( triggerMessage.author.name + " doubts that.")
+      
+
+@commands.registerEventHandler(name="iaa")
+@commands.registerEventHandler(name="IAA")
+async def IAA(triggerMessage):
+    rw = RandomWords()
+    await triggerMessage.channel.send(f"IAA is {rw.random_word('i').capitalize()} {rw.random_word('a').capitalize()} {rw.random_word('a').capitalize()}")     
 
 @commands.registerEventHandler(name="addphrase")
 @permissions.needs_admin    
