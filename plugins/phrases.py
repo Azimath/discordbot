@@ -212,7 +212,7 @@ async def CONTRIBUTER(triggerMessage):
     for member in triggerMessage.guild.members:
         for role in member.roles:
             if role.name == "Contributors":
-                await triggerMessage.channel.send(f" {member.nick}, "")
+                await triggerMessage.channel.send(f" {member.nick}, ")
 
 @commands.registerEventHandler(name="addphrase")
 @permissions.needs_admin    
