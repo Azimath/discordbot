@@ -201,7 +201,9 @@ async def doubt(triggerMessage):
 @commands.registerEventHandler(name="IAA")
 async def IAA(triggerMessage):
     rw = RandomWords()
-    await triggerMessage.channel.send(f"IAA is {rw.random_word('i').capitalize()} {rw.random_word('a').capitalize()} {rw.random_word('a').capitalize()}")     
+    NewName = rw.random_word('i').capitalize() + " " + rw.random_word('a').capitalize() + " " rw.random_word('a').capitalize()
+    triggerMessage.guild.edit(name=f"{NewName}-Official")
+    await triggerMessage.channel.send(f"{NewName}")
 
 @commands.registerEventHandler(name="addphrase")
 @permissions.needs_admin    
