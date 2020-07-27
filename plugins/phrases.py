@@ -208,7 +208,7 @@ async def IAA(triggerMessage):
 @commands.registerEventHandler(name="Contributors")
 @commands.registerEventHandler(name="contributors")
 async def CONTRIBUTER(triggerMessage):
-    await triggerMessage.channel.sent("The Contributors are")
+    await triggerMessage.channel.send("The Contributors are")
     for member in triggerMessage.guild.members:
         for role in member.roles:
             if role.name == "Contributors":
