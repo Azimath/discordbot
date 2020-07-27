@@ -205,6 +205,15 @@ async def IAA(triggerMessage):
     await triggerMessage.guild.edit(name=f"{NewName}-Official")
     await triggerMessage.channel.send(f"{NewName}")
 
+@commands.registerEventHandler(name="Contributors")
+@commands.registerEventHandler(name="contributors")
+async def CONTRIBUTER(triggerMessage):
+    await triggerMessage.channel.sent("The Contributors are")
+    for member in triggerMessage.guild.members:
+        for role in member.roles:
+            if role.name == "Contributors":
+                await triggerMessage.channel.send(f" {member.nick}, "")
+
 @commands.registerEventHandler(name="addphrase")
 @permissions.needs_admin    
 async def addphrase(triggerMessage):
