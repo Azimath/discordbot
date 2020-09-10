@@ -58,7 +58,7 @@ voice = None
 message = None
 
 if not discord.opus.is_loaded():
-    discord.opus.load_opus('/usr/include/opus')
+    discord.opus.load_opus('/usr/lib/x86_64-linux-gnu/libopus.so')
 
 audiobank = {}
 with open('audiobank.json', 'r') as database:
