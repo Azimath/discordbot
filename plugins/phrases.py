@@ -188,7 +188,13 @@ async def disrespects(triggerMessage):
 @commands.messageHandlerFilter("F")
 async def respects(triggerMessage):
     if triggerMessage.content.__len__() == 1:
-        await triggerMessage.channel.send( triggerMessage.author.name + " has paid their respects.")
+        raremsg = random.randrange(100)
+        if raremsg < 2:
+            await triggerMessage.channel.send( triggerMessage.author.name + " has sold missiles to Iran.")
+        elif raremsg < 5:
+            await triggerMessage.channel.send( triggerMessage.author.name + " has sent crack to inner cities.")
+        else:
+            await triggerMessage.channel.send( triggerMessage.author.name + " has paid their respects.")
       
 @commands.registerEventHandler(triggerType="\\messageNoBot", name="X")
 @commands.messageHandlerFilter("X")
