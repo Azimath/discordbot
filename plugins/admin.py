@@ -3,6 +3,7 @@ import permissions
 import commands
 import asyncio
 import json
+import sys
 
 """This is a plugin for a few basic admin functions and the almighty censorship cannon.
    Feared by Jerries everywhere.
@@ -94,11 +95,12 @@ async def restart(triggerMessage):
 @permissions.needs_moderator 
 async def changeAllNames(triggerMessage):
     names = {}
-    for member in triggerMessage.server.members:
+    for member in triggerMessage.guild.members:
         names.update({ member.id : member.nick})
         try:
-            await client.change_nickname(member, triggerMessage.content.split()[1])
+            await member.edit(nick=triggerMessage.content.split()[1],reason="Scoobert Doobert")
         except:
+            print(sys.exc_info()[0])
             print("Couldn't scoobert " + member.name.encode('ascii', 'ignore').decode('ascii'))
     with open('names.json', 'w') as database:
             database.write(json.dumps(names, indent=4))
@@ -108,11 +110,12 @@ async def changeAllNames(triggerMessage):
 async def unchangeAllNames(triggerMessage):
     with open('names.json', 'r') as database:
         names = json.loads(database.read())
-        for member in triggerMessage.server.members:
+        for member in triggerMessage.guild.members:
             try:
-                await client.change_nickname(member, names[member.id])
+                await member.edit(nick=names[str(member.id)], reason="Scoobert Doobert")
             except:
-                print("Couldn't unscoobert " + member.name.encode('ascii', 'ignore').decode('ascii'))
+                print(sys.exc_info()[0])
+                print("Couldn't unscoobert " + str(member.id) + ":" + member.name.encode('ascii', 'ignore').decode('ascii'))
             
 @commands.registerEventHandler(name="delete")
 @permissions.needs_moderator
