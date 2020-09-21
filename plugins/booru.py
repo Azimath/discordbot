@@ -50,8 +50,8 @@ def downloadImage(url):
     
     #https://stackoverflow.com/a/39217788
     data = file_response.content
-        
     
+        
     return io.BufferedReader(io.BytesIO(data)), file_extension
     
 def gelbooru(tags, return_tags=False):
@@ -73,8 +73,8 @@ def e621(tags, return_tags=False):
         i = random.randint(0, len(j)-1)
         target = j[i]['file']['url']
         if target is not None:
-        return downloadImage(target)
-    else:
+            return downloadImage(target)
+        else:
             print(j[i])
             return None
     else:
@@ -416,7 +416,7 @@ async def startBooruGame(triggerMessage):
                 
             if target is None:
                 await triggerMessage.channel.send( "Oopsie woopsie Uwu. Couldn't find a suitable post. Try again?")
-                return   
+                return
 
             for t in ['general', 'species', 'artist', 'character', 'copyright', 'lore', 'meta']:
                 for tag in target['tags'][t]:
