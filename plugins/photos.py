@@ -2,7 +2,7 @@ import commands
 import permissions
 import discord
 import requests
-from io import BytesIO
+from io import BytesIO, BufferedReader
 from PIL import Image, ImageFilter
 import random
 import time
@@ -70,28 +70,38 @@ async def morejpeg(triggerMessage):
 
             timeout[user] = nowtime
         
-        iters = 1
+        iters = 5
         try:
             iters = int(triggerMessage.content.split()[1])
         except:
-            print ("Couldn't get jpeg iterations, defaulting to 1")
-        iters = min(iters, 10)    
+            pass
+
+        iters = min(iters, 100)    
         img = Image.open(BytesIO(r.content)).convert("RGB") #https://stackoverflow.com/a/13024547
-        img.save("more.jpeg", quality = 100)
+        imBytes = BytesIO()
+
+        img.save(imBytes, quality = 100, format="JPEG")
+        imBytes.seek(0)
+
         for i in range(iters):
             translationX = random.choice([-12,-4,0,4,12])
             translationY = random.choice([-12,-4,0,4,12])
 
-            img = Image.open("more.jpeg").convert("RGB") 
+            img = Image.open(imBytes).convert("RGB")
+            imBytes.close()
             img = img.transform(img.size, Image.AFFINE, (1,0,translationX,0,1,translationY)).transpose(Image.ROTATE_90)
-            img.save("more.jpeg", quality = 1)
+            imBytes = BytesIO()
+            img.save(imBytes, quality = 1, format="JPEG")
+            imBytes.seek(0)
 
-            img = Image.open("more.jpeg").transpose(Image.ROTATE_270)
+            img = Image.open(imBytes).transpose(Image.ROTATE_270)
+            imBytes.close()
             img = img.transform(img.size, Image.AFFINE, (1,0,-translationX,0,1,-translationY))
-            img.save("more.jpeg", quality = 1)
+            imBytes = BytesIO()
+            img.save(imBytes, quality = 1, format="JPEG")
+            imBytes.seek(0)
 
-        with open("more.jpeg", "rb") as image:
-            await triggerMessage.channel.send(content="Now with more JPEG", file=discord.File(image, filename="more.jpeg"))
+        await triggerMessage.channel.send(content="Now with more JPEG", file=discord.File(BufferedReader(imBytes), filename="more.jpeg"))
     
 async def hugeify(url):
     session = requests.Session()
