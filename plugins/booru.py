@@ -339,7 +339,7 @@ gameHistoryDBCursor.execute("create table if not exists Games (time integer, ima
 gameHistoryDB.commit()
     
 def nameFromId(channel, id):
-    member = discord.utils.find(lambda m: m.id == id, channel.server.members)
+    member = channel.guild.get_member(id)
     name = member.name
     if member.nick is not None:
         name = member.nick
@@ -404,11 +404,10 @@ async def startBooruGame(triggerMessage):
         tags = []
         target = ""
         try:    
-            j = getData("http://e621.net/post/index.json?limit={0}&tags={1}", ["order:random","-scat","-young","-fart"])
+            j = getData("http://e621.net/posts.json?limit={0}&tags={1}", ["order:random","-scat","-young","-fart"])['posts']
             target = None
             for i in j: # look for a suitable post
-                file_ext = i["file_ext"]
-                if i["file_ext"] not in ['png', 'jpg']:
+                if i["file"]["ext"] not in ['png', 'jpg']:
                     continue
                 if len(i["tags"]) <= 5:
                     continue
@@ -418,8 +417,12 @@ async def startBooruGame(triggerMessage):
             if target is None:
                 await triggerMessage.channel.send( "Oopsie woopsie Uwu. Couldn't find a suitable post. Try again?")
                 return   
-            tags = target["tags"].casefold().split(" ")
-            target = target["file_url"]
+
+            for t in ['general', 'species', 'artist', 'character', 'copyright', 'lore', 'meta']:
+                for tag in target['tags'][t]:
+                    tags.append(tag)
+
+            target = target["file"]["url"]
             async with triggerMessage.channel.typing():
                 data, extension = downloadImage(target)
                 
