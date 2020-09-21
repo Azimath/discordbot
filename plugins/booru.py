@@ -50,19 +50,16 @@ def downloadImage(url):
     
     #https://stackoverflow.com/a/39217788
     data = file_response.content
-    print(len(data))
-    with open("out."+file_extension, 'wb') as f:
-        f.write(data)
-        f.close()
         
-    return "out."+file_extension
+    
+    return io.BufferedReader(io.BytesIO(data)), file_extension
     
 def gelbooru(tags, return_tags=False):
     tags.append("-loli")
     tags.append("-shota")
     j = getData("http://gelbooru.com/index.php?page=dapi&limit={0}&s=post&&q=index&json=1&tags={1}", tags)
     if not return_tags:
-        target = j[random.randint(0, len(j))]['file_url']
+        target = j[random.randint(0, len(j)-1)]['file_url']
         return downloadImage(target)
     else:
         i = random.randint(0, len(j))
@@ -73,8 +70,13 @@ def gelbooru(tags, return_tags=False):
 def e621(tags, return_tags=False):
     j = getData("http://e621.net/posts.json?limit={0}&tags={1}", tags)['posts']
     if not return_tags:
-        target = j[random.randint(0, len(j))]['file']['url']
+        i = random.randint(0, len(j)-1)
+        target = j[i]['file']['url']
+        if target is not None:
         return downloadImage(target)
+    else:
+            print(j[i])
+            return None
     else:
         i = random.randint(0, len(j))
         target = j[i]['file']['url']
@@ -87,7 +89,7 @@ def e621(tags, return_tags=False):
 def rule34(tags, return_tags=False):
     j = getDOM("https://rule34.xxx/index.php?page=dapi&s=post&q=index&limit={0}&tags={1}", tags).getElementsByTagName("post")
     if not return_tags:
-        target = j[random.randint(0, len(j))].attributes['file_url'].value
+        target = j[random.randint(0, len(j)-1)].attributes['file_url'].value
         return downloadImage(target)
     else:
         i = random.randint(0, len(j))
@@ -95,17 +97,19 @@ def rule34(tags, return_tags=False):
         return (downloadImage(target), j[i].attributes['tags'].value.split(" ")[1:-1])
     
 functionMap = {"e621":e621, "gelbooru":gelbooru, "rule34":rule34}
+SUPPORTED = str(list(functionMap.keys()))
 
 async def postRandom(channel, booru, tags):
+    global SUPPORTED
     try:
-        out = functionMap[booru](tags)
+        data, extension = functionMap[booru](tags)
         async with channel.typing():
-            with open(out, "rb") as image:
-                await channel.send(file=discord.File(image, filename=out))
+            await channel.send(file=discord.File(data, filename="fur."+extension))
+            data.close()
     except IndexError:
         await channel.send("Oopsie woopsie Uwu. " + booru + " returned no search results.")
     except KeyError:
-        await channel.send("Oopsie woopsie. " + booru + " is not supported.\nSupported boorus: "+str(SUPPORTED))
+        await channel.send("Oopsie woopsie. " + booru + " is not supported.\nSupported boorus: "+ SUPPORTED)
     except JSONDecodeError:
         await channel.send("Oopsie Woopsie. Failed to decode json. " + booru + " returned an empty response, or something weird")
     except Exception as e:
@@ -118,7 +122,7 @@ async def booru(triggerMessage):
     tokens = triggerMessage.content.split()
     #if (len(tokens) == 1 or tokens[1].lower() == "help"):
     if (len(tokens) <= 2):
-        await triggerMessage.channel.send( "Syntax is `!booru booru_name tag0 ...`\nCurrently supported boorus: " + str(list(functionMap.keys())))
+        await triggerMessage.channel.send( "Syntax is `!booru booru_name tag0 ...`\nCurrently supported boorus: " + SUPPORTED)
         return
     if (triggerMessage.channel.type is discord.ChannelType.text and not triggerMessage.channel.is_nsfw()):
         tokens.append("rating:safe")
@@ -135,14 +139,15 @@ async def unbusy(triggerMessage):
     
 @commands.registerEventHandler(name="secret", exclusivity="global")
 async def postsecret(triggerMessage):
-    filename = addsecret(e621(["furry"]))[0]
-    if filename is not None:
-        with open(filename, "rb") as image:
-            await triggerMessage.channel.send(file=discord.File(image, filename="secret.png"))
+    data_in = e621(["anthro"])
+    if data_in is not None:
+            data, _ = addsecret(data_in[0])
+            await triggerMessage.channel.send(file=discord.File(data, filename="secret.png"))
+            data.close()
     else:
         await triggerMessage.channel.send("Failed to generate image")
 
-def addsecret(file_name):
+def addsecret(data_in):
     chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghkmnopqrstuvwxyz1234567890"
     pw = ""
     for i in range(6):
@@ -150,7 +155,7 @@ def addsecret(file_name):
         
     #get an image from e621
     #we can mess with tags later
-    bg = Image.open(file_name)
+    bg = Image.open(data_in)
     
     #make sure the image has an alpha channel so alpha_composite will work later
     bg = bg.convert(mode="RGBA")
@@ -195,9 +200,10 @@ def addsecret(file_name):
     
     #composite images and save
     bg.alpha_composite(img)
-    out = io.BytesIO()
-    bg.save("out.png", format="PNG")
-    return ("out.png", pw)
+    output = io.BytesIO()
+    bg.save(output, format="PNG")
+    output.seek(0)
+    return (io.BufferedReader(output), pw)
   
 @commands.registerEventHandler(name="doge", exclusivity="global")      
 async def doge(triggerMessage):
@@ -216,22 +222,22 @@ async def doge(triggerMessage):
     tags.extend(["-young", "-scat","-fart"]) #Anti trash
     
     x,y = functionMap[site](tags, return_tags=True)
-    filename = makedoge(x, y)
-    if filename is not None:
-        with open(filename, "rb") as image:
-            await triggerMessage.channel.send(file=discord.File(image, filename="doge.png"))
+    data = makedoge(x[0], y)
+    if data is not None:
+        await triggerMessage.channel.send(file=discord.File(data, filename="doge.png"))
+        data.close()
     else:
         await triggerMessage.channel.send("Failed to generate image")
 
     
-def makedoge(file_name, tags):
+def makedoge(data, tags):
     colors = ["Red", "Green", "GreenYellow", "Magenta", "Cyan", "Blue", "White", "Black", "Orange", "Yellow", "Grey"]
     colors = random.sample(colors, 8)
     # this lets us take either the string straight from the json or an already split up list
     if type(tags) == str:
         tags = tags.split(" ")
 
-    img = Image.open(file_name)
+    img = Image.open(data)
     draw = ImageDraw.Draw(img)
     
     phrases = ["wow."]
@@ -255,6 +261,11 @@ def makedoge(file_name, tags):
     for i in range(len(phrases)):
         draw.text((xs[i],ys[i]), phrases[i], fill=colors[i], font=font)
         
+    output = io.BytesIO()
+    img.save(output, format="PNG")
+    output.seek(0)
+    return io.BufferedReader(output)
+
 buttplugClients = {}
 
 @commands.registerEventHandler(name="keister", exclusivity="global")  
@@ -410,10 +421,10 @@ async def startBooruGame(triggerMessage):
             tags = target["tags"].casefold().split(" ")
             target = target["file_url"]
             async with triggerMessage.channel.typing():
-                filename = downloadImage(target)
+                data, extension = downloadImage(target)
                 
-                with open(filename, "rb") as image:
-                    await triggerMessage.channel.send(file=discord.File(image, filename=filename))
+                await triggerMessage.channel.send(file=discord.File(data, filename="fur."+extension))
+                data.close()
                 
         except JSONDecodeError:
             await triggerMessage.channel.send( "Oopsie Woopsie. Failed to decode json.")
