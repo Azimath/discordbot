@@ -1,15 +1,22 @@
-import commands
-import permissions
+import asyncio
+import atexit
+import io
+import json
+import random
+import sqlite3
+import time
+from json import JSONDecodeError
+from xml.dom import minidom
+
 import discord
 import requests
-import random
-import time
-import json
-from xml.dom import minidom
-import sqlite3, atexit
-from json import JSONDecodeError
+from buttplug.client import (ButtplugClient, ButtplugClientConnectorError,
+                             ButtplugClientDevice,
+                             ButtplugClientWebsocketConnector)
 from PIL import Image, ImageDraw, ImageFont
-import io
+
+import commands
+import permissions
 
 client = None
     
@@ -248,8 +255,35 @@ def makedoge(file_name, tags):
     for i in range(len(phrases)):
         draw.text((xs[i],ys[i]), phrases[i], fill=colors[i], font=font)
         
-    img.save("out.png")
-    return "out.png"
+buttplugClients = {}
+
+@commands.registerEventHandler(name="keister", exclusivity="global")  
+async def keister(triggerMessage):
+    global buttplugClients
+
+    if triggerMessage.author.id in buttplugClients:
+        buttplugClients[triggerMessage.author.id].stop_scanning()
+        buttplugClients[triggerMessage.author.id].disconnect()
+
+    buttplugClients[triggerMessage.author.id] = ButtplugClient(triggerMessage.author.name)
+    connector = ButtplugClientWebsocketConnector(triggerMessage.content.split()[1])
+
+    await buttplugClients[triggerMessage.author.id].connect(connector)
+    await buttplugClients[triggerMessage.author.id].start_scanning()
+    await triggerMessage.channel.send("Keistered!")
+
+@commands.registerEventHandler(name="unkeister", exclusivity="global")  
+async def unkeister(triggerMessage):
+    global buttplugClients
+
+    if triggerMessage.author.id in buttplugClients:
+        for devid in buttplugClients[triggerMessage.author.id].devices:
+            await buttplugClients[triggerMessage.author.id].devices[devid].send_stop_device_cmd()
+        await buttplugClients[triggerMessage.author.id].stop_scanning()
+        await buttplugClients[triggerMessage.author.id].disconnect()
+        buttplugClients.pop(triggerMessage.author.id)
+
+        await triggerMessage.channel.send("Unkeistered!")
 
 class BooruGame:
     def __init__(self, tags, url):
@@ -403,6 +437,8 @@ async def endBooruGame(triggerMessage):
 @commands.registerEventHandler(name="bg")
 @commands.registerEventHandler(name="booruguess")
 async def booruGameGuess(triggerMessage):
+    global buttplugClients
+
     if triggerMessage.channel not in gameInstances:
         await triggerMessage.channel.send( "No game in progress")
         return
@@ -411,10 +447,20 @@ async def booruGameGuess(triggerMessage):
     resultText = ""
     for arg in args[1:]:
         resultText += gameInstances[triggerMessage.channel].guess(str(arg), triggerMessage.author.id) + "\n"
-    await triggerMessage.channel.send( resultText)
+    await triggerMessage.channel.send(resultText)
         
     if len(gameInstances[triggerMessage.channel].tags) == 0:
         await endBooruGame(triggerMessage)
+        for user, bpclient in buttplugClients.items():
+            for devid, dev in bpclient.items():
+                await dev.send_stop_device_cmd()
+    else:
+        for user, bpclient in buttplugClients.items():
+            if user in gameInstances[triggerMessage.channel].userScores:
+                score = len(gameInstances[triggerMessage.channel].userScores[user])
+                for devid, dev in bpclient.items():
+                    if "VibrateCmd" in dev.allowed_messages.keys():
+                        await dev.send_vibrate_cmd(min(score/5, 1.0))
 
 @commands.registerEventHandler(name="boorucoin")        
 @commands.registerEventHandler(name="booruleaders")
