@@ -76,7 +76,7 @@ async def morejpeg(triggerMessage):
         except:
             pass
 
-        iters = min(iters, 100)    
+        iters = min(iters, 20)    
         img = Image.open(BytesIO(r.content)).convert("RGB") #https://stackoverflow.com/a/13024547
         imBytes = BytesIO()
 
