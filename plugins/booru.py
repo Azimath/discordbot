@@ -7,6 +7,7 @@ import sqlite3
 import time
 from json import JSONDecodeError
 from xml.dom import minidom
+import math
 
 import discord
 import requests
@@ -487,3 +488,115 @@ async def booruLeaders(triggerMessage):
         name = nameFromId(triggerMessage.channel, id)
         leaderboardString += name + " : " + str(leaderboard[id]) + "\n"
     await triggerMessage.channel.send( leaderboardString)
+
+border = Image.open("tarot_frame.png")
+font = ImageFont.truetype(font="comic.ttf", size=25)
+def makecard(image, name, flipped):
+    #Target size: 370x640
+    #Border: 40 on top, 10 on bottom, 10 on sides
+    cw = 370
+    ch = 640
+
+    bordw = 10
+
+    tw = cw - 2 * bordw
+    th = ch - 50
+
+    cardimg = Image.new("RGBA", (cw,ch))
+
+    if image.height < image.width:
+        image = image.rotate(90, expand=True)
+    
+    sf = min(image.height/th, image.width/tw)
+    image = image.resize((math.floor(image.width/sf), math.floor(image.height/sf)))
+    print(image.width, image.height)
+    image = image.crop(box=(image.width//2-tw//2, image.height//2-th//2, image.width//2+tw//2, image.height//2+th//2))
+
+    cardimg.paste(image, (bordw,40))
+    cardimg.paste(border, (0,0), border)
+    
+    draw = ImageDraw.Draw(cardimg)
+
+    textx = math.floor(cw/2 - draw.textsize(name, font=font)[0]/2)
+    draw.text((textx,0), name, font=font, fill=(0,0,0,255))
+
+    if flipped:
+        cardimg = cardimg.rotate(180)
+
+    return cardimg
+
+def stitch_images(images):
+    endWidth = 10
+    endHeight = 0
+
+    for image in images:
+        endWidth += image.width + 10
+        endHeight = max(endHeight, image.height)
+    
+    result = Image.new('RGB', (endWidth, endHeight+20))
+
+    xpos = 10
+    for image in images:
+        result.paste(image, (xpos, 10))
+        xpos += image.width + 10
+    
+    return result
+
+@commands.registerEventHandler(name="tarot")
+async def e621_tarot(triggerMessage):
+    # pick 3 cards
+    
+    deck = [
+            (["anthro", "rating:explicit"], "The Anthro"),
+            (["feral", "rating:explicit"], "The Feral"),
+            (["human", "rating:explicit"], "The Human"),
+            (["vore"], "The Devourer"),
+            (["hyper_penis"], "The Tower"),
+            (["hyper_breasts"], "The Sun and Moon"),
+            (["cum_inflation"], "The Cum Inflation"),
+            (["mammal", "rating:explicit"], "The Mammal"),
+            (["scalie", "-dragon", "rating:explicit"], "The Scalie"),
+            (["avian", "rating:explicit"], "The Bird"),
+            (["tentacles", "rating:explicit"], "The Tentacles"),
+            (["ejaculation"], "The Fountain"),
+            (["sonic_the_hedgehog_(series)", "rating:explicit"], "The Sonic The Hedgehog Franchise"),
+            (["my_little_pony", "rating:explicit"], "The Pony"),
+            (["pokémon", "rating:explicit"], "The Pokémon"),
+            (["bondage", "rating:explicit"], "The Bound Man"),
+            (["diaper", "rating:safe"], "The Diaper"),
+            (["dragon", "rating:explicit"], "The Dragon"),
+            (["male/male", "rating:explicit"], "The Emperors"),
+            (["male/female", "rating:explicit"], "The Lovers"),
+            (["female/female", "rating:explicit"], "The Empresses"),
+            (["clown"], "The Fool"),
+            (["group_sex"], "The Orgy")        
+            ]
+    
+    cards = random.sample(deck, 3)
+    status = "Shuffles"
+    statusMsg = await triggerMessage.channel.send(status)
+    try:
+        #fetch images and turn into tarots
+        images = []
+        for tags,name in cards:
+            tags.extend(["-young", "order:random"])
+            print(tags)
+            images.append(makecard(image=Image.open(e621(tags)[0]), name=name, flipped=random.choice([False, False, True]) ))
+            status += "\nDraws a card"
+            await statusMsg.edit(content=status)
+            
+        # stitch into one image to post
+        stitched = stitch_images(images)
+
+        output = io.BytesIO()
+        stitched.save(output, format="PNG")
+        output.seek(0)
+        data = io.BufferedReader(output)
+        
+        await triggerMessage.channel.send(file=discord.File(data, filename="tarot.png"))
+
+        output.close()
+    except Exception as e:
+        await triggerMessage.channel.send("Reply hazy try again")
+        raise e
+
