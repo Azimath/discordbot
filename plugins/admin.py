@@ -4,6 +4,8 @@ import commands
 import asyncio
 import json
 import sys
+import re
+import metadata_parser
 
 """This is a plugin for a few basic admin functions and the almighty censorship cannon.
    Feared by Jerries everywhere.
@@ -32,6 +34,39 @@ async def invite(triggerMessage):
 async def newsPurge(triggerMessage):
     if triggerMessage.author.id == "102980090970779648" and triggerMessage.channel.id != "102984909320110080":
         await client.delete_message(triggerMessage)
+
+def isAmp(word):
+    return any(map(word.__contains__, ampKeywords)) and any(map(word.__contains__, ["http://", "https://"]))
+
+def deAmp(link):
+    try:
+        page = metadata_parser.MetadataParser(url=link, search_head_only=True)
+        amputee = page.get_url_canonical()
+        if amputee is not None:
+            return amputee
+        else:
+            return link
+    except:
+        return link
+
+ampKeywords = ["/amp", "amp/", ".amp", "amp.", "?amp", "amp?", "=amp",
+                "amp=", "&amp", "amp&", "%amp", "amp%", "_amp", "amp_"]
+
+#https://github.com/KilledMufasa/AmputatorBot/
+@commands.registerEventHandler(triggerType="\\messageNoBot", name="newsPurge")
+async def deAmpMessage(triggerMessage):
+    words = triggerMessage.content.split()
+    if words is None:
+        words = triggerMessage.content
+    if any(map(isAmp, words)):
+        words = [deAmp(word) if isAmp(word) else word for word in words]
+
+        message = [triggerMessage.author.name + ":"]
+        message.extend(words)
+
+        await triggerMessage.channel.send(" ".join(message))
+        await triggerMessage.delete()
+    
 
 @commands.registerEventHandler(name="register")
 async def registerNewUser(triggerMessage):  
