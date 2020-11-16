@@ -206,10 +206,10 @@ async def doubt(triggerMessage):
 @commands.registerEventHandler(name="iaa")
 @commands.registerEventHandler(name="IAA")
 async def IAA(triggerMessage):
-    rw = RandomWords()
-    NewName = rw.random_word('i').capitalize() + " " + rw.random_word('a').capitalize() + " " + rw.random_word('a').capitalize()
-    await triggerMessage.guild.edit(name=f"{NewName}-Official")
-    await triggerMessage.channel.send(f"{NewName}")
+ #   rw = RandomWords()
+ #   NewName = rw.random_word('i').capitalize() + " " + rw.random_word('a').capitalize() + " " + rw.random_word('a').capitalize()
+ #   await triggerMessage.guild.edit(name=f"{NewName}-Official")
+    await triggerMessage.channel.send("IAA, more like I Am Gay")
 
 @commands.registerEventHandler(name="Contributors")
 @commands.registerEventHandler(name="contributors")
