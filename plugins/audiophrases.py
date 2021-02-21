@@ -81,7 +81,7 @@ async def join(triggerMessage):
                 await voice.disconnect()
             voice = await channel.connect() # there is no better way to do this
     else:
-        channel = discord.utils.get(triggerMessage.server.channels, name=triggerMessage.content[6:], type=discord.ChannelType.voice)
+        channel = discord.utils.get(triggerMessage.guild.voice_channels, name=triggerMessage.content[6:])
         if channel is not None:
             if voice is not None:
                 await voice.disconnect()
@@ -204,7 +204,7 @@ async def youtube(triggerMessage):
         if "entries" in info:
             info = info['entries'][0]
 
-        source = discord.FFmpegPCMAudio(info['url'])
+        source = discord.FFmpegPCMAudio(info['url'], before_options="-probesize 42M")
         voice.play(source)
     except DownloadError as err:
         await triggerMessage.channel.send(err)
