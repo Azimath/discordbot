@@ -63,7 +63,7 @@ def gelbooru(tags, return_tags=False):
         target = j[random.randint(0, len(j)-1)]['file_url']
         return downloadImage(target)
     else:
-        i = random.randint(0, len(j))
+        i = random.randint(0, len(j)-1)
         target = j[i]['file_url']
         return (downloadImage(target), j[i]['tags'])
 
@@ -79,7 +79,7 @@ def e621(tags, return_tags=False):
             print(j[i])
             return None
     else:
-        i = random.randint(0, len(j))
+        i = random.randint(0, len(j)-1)
         target = j[i]['file']['url']
         tags = []
         for t in ['general', 'species', 'artist', 'character', 'copyright', 'lore', 'meta']:
@@ -93,7 +93,7 @@ def rule34(tags, return_tags=False):
         target = j[random.randint(0, len(j)-1)].attributes['file_url'].value
         return downloadImage(target)
     else:
-        i = random.randint(0, len(j))
+        i = random.randint(0, len(j)-1)
         target = j[i].attributes['file_url'].value
         return (downloadImage(target), j[i].attributes['tags'].value.split(" ")[1:-1])
     
