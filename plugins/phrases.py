@@ -22,6 +22,7 @@ from random_words import RandomWords
    !tingle : links to a random tingler
    !lmgtfy, !google: generates an lmgtfy link from the given query
    !IAA : explains what IAA stands for
+   !trivia : gives a random true fact
    """
 
 client = None
@@ -48,6 +49,10 @@ async def refreshDragons(triggerMessage):
                                                       + " dragons. Got " + str(len(phrasebank["dragons"])-oldnum) + " new dragons")
     if len(phrasebank["dragons"]) - oldnum > 0:
         pass#await triggerMessage.channel.send( "@everyone")
+      
+@commands.registerEventHandler(name="trivia")
+async def trivia(triggerMessage):
+   await triggerMessage.channel.send(random.choice(phrasebank["trivia"]))
 
 @commands.registerEventHandler(name="lart")
 async def lart(triggerMessage):
