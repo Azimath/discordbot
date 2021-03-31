@@ -1,16 +1,24 @@
 import discord
 import asyncio
 import commands
+import json
+import datetime
 
 client = None
 
 karma = {}
+lastSave = datetime.fromtimestamp(0)
 
-def loadKarmaFromFile():
-    return
+try:
+    with open('karma.json', 'r') as karmafile:
+        karma = json.loads(karmafile.read())
+except:
+    pass
 
-def saveKarmaToFile():
-    return
+def saveKarmaToFile(karma):
+    with open('karma.json', 'w') as karmafile:
+        json.dump(karma, karmafile, indent=4)
+
   
 @commands.registerEventHandler(triggerType="\\messageNoBot")
 def addReactVotes(triggerMessage):
@@ -30,6 +38,9 @@ def processVoteCast(triggerMessage, reaction, user):
             karma[triggerMessage.author.name] -= 1
         else:
             karma[triggerMessage.author.name] = -1
+    now = datetime.now()
+    if (now - lastSave).total_seconds() > 600:
+         saveKarmaToFile(karma)
          
 @commands.registerEventHandler(name="showkarma")    
 def showKarma(triggerMessage):
