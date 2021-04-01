@@ -21,13 +21,13 @@ def saveKarmaToFile(karma):
 
   
 @commands.registerEventHandler(triggerType="\\messageNoBot")
-def addReactVotes(triggerMessage):
+async def addReactVotes(triggerMessage):
     if (triggerMessage.guild.id == 102981131074297856):
         await triggerMessage.add_reaction(client.get_emoji(826584584866627684))
         await triggerMessage.add_reaction(client.get_emoji(826584671940640790))
       
 @commands.registerEventHandler(triggerType="\\reactionChanged", name="processVoteCast")
-def processVoteCast(triggerMessage, reaction, user):
+async def processVoteCast(triggerMessage, reaction, user):
     if (reaction.emoji == client.get_emoji(826584584866627684)):
         if triggerMessage.author.name in karma:
             karma[triggerMessage.author.name] += 1
@@ -43,7 +43,7 @@ def processVoteCast(triggerMessage, reaction, user):
          saveKarmaToFile(karma)
          
 @commands.registerEventHandler(name="showkarma")    
-def showKarma(triggerMessage):
+async def showKarma(triggerMessage):
      if triggerMessage.author.name not in karma:
          karma[triggerMessage.author.name] = 0
      await triggerMessage.channel.send("Karma: " + karma[triggerMessage.author.name])
