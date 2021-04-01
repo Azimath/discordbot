@@ -33,7 +33,7 @@ async def processVoteCast(triggerMessage, reaction, user):
             karma[triggerMessage.author.name] += 1
         else:
             karma[triggerMessage.author.name] = 1
-    elif(reaction.emoji == client.get_emoji(826584671940640790):
+    elif(reaction.emoji == client.get_emoji(826584671940640790)):
         if triggerMessage.author.name in karma:
             karma[triggerMessage.author.name] -= 1
         else:
