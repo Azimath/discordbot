@@ -2,7 +2,7 @@ import discord
 import asyncio
 import commands
 import json
-import datetime
+from datetime import datetime
 
 client = None
 
