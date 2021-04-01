@@ -79,11 +79,11 @@ if __name__ == "__main__":
     def listen():
         @client.event
         async def on_reaction_add(reaction, user):
-            await commands.executeEvent(triggerType="\\reactionChanged", triggerMessage=reaction.message, reaction=reaction, user=user)
+            await commands.executeEvent(triggerType="\\reactionAdded", triggerMessage=reaction.message, reaction=reaction, user=user)
             
         @client.event
         async def on_reaction_remove(reaction, user):
-            await commands.executeEvent(triggerType="\\reactionChanged", triggerMessage=reaction.message, reaction=reaction, user=user)
+            await commands.executeEvent(triggerType="\\reactionRemoved", triggerMessage=reaction.message, reaction=reaction, user=user)
         
         @client.event
         async def on_message(message):

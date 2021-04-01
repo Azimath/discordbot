@@ -22,25 +22,22 @@ def voiceCommandExclusive(func):
         global voice
         global lastTime
         if voice is None:
-            channel = None
-            for c in client.get_all_channels():
-                if c.type==discord.ChannelType.voice and triggerMessage.author in c.members:
-                    channel = c
-                    break
-            
+            channel = triggerMessage.author.voice.channel
+
             if channel is not None:            
                 voice = await channel.connect() # there is no better way to do this
             else:
+                await triggerMessage.channel.send("Error: Couldn't find your voice channel")
                 return
         #print(str(time.time()) + ">" + str(lastTime) + "+" + str(cd))
         if time.time() > lastTime + cd:
             if not voice.is_connected():
-                await triggerMessage.channel.send( "Error: not connected to voice")
+                await triggerMessage.channel.send("Error: not connected to voice")
             else:
                 if voice is not None:
                     if hasattr(voice, "is_playing"):
                         if voice.is_playing():
-                            await triggerMessage.channel.send( "Fuck you")
+                            await triggerMessage.channel.send("Fuck you")
                             return
                 lastTime = time.time()
                 await func(triggerMessage)
@@ -205,7 +202,13 @@ async def youtube(triggerMessage):
             info = info['entries'][0]
 
         source = discord.FFmpegPCMAudio(info['url'], before_options="-probesize 42M")
-        voice.play(source)
+
+        def playAgain(e):
+            print("Play me again!", info['url'])
+            source = discord.FFmpegPCMAudio(info['url'], before_options="-probesize 42M")
+            voice.play(source, after=playAgain)
+
+        voice.play(source, after=playAgain)
     except DownloadError as err:
         await triggerMessage.channel.send(err)
         return
@@ -224,7 +227,7 @@ async def youtube(triggerMessage):
     except discord.Forbidden:
         pass
 
-@commands.registerEventHandler(triggerType="\\reactionChanged", name="soundControl")
+@commands.registerEventHandler(triggerType="\\reactionAdded", name="soundControl")
 async def soundControl(triggerMessage, reaction, user):
     global message
     if message is None:

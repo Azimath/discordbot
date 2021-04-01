@@ -20,7 +20,8 @@ triggerHandlers = {
     "\\botException" : {},
     "\\set_root_context_on_load" : {},
     "\\timeTick" : {},
-    "\\reactionChanged" : {},
+    "\\reactionAdded" : {},
+    "\\reactionRemoved" : {},
     "\\messageEdit": {}
 }
 
