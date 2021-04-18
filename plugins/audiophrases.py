@@ -183,7 +183,7 @@ async def radio(triggerMessage):
 async def youtube(triggerMessage):
     global message
     global repeating
-    repeating = false
+    repeating = False
     if triggerMessage.channel.type != discord.ChannelType.text:
         await triggerMessage.channel.send( "Go fuck yourself")
         await discord.utils.get(client.get_all_channels(), server__name="IAA-Official", name='genearl', type=discord.ChannelType.text).send(triggerMessage.author.name + " should go fuck themselves")
@@ -255,16 +255,16 @@ async def soundControl(triggerMessage, reaction, user):
                 voice.pause()
             elif(reaction.emoji == '\u23f9') and (voice.is_playing() or voice.is_paused()):
                 print("Stop")
-                repeating = false
+                repeating = False
                 voice.stop()
                 await triggerMessage.clear_reactions()
             elif(reaction.emoji == '\u1F501') and (voice.is_playing() or voice.is_paused()):
                 if not repeating:
                     print("Begin Looping")
-                    repeating = true
+                    repeating = True
                 else:
                     print("Stop Looping")
-                    repeating = true
+                    repeating = False
     #print(user.name.encode('unicode_escape').decode('ascii'))
         
 @commands.registerEventHandler(name="stop") 
