@@ -222,7 +222,7 @@ async def youtube(triggerMessage):
     
     await message.add_reaction('\u23ef')
     await message.add_reaction('\u23f9')
-    await message.add_reaction('\u1F501')
+    await message.add_reaction('\U0001F501')
     
     print("User " + str(triggerMessage.author.id) + " started video: " + url)
     
@@ -258,7 +258,7 @@ async def soundControl(triggerMessage, reaction, user):
                 repeating = False
                 voice.stop()
                 await triggerMessage.clear_reactions()
-            elif(reaction.emoji == '\u1F501') and (voice.is_playing() or voice.is_paused()):
+            elif(reaction.emoji == '\U0001F501') and (voice.is_playing() or voice.is_paused()):
                 if not repeating:
                     print("Begin Looping")
                     repeating = True
