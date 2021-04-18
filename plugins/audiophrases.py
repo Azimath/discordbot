@@ -182,6 +182,7 @@ async def radio(triggerMessage):
 @voiceCommandExclusive
 async def youtube(triggerMessage):
     global message
+    global repeating = false
     if triggerMessage.channel.type != discord.ChannelType.text:
         await triggerMessage.channel.send( "Go fuck yourself")
         await discord.utils.get(client.get_all_channels(), server__name="IAA-Official", name='genearl', type=discord.ChannelType.text).send(triggerMessage.author.name + " should go fuck themselves")
@@ -204,9 +205,10 @@ async def youtube(triggerMessage):
         source = discord.FFmpegPCMAudio(info['url'], before_options="-probesize 42M")
 
         def playAgain(e):
-            print("Play me again!", info['url'])
-            source = discord.FFmpegPCMAudio(info['url'], before_options="-probesize 42M")
-            voice.play(source, after=playAgain)
+            if repeating:
+                print("Play me again!", info['url'])
+                source = discord.FFmpegPCMAudio(info['url'], before_options="-probesize 42M")
+                voice.play(source, after=playAgain)
 
         voice.play(source, after=playAgain)
     except DownloadError as err:
@@ -219,6 +221,7 @@ async def youtube(triggerMessage):
     
     await message.add_reaction('\u23ef')
     await message.add_reaction('\u23f9')
+    await message.add_reaction('\u1F501')
     
     print("User " + str(triggerMessage.author.id) + " started video: " + url)
     
@@ -230,6 +233,7 @@ async def youtube(triggerMessage):
 @commands.registerEventHandler(triggerType="\\reactionAdded", name="soundControl")
 async def soundControl(triggerMessage, reaction, user):
     global message
+    global repeating
     if message is None:
         return
         
@@ -250,8 +254,16 @@ async def soundControl(triggerMessage, reaction, user):
                 voice.pause()
             elif(reaction.emoji == '\u23f9') and (voice.is_playing() or voice.is_paused()):
                 print("Stop")
+                repeating = false
                 voice.stop()
                 await triggerMessage.clear_reactions()
+            elif(reaction.emoji == '\u1F501') and (voice.is_playing() or voice.is_paused()):
+                if not repeating:
+                    print("Begin Looping")
+                    repeating = true
+                else:
+                    print("Stop Looping")
+                    repeating = true
     #print(user.name.encode('unicode_escape').decode('ascii'))
         
 @commands.registerEventHandler(name="stop") 
