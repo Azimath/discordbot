@@ -182,7 +182,8 @@ async def radio(triggerMessage):
 @voiceCommandExclusive
 async def youtube(triggerMessage):
     global message
-    global repeating = false
+    global repeating
+    repeating = false
     if triggerMessage.channel.type != discord.ChannelType.text:
         await triggerMessage.channel.send( "Go fuck yourself")
         await discord.utils.get(client.get_all_channels(), server__name="IAA-Official", name='genearl', type=discord.ChannelType.text).send(triggerMessage.author.name + " should go fuck themselves")
