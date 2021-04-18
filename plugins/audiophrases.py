@@ -233,7 +233,7 @@ async def youtube(triggerMessage):
 @commands.registerEventHandler(triggerType="\\reactionAdded", name="soundControl")
 async def soundControl(triggerMessage, reaction, user):
     global message
-    global stoping
+    global repeating
     if message is None:
         return
         
