@@ -2,6 +2,7 @@ import asyncio
 import permissions
 import commands
 import io
+import discord
 from PIL import ImageFont, Image, ImageDraw
 
 client = None
