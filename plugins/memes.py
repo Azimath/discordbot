@@ -130,7 +130,7 @@ def make_tiw(text):
 
 @commands.registerEventHandler(name="tiw")
 async def tiw(triggerMessage):
-  text = triggerMessage.content.split(" ")[1:]
+  text = triggerMessage.content.split(" ", 1)[1]
   image = make_tiw(text)
   output = io.BytesIO()
   image.save(output, format="PNG")
