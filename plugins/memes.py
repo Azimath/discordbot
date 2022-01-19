@@ -117,7 +117,7 @@ def solvefont(text, font_name, rect):
     return best_string, best_size, best_score
   
 def make_tiw(text):
-  source = Image.open("./resources/tiw.jpg")
+  image = Image.open("./resources/tiw.jpg")
   name = "comic.ttf"
   offset = (228, 100)
   box = (117, 174)
