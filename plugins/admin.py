@@ -59,13 +59,15 @@ async def deAmpMessage(triggerMessage):
     if words is None:
         words = triggerMessage.content
     if any(map(isAmp, words)):
-        words = [deAmp(word) if isAmp(word) else word for word in words]
 
-        message = [triggerMessage.author.name + ":"]
-        message.extend(words)
+        new_words = [deAmp(word) if isAmp(word) else word for word in words]
+        if new_words != words:
+            # only delete the message if any of the links were actually amp links
+            message = [triggerMessage.author.name + ":"]
+            message.extend(new_words)
 
-        await triggerMessage.channel.send(" ".join(message))
-        await triggerMessage.delete()
+            await triggerMessage.channel.send(" ".join(message))
+            await triggerMessage.delete()
     
 
 @commands.registerEventHandler(name="register")
