@@ -1,6 +1,8 @@
 import asyncio
 import permissions
 import commands
+import io
+import discord
 from PIL import ImageFont, Image, ImageDraw
 
 client = None
@@ -117,7 +119,7 @@ def solvefont(text, font_name, rect):
     return best_string, best_size, best_score
   
 def make_tiw(text):
-  source = Image.open("/resources/tiw.jpg")
+  image = Image.open("./resources/tiw.jpg")
   name = "comic.ttf"
   offset = (228, 100)
   box = (117, 174)
@@ -130,7 +132,7 @@ def make_tiw(text):
 
 @commands.registerEventHandler(name="tiw")
 async def tiw(triggerMessage):
-  text = triggerMessage.split(" ")[1:]
+  text = triggerMessage.content.split(" ", 1)[1]
   image = make_tiw(text)
   output = io.BytesIO()
   image.save(output, format="PNG")
@@ -138,3 +140,24 @@ async def tiw(triggerMessage):
   data = io.BufferedReader(output)
   await triggerMessage.channel.send(file=discord.File(data, filename="tiw.png"))
   
+def make_1984(text):
+  image = Image.open("./resources/1984.jpg")
+  name = "comic.ttf"
+  offset = (55, 20)
+  box = (270, 90)
+  wrapped_text, size, score = solvefont(text, name, box)
+  draw = ImageDraw.Draw(image)
+  font = ImageFont.truetype(name, size)
+
+  draw.text(offset, wrapped_text, font=font, fill=(0,0,0))
+  return image
+
+@commands.registerEventHandler(name="literally1984")
+async def literally1984(triggerMessage):
+  text = triggerMessage.content.split(" ", 1)[1]
+  image = make_1984(text)
+  output = io.BytesIO()
+  image.save(output, format="PNG")
+  output.seek(0)
+  data = io.BufferedReader(output)
+  await triggerMessage.channel.send(file=discord.File(data, filename="1984.png"))
