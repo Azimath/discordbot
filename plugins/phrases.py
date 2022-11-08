@@ -78,6 +78,11 @@ async def praise(triggerMessage):
 @commands.messageHandlerFilter("keikaku", filterType="cqc")
 async def keikaku(triggerMessage):
     await triggerMessage.channel.send( "tl note: keikaku means plan")
+      
+@commands.registerEventHandler(triggerType="\\messageNoBot", name="ifonly")
+@commands.messageHandlerFilter("if only there was something", filterType="cqc")
+async def ifonly(triggerMessage):
+    await triggerMessage.reply("https://en.wikipedia.org/wiki/LGM-30_Minuteman", mention_author=True)
 
 @commands.registerEventHandler(name="help")
 async def help(triggerMessage):
