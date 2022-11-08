@@ -82,7 +82,9 @@ async def keikaku(triggerMessage):
 @commands.registerEventHandler(triggerType="\\messageNoBot", name="ifonly")
 @commands.messageHandlerFilter("if only there was something", filterType="cqc")
 async def ifonly(triggerMessage):
-    await triggerMessage.reply("https://en.wikipedia.org/wiki/LGM-30_Minuteman", mention_author=True)
+    if random.randint(1, 10) == 1:
+        options = ["https://en.wikipedia.org/wiki/Satan_(missile)", "https://en.wikipedia.org/wiki/LGM-30_Minuteman", "https://en.wikipedia.org/wiki/TOS-1", "https://en.wikipedia.org/wiki/M240_machine_gun", "https://en.wikipedia.org/wiki/Killdozer_(Bulldozer)"]
+        await triggerMessage.reply(random.choice[options], mention_author=True)
 
 @commands.registerEventHandler(name="help")
 async def help(triggerMessage):
