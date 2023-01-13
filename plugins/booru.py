@@ -11,9 +11,13 @@ import math
 
 import discord
 import requests
-from buttplug.client import (ButtplugClient, ButtplugClientConnectorError,
-                             ButtplugClientDevice,
-                             ButtplugClientWebsocketConnector)
+try:
+    from buttplug.client import (ButtplugClient, ButtplugClientConnectorError,
+                                 ButtplugClientDevice,
+                                 ButtplugClientWebsocketConnector)
+except:
+    print("Couldn't find module 'buttplug'")
+
 from PIL import Image, ImageDraw, ImageFont
 
 import commands
@@ -60,12 +64,11 @@ def gelbooru(tags, return_tags=False):
     tags.append("-shota")
     j = getData("http://gelbooru.com/index.php?page=dapi&limit={0}&s=post&&q=index&json=1&tags={1}", tags)
     if not return_tags:
-        target = j[random.randint(0, len(j)-1)]['file_url']
+        target = random.choice(j['post'])['file_url']
         return downloadImage(target)
     else:
-        i = random.randint(0, len(j)-1)
-        target = j[i]['file_url']
-        return (downloadImage(target), j[i]['tags'])
+        target = random.choice(j['post'])
+        return (downloadImage(target['file_url']), target['tags'])
 
 #tags should be a list of desired tags
 def e621(tags, return_tags=False):
@@ -102,6 +105,9 @@ SUPPORTED = str(list(functionMap.keys()))
 
 async def postRandom(channel, booru, tags):
     global SUPPORTED
+    if booru not in functionMap:
+        await channel.send("Oopsie woopsie. " + booru + " is not supported.\nSupported boorus: " + SUPPORTED)
+        return
     try:
         data, extension = functionMap[booru](tags)
         async with channel.typing():
@@ -110,7 +116,7 @@ async def postRandom(channel, booru, tags):
     except IndexError:
         await channel.send("Oopsie woopsie Uwu. " + booru + " returned no search results.")
     except KeyError:
-        await channel.send("Oopsie woopsie. " + booru + " is not supported.\nSupported boorus: "+ SUPPORTED)
+        await channel.send("Oopsie woopsie. " + booru + " changed their api format or something probably.")
     except JSONDecodeError:
         await channel.send("Oopsie Woopsie. Failed to decode json. " + booru + " returned an empty response, or something weird")
     except Exception as e:
