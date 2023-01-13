@@ -68,7 +68,7 @@ def gelbooru(tags, return_tags=False):
         return downloadImage(target)
     else:
         target = random.choice(j['post'])
-        return (downloadImage(target['file_url']), j['tags'])
+        return (downloadImage(target['file_url']), target['tags'])
 
 #tags should be a list of desired tags
 def e621(tags, return_tags=False):
