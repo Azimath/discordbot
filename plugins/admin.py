@@ -126,6 +126,7 @@ class RestartException(Exception):
 @commands.registerEventHandler(name="reeeeestart")
 @permissions.needs_moderator
 async def restart(triggerMessage):
+    triggerMessage.channel.send("Ok I guess I'll just die")
     raise RestartException
 
 @commands.registerEventHandler(name="nameall")

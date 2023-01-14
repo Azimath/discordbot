@@ -51,6 +51,7 @@ async def embeds(triggerMessage):
 @commands.registerEventHandler(name="gitpull")
 async def gitpull(triggerMessage):
     os.system("git pull origin master")
+    triggerMessage.channel.send("Git pulled")
 
 @permissions.needs_admin        
 @commands.registerEventHandler(name="oauth")
