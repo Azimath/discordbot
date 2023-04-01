@@ -31,7 +31,7 @@ async def chat(triggerMessage):
 
     try:
         async with triggerMessage.channel.typing():
-            prompt = triggerMessage.content.split(" ", 1)
+            prompt = triggerMessage.content.split(" ", 1)[1]
             re = m.prompt(prompt)
 
             # todo: split up full response across multiple messags
