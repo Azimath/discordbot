@@ -48,6 +48,8 @@ async def loadPlugins():
     (plugins, errors) = load_all_modules_from_dir("plugins")
     for plugin in plugins:
         plugin.client = client
+        if hasattr(plugin, "asyncinit"):
+            await plugin.asyncinit()
         
     if len(errors) > 0:
         channel = client.get_channel(124051195949088768)
@@ -72,7 +74,7 @@ if __name__ == "__main__":
         config = json.loads(configfile.read())
 
     print("Config loaded")
-    client = discord.Client()
+    client = discord.Client(intents=discord.Intents.all())
     permissions.client = client
     commands.client = client
 #    interactive = PyREPL.REPL(client)
@@ -123,6 +125,7 @@ if __name__ == "__main__":
                 loaded = True
                 
             await client.change_presence(status=discord.Status.online)
+            await client.get_channel(124051195949088768).send("Good Morning!")
         @client.event
         async def on_error(event, *args, **kwargs):
             await client.close()
