@@ -21,7 +21,7 @@ def saveKarmaToFile(karma):
         json.dump(karma, karmafile, indent=4)
 
 
-@commands.registerEventHandler(triggerType="\\messageNoBot", name="redditVoteReact")
+#@commands.registerEventHandler(triggerType="\\messageNoBot", name="redditVoteReact")
 async def addReactVotes(triggerMessage):
     if (triggerMessage.guild.id == 102981131074297856):
         await triggerMessage.add_reaction(client.get_emoji(826584584866627684))
@@ -68,3 +68,4 @@ async def showKarma(triggerMessage):
      if triggerMessage.author.name not in karma:
          karma[triggerMessage.author.name] = 0
      await triggerMessage.channel.send("Karma: " + str(karma[triggerMessage.author.name]))
+     saveKarmaToFile(karma)
