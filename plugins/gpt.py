@@ -30,14 +30,14 @@ async def chat(triggerMessage):
         return
 
     try:
-        prompt = triggerMessage.content.split(" ", 1)
-        await triggerMessage.channel.typing()
-        re = m.prompt(prompt)
+        async with triggerMessage.channel.typing():
+            prompt = triggerMessage.content.split(" ", 1)
+            re = m.prompt(prompt)
 
-        # todo: split up full response across multiple messags
-        if len(re) > 1990:
-            re = re[:1990] + "...."
-        await triggerMessage.channel.send(re)
+            # todo: split up full response across multiple messags
+            if len(re) > 1990:
+                re = re[:1990] + "...."
+            await triggerMessage.channel.send(re)
 
 
     except:
