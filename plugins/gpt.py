@@ -151,7 +151,6 @@ class GPT4Async():
         bot.stdin.write(prompt.encode('utf-8'))
         bot.stdin.write(b"\n")
         await bot.stdin.drain()
-        await bot.stdin._
         return_value = await self._parse_to_prompt(write_to_stdout)
         if not continuous_session:
             self.close()
