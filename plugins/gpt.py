@@ -199,3 +199,26 @@ async def chat(triggerMessage):
         traceback.print_tb(exc_traceback)
     finally:
         lock = False
+        
+@commands.registerEventHandler(name="meds")
+async def meds(triggerMessage):
+    global lock
+    if lock:
+        await triggerMessage.channel.send("One at a time please!")
+        return
+    m = None
+    try:
+        async with triggerMessage.channel.typing():
+            lock = True
+            await triggerMessage.channel.typing()
+            m = GPT4All()
+            m.open()
+            await triggerMessage.channel.send("Sorry, I don't know what came over me. I took a double dose of normal pills and now I should be better.")
+    except:
+        print("Unable to load model :(")
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        print("Unexpected error:", exc_value)
+        traceback.print_tb(exc_traceback)
+        await triggerMessage.channel.send("oopsie woopsie. A terrible disaster has occurred.")
+    finally:
+        lock = False
