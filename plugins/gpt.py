@@ -210,9 +210,8 @@ async def meds(triggerMessage):
     try:
         async with triggerMessage.channel.typing():
             lock = True
-            await triggerMessage.channel.typing()
-            m = GPT4All()
-            m.open()
+            m = GPT4Async()
+            await m.open()
             await triggerMessage.channel.send("Sorry, I don't know what came over me. I took a double dose of normal pills and now I should be better.")
     except:
         print("Unable to load model :(")
