@@ -1,6 +1,6 @@
 #!/bin/bash
 while true
   do
-    python3.6 discordbot.py
+    python3.11 discordbot.py
     sleep 1
   done

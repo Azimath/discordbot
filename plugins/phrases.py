@@ -4,7 +4,6 @@ import asyncio
 import aiohttp
 import permissions
 import commands
-from random_words import RandomWords
 
 """A plugin for giving various kinds of random phrases.
    !lart user : uses the LART on the given user.

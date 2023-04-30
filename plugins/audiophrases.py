@@ -8,7 +8,7 @@ import commands
 
 import time
 import re
-from youtube_dl import YoutubeDL, DownloadError
+from yt_dlp import YoutubeDL, DownloadError
 import json
 import subprocess
 import functools
