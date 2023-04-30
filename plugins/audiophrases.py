@@ -16,14 +16,14 @@ import functools
 cd = 2
 lastTime = time.time() - cd # for cooldowns
 
+
 def voiceCommandExclusive(func):
     global voice
     async def command(triggerMessage):
         global voice
         global lastTime
-        if voice is None:
+        if voice is None or not voice.is_connected():
             channel = triggerMessage.author.voice.channel
-
             if channel is not None:            
                 voice = await channel.connect() # there is no better way to do this
             else:
@@ -53,6 +53,10 @@ def voiceCommandExclusive(func):
 client = None
 voice = None
 message = None
+
+async def asyncInit():
+    for vc in client.voice_clients:
+        vc.disconnect()
 
 if not discord.opus.is_loaded():
     discord.opus.load_opus('/usr/lib/x86_64-linux-gnu/libopus.so')
