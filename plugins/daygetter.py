@@ -21,7 +21,7 @@ async def checkDay():
         
     midnight = datetime.combine(date.today(), time.min.replace(tzinfo=tz)) #Get an offset aware datetime representing the previous midnight
     
-    channel = client.get_channel(102981131074297856) #IAA genearl
+    channel = client.get_channel(1060010787307004004) #IAA genearl
     
     async for m in channel.history(limit=2):
         if tz.localize(m.created_at) > midnight:
