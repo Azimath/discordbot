@@ -68,6 +68,17 @@ async def deAmpMessage(triggerMessage):
 
             await triggerMessage.channel.send(" ".join(message))
             await triggerMessage.delete()
+
+@commands.registerEventHandler(triggerType="\\messageNoBot", name="fixTwit")
+@commands.messageHandlerFilter("://twitter", filterType="cqc")
+async def fixTwit(triggerMessage):
+    #should we limit this to only certain servers?
+    message = triggerMessage.content
+    message.replace("://twitter", "://vxtwitter")
+    message = triggerMessage.author.name + ": " + message
+
+    await triggerMessage.channel.send(message)
+    await triggerMessage.delete()
     
 
 @commands.registerEventHandler(name="register")
