@@ -74,7 +74,7 @@ async def deAmpMessage(triggerMessage):
 async def fixTwit(triggerMessage):
     #should we limit this to only certain servers?
     message = triggerMessage.content
-    message.replace("://twitter", "://vxtwitter")
+    message = message.replace("://twitter", "://vxtwitter")
     message = triggerMessage.author.name + ": " + message
 
     await triggerMessage.channel.send(message)
