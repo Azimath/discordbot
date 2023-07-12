@@ -72,13 +72,14 @@ async def deAmpMessage(triggerMessage):
 @commands.registerEventHandler(triggerType="\\messageNoBot", name="fixTwit")
 @commands.messageHandlerFilter("://twitter", filterType="cqc")
 async def fixTwit(triggerMessage):
-    #should we limit this to only certain servers?
-    message = triggerMessage.content
-    message = message.replace("://twitter", "://vxtwitter")
-    message = triggerMessage.author.name + ": " + message
-
-    await triggerMessage.channel.send(message)
-    await triggerMessage.delete()
+    # only fix tweets if the embed failed to load
+    if not [embed.url for embed in triggerMessage.embeds if "/twitter" in embed.url]:
+        message = triggerMessage.content
+        message = message.replace("://twitter", "://vxtwitter")
+        message = triggerMessage.author.name + ": " + message
+    
+        await triggerMessage.channel.send(message)
+        await triggerMessage.delete()
     
 
 @commands.registerEventHandler(name="register")
