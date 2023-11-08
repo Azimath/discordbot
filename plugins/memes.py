@@ -161,3 +161,25 @@ async def literally1984(triggerMessage):
   output.seek(0)
   data = io.BufferedReader(output)
   await triggerMessage.channel.send(file=discord.File(data, filename="1984.png"))
+
+def make_truther(text):
+  image = Image.open("./resources/Truther.png")
+  name = "comic.ttf"
+  offset = (9, 115)
+  box = (110, 20)
+  wrapped_text, size, score = solvefont(text, name, box)
+  draw = ImageDraw.Draw(image)
+  font = ImageFont.truetype(name, size)
+
+  draw.text(offset, wrapped_text, font=font, fill=(0,0,0))
+  return image
+
+@commands.registerEventHandler(name="truther")
+async def truther(triggerMessage):
+  text = triggerMessage.content.split(" ", 1)[1]
+  image = make_truther(text)
+  output = io.BytesIO()
+  image.save(output, format="PNG")
+  output.seek(0)
+  data = io.BufferedReader(output)
+  await triggerMessage.channel.send(file=discord.File(data, filename="Truther.png"))
