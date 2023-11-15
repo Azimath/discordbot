@@ -73,7 +73,7 @@ async def deAmpMessage(triggerMessage):
 @commands.messageHandlerFilter("://twitter", filterType="cqc")
 async def fixTwit(triggerMessage):
     # only fix tweets if the embed failed to load
-    if not [embed.url for embed in triggerMessage.embeds if "/twitter" in embed.url and "status" in embed.url]:
+    if not [embed.url for embed in triggerMessage.embeds if "/twitter" in embed.url and "/status/" in embed.url]:
         message = triggerMessage.content
         message = message.replace("://twitter", "://vxtwitter")
 
