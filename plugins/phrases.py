@@ -128,6 +128,12 @@ async def mango(triggerMessage):
     mango = random.choice(phrasebank["mango"])
     await triggerMessage.channel.send( mango)
 
+@commands.registerEventHandler(name="gork")
+async def gork(triggerMessage):
+    ball = random.choice(phrasebank["gork"])
+    #print("8ball: " + ball)
+    await triggerMessage.channel.send( ":iaaShine: " + ball)
+   
 @commands.registerEventHandler(name="8ball")
 async def eightball(triggerMessage):
     ball = random.choice(phrasebank["8balls"])
